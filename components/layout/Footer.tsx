@@ -1,0 +1,113 @@
+"use client";
+
+import Link from "next/link";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+export default function Footer() {
+    return (
+        <footer className="bg-slate-900 border-t border-slate-800 text-slate-300">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+
+                    {/* Brand & Description */}
+                    <div className="space-y-6">
+                        <Link href="/" className="inline-block">
+                            <span className="text-2xl font-bold text-white font-outfit">
+                                ONLINE<span className="text-[#e94560]">ITGURU</span>
+                            </span>
+                        </Link>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            Empowering the next generation of tech leaders with industry-aligned training, expert mentorship, and guaranteed placement support.
+                        </p>
+                        <div className="flex items-center gap-4">
+                            <SocialLink href="#" icon={Facebook} />
+                            <SocialLink href="#" icon={Twitter} />
+                            <SocialLink href="#" icon={Instagram} />
+                            <SocialLink href="#" icon={Linkedin} />
+                        </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div>
+                        <h3 className="text-white font-bold font-outfit text-lg mb-6">Quick Links</h3>
+                        <ul className="space-y-4 text-sm">
+                            <FooterLink href="/courses">All Courses</FooterLink>
+                            <FooterLink href="/corporate">Corporate Training</FooterLink>
+                            <FooterLink href="/blog">Success Stories</FooterLink>
+                            <FooterLink href="/about">About Us</FooterLink>
+                            <FooterLink href="/contact">Contact</FooterLink>
+                        </ul>
+                    </div>
+
+                    {/* Contact Info */}
+                    <div>
+                        <h3 className="text-white font-bold font-outfit text-lg mb-6">Contact Us</h3>
+                        <ul className="space-y-4 text-sm">
+                            <li className="flex items-start gap-3">
+                                <MapPin className="w-5 h-5 text-[#e94560] shrink-0" />
+                                <span>123 Tech Park, Innovation Street,<br />Hyderbad, India 560100</span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                                <Phone className="w-5 h-5 text-[#e94560] shrink-0" />
+                                <span>+91 98765 43210</span>
+                            </li>
+                            <li className="flex items-center gap-3">
+                                <Mail className="w-5 h-5 text-[#e94560] shrink-0" />
+                                <span>admissions@onlineitguru.com</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Newsletter */}
+                    <div>
+                        <h3 className="text-white font-bold font-outfit text-lg mb-6">Stay Updated</h3>
+                        <p className="text-slate-400 text-sm mb-4">
+                            Subscribe to our newsletter for the latest tech trends and career tips.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <Input
+                                type="email"
+                                placeholder="Enter your email"
+                                className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus-visible:ring-[#e94560]"
+                            />
+                            <Button className="bg-[#e94560] hover:bg-[#d63850] text-white w-full">
+                                Subscribe
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                    <p>&copy; {new Date().getFullYear()} ONLINEITGURU. All rights reserved.</p>
+                    <div className="flex gap-6">
+                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    );
+}
+
+function SocialLink({ href, icon: Icon }: { href: string; icon: any }) {
+    return (
+        <a
+            href={href}
+            className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-[#e94560] hover:text-white transition-all duration-300"
+        >
+            <Icon className="w-5 h-5" />
+        </a>
+    );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+    return (
+        <li>
+            <Link href={href} className="hover:text-[#e94560] transition-colors inline-block">
+                {children}
+            </Link>
+        </li>
+    );
+}
