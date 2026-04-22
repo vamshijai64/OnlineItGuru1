@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -47,16 +47,21 @@ interface Props {
 }
 
 export default function CourseMegaMenu({ onClose }: Props) {
-    const categories = useHomeStore((state) => state.categories);
-    const courses = useHomeStore((state) => state.courses);
-    const loading = useHomeStore((state) => state.loading.categories);
-    const [activeIndex, setActiveIndex] = useState(0);
+   const categories             = useHomeStore((state) => state.categories);
+  const fetchCoursesByCategory = useHomeStore((state) => state.fetchCoursesByCategory);  // ← add this
+  const categoryCoursesPage    = useHomeStore((state) => state.categoryCoursesPage);      // ← add this
+  const loading                = useHomeStore((state) => state.loading.categories);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-    const activeCategory = categories?.[activeIndex];
+  const activeCategory = categories?.[activeIndex];
     
     // Filter courses that belong to the active category
-    const categoryCourses = courses?.filter(c => c.category === activeCategory?.title).slice(0, 5) || [];
-
+     const categoryCourses = categoryCoursesPage?.items?.slice(0, 5) ?? [];
+     useEffect(() => {
+    if (activeCategory?.slug) {
+      fetchCoursesByCategory(activeCategory.slug, 1);
+    }
+  }, [activeCategory?.slug]);
     return (
         <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -132,7 +137,7 @@ export default function CourseMegaMenu({ onClose }: Props) {
                                 categoryCourses.map((course) => (
                                     <Link
                                         key={course.id}
-                                        href={`/courses/${course.slug}`}
+                                       href={`/courses/${course.slug}`}
                                         onClick={onClose}
                                         className="flex items-center justify-between p-3 rounded-xl hover:bg-indigo-50 group transition-all"
                                     >
