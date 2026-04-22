@@ -7,220 +7,42 @@ import {
     GraduationCap, Menu, X, ChevronDown, ChevronRight,
     LogOut, User, Code2, BarChart2, Palette, Megaphone,
     Briefcase, Database, Cloud, Shield, Cpu, ArrowRight,
-    Star, Clock,
+    Star, Clock, PieChart, Brain, CircleDot, FolderKanban,
+    TestTube, Layout, Bitcoin, Monitor, Smartphone, Bot,
+    BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "@/store/auth-store";
 import { useRouter, usePathname } from "next/navigation";
+import CourseMegaMenu from "../CourseMegaMenu";
+import { useHomeStore } from "@/store/homeStore";
 
-/* ─── Mega Menu Data ─────────────────────────────────────────── */
-const COURSE_CATEGORIES = [
-    {
-        label: "Development",
-        icon: Code2,
-        courses: [
-            { name: "Full-Stack Web Development", slug: "full-stack-web-development", duration: "6 Months", rating: 4.8 },
-            { name: "React & Next.js Mastery", slug: "full-stack-web-development", duration: "3 Months", rating: 4.7 },
-            { name: "Python Programming", slug: "full-stack-web-development", duration: "4 Months", rating: 4.6 },
-        ],
-    },
-    {
-        label: "Data Science",
-        icon: BarChart2,
-        courses: [
-            { name: "Data Science & ML with Python", slug: "data-science-machine-learning", duration: "8 Months", rating: 4.9 },
-            { name: "Power BI & Tableau", slug: "data-science-machine-learning", duration: "2 Months", rating: 4.7 },
-            { name: "Data Engineering", slug: "data-science-machine-learning", duration: "5 Months", rating: 4.6 },
-        ],
-    },
-    {
-        label: "Design",
-        icon: Palette,
-        courses: [
-            { name: "UI/UX Design Masterclass", slug: "ui-ux-design-masterclass", duration: "4 Months", rating: 4.7 },
-            { name: "Figma for Professionals", slug: "ui-ux-design-masterclass", duration: "2 Months", rating: 4.5 },
-        ],
-    },
-    {
-        label: "Cloud & DevOps",
-        icon: Cloud,
-        courses: [
-            { name: "AWS Solutions Architect", slug: "full-stack-web-development", duration: "3 Months", rating: 4.8 },
-            { name: "Docker & Kubernetes", slug: "full-stack-web-development", duration: "2 Months", rating: 4.7 },
-        ],
-    },
-];
 
-const QUICK_LINKS = [
-    { label: "All Courses", href: "/courses", icon: GraduationCap },
-    { label: "Business", href: "/courses", icon: Briefcase },
-    { label: "Cybersecurity", href: "/courses", icon: Shield },
-    { label: "AI & ML", href: "/courses", icon: Cpu },
-    { label: "Database", href: "/courses", icon: Database },
-    { label: "Marketing", href: "/courses", icon: Megaphone },
-];
-
-/* ─── Mega Dropdown Component ────────────────────────────────── */
-function CoursesMegaMenu({ onClose }: { onClose: () => void }) {
-    const [activeCategory, setActiveCategory] = useState(0);
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[900px] max-w-[96vw] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
-        >
-            <div className="flex">
-                {/* ── Col 1: Category tabs ── */}
-                <div className="w-52 flex-shrink-0 bg-slate-50 border-r border-slate-100 py-5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-5 mb-3">
-                        Categories
-                    </p>
-                    {COURSE_CATEGORIES.map((cat, i) => {
-                        const Icon = cat.icon;
-                        const active = activeCategory === i;
-                        return (
-                            <button
-                                key={cat.label}
-                                onMouseEnter={() => setActiveCategory(i)}
-                                onClick={() => setActiveCategory(i)}
-                                className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold transition-all group ${active ? "bg-white text-indigo-700 border-r-2 border-indigo-600 shadow-sm" : "text-slate-600 hover:text-indigo-600 hover:bg-white/60"
-                                    }`}
-                            >
-                                <Icon className={`h-4 w-4 flex-shrink-0 ${active ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500"}`} />
-                                {cat.label}
-                                <ChevronRight className={`ml-auto h-3.5 w-3.5 ${active ? "text-indigo-400" : "text-slate-300"}`} />
-                            </button>
-                        );
-                    })}
-
-                    <div className="mx-5 mt-4 pt-4 border-t border-slate-200">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Explore</p>
-                        {QUICK_LINKS.slice(1).map(({ label, href }) => (
-                            <Link
-                                key={label}
-                                href={href}
-                                onClick={onClose}
-                                className="block text-xs text-slate-500 hover:text-indigo-600 py-1.5 transition-colors"
-                            >
-                                {label}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── Col 2: Courses for active category ── */}
-                <div className="flex-1 py-5 px-6">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-                        {COURSE_CATEGORIES[activeCategory].label} Courses
-                    </p>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeCategory}
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.15 }}
-                            className="space-y-1"
-                        >
-                            {COURSE_CATEGORIES[activeCategory].courses.map((course) => (
-                                <Link
-                                    key={course.slug + course.name}
-                                    href={`/courses/${course.slug}`}
-                                    onClick={onClose}
-                                    className="flex items-center justify-between p-3 rounded-xl hover:bg-indigo-50 group transition-all"
-                                >
-                                    <div>
-                                        <p className="text-sm font-semibold text-slate-800 group-hover:text-indigo-700 transition-colors">
-                                            {course.name}
-                                        </p>
-                                        <div className="flex items-center gap-3 mt-1">
-                                            <span className="flex items-center gap-1 text-xs text-slate-400">
-                                                <Clock className="h-3 w-3" />{course.duration}
-                                            </span>
-                                            <span className="flex items-center gap-1 text-xs text-amber-500 font-semibold">
-                                                <Star className="h-3 w-3 fill-current" />{course.rating}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
-                                </Link>
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
-
-                    <Link
-                        href="/courses"
-                        onClick={onClose}
-                        className="mt-4 flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors group"
-                    >
-                        View all {COURSE_CATEGORIES[activeCategory].label} courses
-                        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                </div>
-
-                {/* ── Col 3: Featured promo card ── */}
-                <div className="w-60 flex-shrink-0 border-l border-slate-100 p-5 bg-gradient-to-b from-indigo-50 to-white flex flex-col">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-3">Why OnlineITGuru</p>
-                    <div className="flex-1 space-y-4">
-                        <div className="rounded-xl bg-white shadow-sm border border-indigo-100 p-4">
-                            <p className="font-bold text-slate-900 text-sm leading-snug mb-1">
-                                Transform your career with industry-expert training
-                            </p>
-                            <p className="text-xs text-slate-500 leading-5">
-                                Live sessions, real projects, and 100% placement support.
-                            </p>
-                        </div>
-                        {/* Stats */}
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                { val: "50K+", label: "Learners" },
-                                { val: "200+", label: "Courses" },
-                                { val: "98%", label: "Placement" },
-                                { val: "4.8★", label: "Rating" },
-                            ].map(({ val, label }) => (
-                                <div key={label} className="bg-white rounded-lg border border-slate-100 p-2.5 text-center shadow-sm">
-                                    <p className="text-base font-extrabold text-indigo-700">{val}</p>
-                                    <p className="text-[10px] text-slate-500 font-medium">{label}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    {/* CTA */}
-                    <Link href="/courses" onClick={onClose}>
-                        <Button className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 text-sm">
-                            Browse All Courses
-                            <ArrowRight className="h-4 w-4" />
-                        </Button>
-                    </Link>
-                    <Link href="/courses" onClick={onClose} className="block text-center text-xs text-indigo-500 hover:underline mt-2">
-                        Free demo available →
-                    </Link>
-                </div>
-            </div>
-
-            {/* Bottom bar */}
-            <div className="bg-slate-50 border-t border-slate-100 px-6 py-3 flex gap-6">
-                {["Contact Us", "Corporate Training", "Become an Instructor"].map((item) => (
-                    <Link
-                        key={item}
-                        href="/courses"
-                        onClick={onClose}
-                        className="text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
-                    >
-                        {item}
-                    </Link>
-                ))}
-            </div>
-        </motion.div>
-    );
-}
-
+const iconMap: Record<string, React.ElementType> = {
+  'fa fa-soundcloud':   Cloud,
+  'fa fa-pie-chart':    PieChart,
+  'fa fa-user':         Cpu,
+  'fa fa-bar-chart-o':  BarChart2,
+  'fa fa-codepen':      Code2,
+  'fa fa-lightbulb-o':  Brain,
+  'fa fa-opera':        CircleDot,
+  'fa fa-file-text':    FolderKanban,
+  'fa fa-wrench':       TestTube,
+  'fa fa-code':         Layout,
+  'fa fa-database':     Database,
+  'fa fa-shield':       Shield,
+  'fa fa-bitcoin':      Bitcoin,
+  'fa fa-windows':      Monitor,
+  'fa fa-mobile-phone': Smartphone,
+  'fa fa-bullhorn':     Megaphone,
+  'fa fa-magic':        Bot,
+};
 /* ─── Main Navbar ─────────────────────────────────────────────── */
 export default function Navbar() {
     const { user, logout } = useAuthStore();
+    const fetchCategories = useHomeStore((state) => state.fetchCategories);
+    const categories = useHomeStore((state) => state.categories);
+
     const router = useRouter();
     const pathname = usePathname();
     const [isScrolled, setIsScrolled] = useState(false);
@@ -248,6 +70,11 @@ export default function Navbar() {
     /* Close dropdown on route change */
     useEffect(() => { setIsCourseMenuOpen(false); setIsMobileMenuOpen(false); }, [pathname]);
 
+    useEffect(() => {
+        if (categories && categories.length === 0) {
+            fetchCategories();
+        }
+    }, []);
     const handleLogout = () => {
         logout();
         router.push("/login");
@@ -305,7 +132,7 @@ export default function Navbar() {
 
                             <AnimatePresence>
                                 {isCourseMenuOpen && (
-                                    <CoursesMegaMenu onClose={() => setIsCourseMenuOpen(false)} />
+                                    <CourseMegaMenu onClose={() => setIsCourseMenuOpen(false)} />
                                 )}
                             </AnimatePresence>
                         </div>
@@ -394,26 +221,18 @@ export default function Navbar() {
                             {/* Mobile Courses Section */}
                             <div>
                                 <p className="text-lg font-medium text-white mb-3">Courses</p>
-                                {COURSE_CATEGORIES.map((cat) => {
-                                    const Icon = cat.icon;
+                                {categories?.map((cat) => {
+                                    const Icon = iconMap[cat.image] ?? BookOpen;
                                     return (
-                                        <div key={cat.label} className="mb-4">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Icon className="h-4 w-4 text-indigo-400" />
-                                                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{cat.label}</p>
-                                            </div>
-                                            <div className="pl-6 space-y-2">
-                                                {cat.courses.map((course) => (
-                                                    <Link
-                                                        key={course.name}
-                                                        href={`/courses/${course.slug}`}
-                                                        onClick={() => setIsMobileMenuOpen(false)}
-                                                        className="block text-sm text-gray-400 hover:text-white transition-colors py-1"
-                                                    >
-                                                        {course.name}
-                                                    </Link>
-                                                ))}
-                                            </div>
+                                        <div key={cat.id} className="mb-2">
+                                            <Link
+                                                href={`/courses/${cat.slug}`}
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="flex items-center gap-3 py-2.5 px-3 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+                                            >
+                                                <Icon className="h-4 w-4 text-indigo-400 flex-shrink-0" />
+                                                <span>{cat.title}</span>
+                                            </Link>
                                         </div>
                                     );
                                 })}

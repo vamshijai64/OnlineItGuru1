@@ -89,6 +89,49 @@ export interface Tutorial {
   featureImage: string | null;
   publishedAt: string;
 }
+export interface Category {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  image: string;        // fa icon class from API
+  position: number;
+}
+export interface CoursesPage {
+  items: Course[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+export interface CourseSection {
+  id: string;
+  title: string;
+  position: number;
+}
+
+export interface CourseDetail {
+  id: string;
+  title: string;
+  slug: string;
+  subtitle: string;
+  description: string;
+  price: string;
+  livePrice: string;
+  rating: number;
+  totalLearners: number;
+  totalReviews: number;
+  duration: string | null;
+  liveProjects: string;
+  resources: number;
+  assignments: number;
+  sectionCount: number;
+  previewImage: string | null;
+  youtubeDemo: string | null;
+  category: { id: string; title: string; slug: string };
+}
 
 const categoryImageMap: Record<string, string> = {
   'Cloud Computing': 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&q=80',
@@ -169,14 +212,22 @@ interface HomeState {
   masterPrograms: Course[];
   blogs: Blog[];
   interviewQuestions: InterviewQuestion[];
+  categories: Category[];
+  categoryCoursesPage: CoursesPage | null;
+  currentCategory: Category | null;
+  courseDetail: CourseDetail | null;
   loading: {
     courses: boolean;
     masterPrograms: boolean;
     blogs: boolean;
     interviewQuestions: boolean;
     tutorials: boolean;
+    categories: boolean;
+     categoryCourses: boolean;
+     courseDetail: boolean;
   };
   tutorials: Tutorial[];
+
   error: string | null;
 
   setHero: (data: HeroData) => void;
@@ -187,6 +238,10 @@ interface HomeState {
   fetchCourses: () => Promise<void>;
   fetchMasterPrograms: () => Promise<void>;
   fetchBlogs: () => Promise<void>;
+  fetchCategories: () => Promise<void>;
+  fetchCoursesByCategory: (slug: string, page?: number) => Promise<void>;
+  fetchCategoryBySlug: (slug: string) => Promise<void>;
+  fetchCourseBySlug: (slug: string) => Promise<void>;
   fetchAll: () => Promise<void>;
 }
 
@@ -215,96 +270,22 @@ export const useHomeStore = create<HomeState>()(
       { icon: Star, title: 'Premium Support', description: 'Get 24/7 priority support from our dedicated team of experts.', gradient: 'from-amber-400 to-yellow-500' },
     ],
 
-    // courses: [
-    //   {
-    //     id: 1,
-    //     title: 'Full Stack Web Development',
-    //     category: 'Web Development',
-    //     duration: '6 months',
-    //     students: 12400,
-    //     rating: 4.9,
-    //     price: 4999,
-    //     originalPrice: 9999,
-    //     image: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=800&q=80',
-    //     badge: 'Bestseller',
-    //     instructor: 'Rahul Sharma',
-    //   },
-    //   {
-    //     id: 2,
-    //     title: 'Data Science & Machine Learning',
-    //     category: 'Data Science',
-    //     duration: '5 months',
-    //     students: 8900,
-    //     rating: 4.8,
-    //     price: 5999,
-    //     originalPrice: 11999,
-    //     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
-    //     badge: 'Trending',
-    //     instructor: 'Priya Nair',
-    //   },
-    //   {
-    //     id: 3,
-    //     title: 'DevOps & Cloud Computing',
-    //     category: 'Cloud',
-    //     duration: '4 months',
-    //     students: 6200,
-    //     rating: 4.7,
-    //     price: 5499,
-    //     originalPrice: 10999,
-    //     image: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&q=80',
-    //     badge: 'New',
-    //     instructor: 'Arun Patel',
-    //   },
-    //   {
-    //     id: 4,
-    //     title: 'React & Next.js Mastery',
-    //     category: 'Frontend',
-    //     duration: '3 months',
-    //     students: 9800,
-    //     rating: 4.9,
-    //     price: 3999,
-    //     originalPrice: 7999,
-    //     image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80',
-    //     badge: 'Bestseller',
-    //     instructor: 'Sneha Reddy',
-    //   },
-    //   {
-    //     id: 5,
-    //     title: 'Python for Automation & AI',
-    //     category: 'Python',
-    //     duration: '4 months',
-    //     students: 11200,
-    //     rating: 4.8,
-    //     price: 4499,
-    //     originalPrice: 8999,
-    //     image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&q=80',
-    //     instructor: 'Vikram Singh',
-    //   },
-    //   {
-    //     id: 6,
-    //     title: 'UI/UX Design Bootcamp',
-    //     category: 'Design',
-    //     duration: '3 months',
-    //     students: 5400,
-    //     rating: 4.7,
-    //     price: 3499,
-    //     originalPrice: 6999,
-    //     image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80',
-    //     badge: 'New',
-    //     instructor: 'Meera Krishnan',
-    //   },
-    // ],
+   
     courses: [],
     interviewQuestions: [],
     masterPrograms: [],
     blogs: [],
-    tutorials: [],   
+    tutorials: [],
+    categories: [],
+    categoryCoursesPage: null,
+    currentCategory: null,
     loading: {
       courses: false,
       masterPrograms: false,
       blogs: false,
       interviewQuestions: false,
       tutorials: false, 
+      categoryCourses: false 
     },
     error: null,
 
@@ -315,102 +296,7 @@ export const useHomeStore = create<HomeState>()(
       set((state) => ({ loading: { ...state.loading, [key]: value } })),
     setError: (msg) => set({ error: msg }),
 
-    // fetchCourses: async () => {
-    //   set((state) => ({ loading: { ...state.loading, courses: true }, error: null }));
-    //   try {
-    //     // ✅ Mock data — comment this out and uncomment API when ready
-    //     const mockData = [
-    //       {
-    //         id: 1,
-    //         title: 'Full Stack Web Development',
-    //         category: 'Web Development',
-    //         duration: '6 months',
-    //         students: 12400,
-    //         rating: 4.9,
-    //         price: 4999,
-    //         originalPrice: 9999,
-    //         image: 'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=800&q=80',
-    //         badge: 'Bestseller',
-    //         instructor: 'Rahul Sharma',
-    //       },
-    //       {
-    //         id: 2,
-    //         title: 'Data Science & Machine Learning',
-    //         category: 'Data Science',
-    //         duration: '5 months',
-    //         students: 8900,
-    //         rating: 4.8,
-    //         price: 5999,
-    //         originalPrice: 11999,
-    //         image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
-    //         badge: 'Trending',
-    //         instructor: 'Priya Nair',
-    //       },
-    //       {
-    //         id: 3,
-    //         title: 'DevOps & Cloud Computing',
-    //         category: 'Cloud',
-    //         duration: '4 months',
-    //         students: 6200,
-    //         rating: 4.7,
-    //         price: 5499,
-    //         originalPrice: 10999,
-    //         image: 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=800&q=80',
-    //         badge: 'New',
-    //         instructor: 'Arun Patel',
-    //       },
-    //       {
-    //         id: 4,
-    //         title: 'React & Next.js Mastery',
-    //         category: 'Frontend',
-    //         duration: '3 months',
-    //         students: 9800,
-    //         rating: 4.9,
-    //         price: 3999,
-    //         originalPrice: 7999,
-    //         image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80',
-    //         badge: 'Bestseller',
-    //         instructor: 'Sneha Reddy',
-    //       },
-    //       {
-    //         id: 5,
-    //         title: 'Python for Automation & AI',
-    //         category: 'Python',
-    //         duration: '4 months',
-    //         students: 11200,
-    //         rating: 4.8,
-    //         price: 4499,
-    //         originalPrice: 8999,
-    //         image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&q=80',
-    //         instructor: 'Vikram Singh',
-    //       },
-    //       {
-    //         id: 6,
-    //         title: 'UI/UX Design Bootcamp',
-    //         category: 'Design',
-    //         duration: '3 months',
-    //         students: 5400,
-    //         rating: 4.7,
-    //         price: 3499,
-    //         originalPrice: 6999,
-    //         image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80',
-    //         badge: 'New',
-    //         instructor: 'Meera Krishnan',
-    //       },
-    //     ];
-    //     set({ courses: mockData });
 
-    //     //  Uncomment below when API is ready, and remove mockData above
-    //     // const response = await axiosClient.get('/courses');
-    //     // set({ courses: response.data });
-
-    //   } catch (error: any) {
-    //     const message = error?.response?.data?.message || 'Failed to load courses';
-    //     set({ error: message });
-    //   } finally {
-    //     set((state) => ({ loading: { ...state.loading, courses: false } }));
-    //   }
-    // },
 
     fetchCourses: async () => {
       set((state) => ({ loading: { ...state.loading, courses: true }, error: null }));
@@ -460,32 +346,100 @@ export const useHomeStore = create<HomeState>()(
         }));
       }
     },
+    fetchCategories: async () => {
+  set((s) => ({ loading: { ...s.loading, categories: true }, error: null }));
+  try {
+    const { data } = await axiosClient.get('/public/categories');
+    set((s) => ({
+      categories: data.data,
+      loading: { ...s.loading, categories: false },
+    }));
+  } catch (err: any) {
+    set((s) => ({
+      error: err?.response?.data?.message || 'Failed to load categories',
+      loading: { ...s.loading, categories: false },
+    }));
+  }
+},
+fetchCoursesByCategory: async (slug, page = 1) => {
+  set((s) => ({ loading: { ...s.loading, categoryCourses: true }, error: null }));
+  try {
+    const url = slug
+      ? `/public/courses?categorySlug=${slug}&page=${page}&limit=12`
+      : `/public/courses?page=${page}&limit=12`;
 
+    const { data } = await axiosClient.get(url);
+
+    set((s) => ({
+      categoryCoursesPage: {
+        items: data.data.items.map(mapCourse),
+        pagination: data.data.pagination,
+      },
+      loading: { ...s.loading, categoryCourses: false },
+    }));
+  } catch (err: any) {
+    set((s) => ({
+      error: err?.response?.data?.message || 'Failed to load courses',
+      loading: { ...s.loading, categoryCourses: false },
+    }));
+  }
+},
+fetchCategoryBySlug: async (slug) => {
+  try {
+    const { data } = await axiosClient.get(`/public/categories/${slug}`);
+    set({ currentCategory: data.data });
+  } catch {
+    // fallback — find from already loaded categories
+    set((s) => ({
+      currentCategory: s.categories.find((c) => c.slug === slug) ?? null,
+    }));
+  }
+},
+fetchCourseBySlug: async (slug) => {
+  set((s) => ({ loading: { ...s.loading, courseDetail: true }, error: null }));
+  try {
+    const { data } = await axiosClient.get(`/public/courses/${slug}`);
+    set((s) => ({
+      courseDetail: data.data,
+      loading: { ...s.loading, courseDetail: false },
+    }));
+  } catch (err: any) {
+    set((s) => ({
+      error: err?.response?.data?.message || 'Failed to load course',
+      loading: { ...s.loading, courseDetail: false },
+    }));
+  }
+},
 
     // ─── Fetch All at Once (use this in page.tsx) ────────────────────────────
     fetchAll: async () => {
-      set({
-        loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true },
-        error: null,
-      });
-      try {
-        const { data } = await axiosClient.get('/public/home');
-        const d = data.data;
-        set({
-          courses: d.featuredCourses.map(mapCourse),
-          masterPrograms: d.featuredMasterPrograms.map(mapCourse),
-          blogs: d.latestBlogs.map(mapBlog),
-          interviewQuestions: d.latestInterviewQuestions.map(mapInterviewQuestion),
-          tutorials: d.latestTutorials.map(mapTutorial),  // ← ADD
-          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false },
-        });
-      } catch (err: any) {
-        set({
-          error: err?.response?.data?.message || 'Failed to load home data',
-          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false },
-        });
-      }
-    },
+  set({
+    loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true ,courseDetail:true},
+    error: null,
+  });
+  try {
+    // Fetch home data + categories in parallel
+    const [homeRes, catRes] = await Promise.all([
+      axiosClient.get('/public/home'),
+      axiosClient.get('/public/categories'),
+    ]);
+    const d = homeRes.data.data;
+    set({
+      courses:            d.featuredCourses.map(mapCourse),
+      masterPrograms:     d.featuredMasterPrograms.map(mapCourse),
+      blogs:              d.latestBlogs.map(mapBlog),
+      interviewQuestions: d.latestInterviewQuestions.map(mapInterviewQuestion),
+      tutorials:          d.latestTutorials.map(mapTutorial),
+      categories:         catRes.data.data,
+      loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false,categoryCourses: false ,courseDetail:false},
+    });
+  } catch (err: any) {
+    set({
+      error: err?.response?.data?.message || 'Failed to load home data',
+      loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false,categoryCourses: false,courseDetail:false },
+    });
+  }
+},
 
     // Add this separate action too:
     fetchInterviewQuestions: async () => {
