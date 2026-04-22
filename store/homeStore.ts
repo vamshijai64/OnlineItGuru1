@@ -223,8 +223,8 @@ interface HomeState {
     interviewQuestions: boolean;
     tutorials: boolean;
     categories: boolean;
-     categoryCourses: boolean;
-     courseDetail: boolean;
+    categoryCourses: boolean;
+    courseDetail: boolean;
   };
   tutorials: Tutorial[];
 
@@ -270,7 +270,7 @@ export const useHomeStore = create<HomeState>()(
       { icon: Star, title: 'Premium Support', description: 'Get 24/7 priority support from our dedicated team of experts.', gradient: 'from-amber-400 to-yellow-500' },
     ],
 
-   
+
     courses: [],
     interviewQuestions: [],
     masterPrograms: [],
@@ -284,8 +284,8 @@ export const useHomeStore = create<HomeState>()(
       masterPrograms: false,
       blogs: false,
       interviewQuestions: false,
-      tutorials: false, 
-      categoryCourses: false 
+      tutorials: false,
+      categoryCourses: false
     },
     error: null,
 
@@ -347,99 +347,99 @@ export const useHomeStore = create<HomeState>()(
       }
     },
     fetchCategories: async () => {
-  set((s) => ({ loading: { ...s.loading, categories: true }, error: null }));
-  try {
-    const { data } = await axiosClient.get('/public/categories');
-    set((s) => ({
-      categories: data.data,
-      loading: { ...s.loading, categories: false },
-    }));
-  } catch (err: any) {
-    set((s) => ({
-      error: err?.response?.data?.message || 'Failed to load categories',
-      loading: { ...s.loading, categories: false },
-    }));
-  }
-},
-fetchCoursesByCategory: async (slug, page = 1) => {
-  set((s) => ({ loading: { ...s.loading, categoryCourses: true }, error: null }));
-  try {
-    const url = slug
-      ? `/public/courses?categorySlug=${slug}&page=${page}&limit=12`
-      : `/public/courses?page=${page}&limit=12`;
+      set((s) => ({ loading: { ...s.loading, categories: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get('/public/categories');
+        set((s) => ({
+          categories: data.data,
+          loading: { ...s.loading, categories: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load categories',
+          loading: { ...s.loading, categories: false },
+        }));
+      }
+    },
+    fetchCoursesByCategory: async (slug, page = 1) => {
+      set((s) => ({ loading: { ...s.loading, categoryCourses: true }, error: null }));
+      try {
+        // ← make sure URL matches exactly what your API expects
+        const url = slug
+          ? `/public/courses?categorySlug=${slug}&page=${page}&limit=12`
+          : `/public/courses?page=${page}&limit=12`;
 
-    const { data } = await axiosClient.get(url);
-
-    set((s) => ({
-      categoryCoursesPage: {
-        items: data.data.items.map(mapCourse),
-        pagination: data.data.pagination,
-      },
-      loading: { ...s.loading, categoryCourses: false },
-    }));
-  } catch (err: any) {
-    set((s) => ({
-      error: err?.response?.data?.message || 'Failed to load courses',
-      loading: { ...s.loading, categoryCourses: false },
-    }));
-  }
-},
-fetchCategoryBySlug: async (slug) => {
-  try {
-    const { data } = await axiosClient.get(`/public/categories/${slug}`);
-    set({ currentCategory: data.data });
-  } catch {
-    // fallback — find from already loaded categories
-    set((s) => ({
-      currentCategory: s.categories.find((c) => c.slug === slug) ?? null,
-    }));
-  }
-},
-fetchCourseBySlug: async (slug) => {
-  set((s) => ({ loading: { ...s.loading, courseDetail: true }, error: null }));
-  try {
-    const { data } = await axiosClient.get(`/public/courses/${slug}`);
-    set((s) => ({
-      courseDetail: data.data,
-      loading: { ...s.loading, courseDetail: false },
-    }));
-  } catch (err: any) {
-    set((s) => ({
-      error: err?.response?.data?.message || 'Failed to load course',
-      loading: { ...s.loading, courseDetail: false },
-    }));
-  }
-},
+        const { data } = await axiosClient.get(url);
+        set((s) => ({
+          categoryCoursesPage: {
+            items: data.data.items.map(mapCourse),
+            pagination: data.data.pagination,
+          },
+          loading: { ...s.loading, categoryCourses: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load courses',
+          loading: { ...s.loading, categoryCourses: false },
+        }));
+      }
+    },
+    fetchCategoryBySlug: async (slug) => {
+      try {
+        const { data } = await axiosClient.get(`/public/categories/${slug}`);
+        set({ currentCategory: data.data });
+      } catch {
+        // fallback — find from already loaded categories
+        set((s) => ({
+          currentCategory: s.categories.find((c) => c.slug === slug) ?? null,
+        }));
+      }
+    },
+    fetchCourseBySlug: async (slug) => {
+      set((s) => ({ loading: { ...s.loading, courseDetail: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get(`/public/courses/${slug}`);
+        set((s) => ({
+          courseDetail: data.data,
+          loading: { ...s.loading, courseDetail: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load course',
+          loading: { ...s.loading, courseDetail: false },
+        }));
+      }
+    },
 
     // ─── Fetch All at Once (use this in page.tsx) ────────────────────────────
     fetchAll: async () => {
-  set({
-    loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true ,courseDetail:true},
-    error: null,
-  });
-  try {
-    // Fetch home data + categories in parallel
-    const [homeRes, catRes] = await Promise.all([
-      axiosClient.get('/public/home'),
-      axiosClient.get('/public/categories'),
-    ]);
-    const d = homeRes.data.data;
-    set({
-      courses:            d.featuredCourses.map(mapCourse),
-      masterPrograms:     d.featuredMasterPrograms.map(mapCourse),
-      blogs:              d.latestBlogs.map(mapBlog),
-      interviewQuestions: d.latestInterviewQuestions.map(mapInterviewQuestion),
-      tutorials:          d.latestTutorials.map(mapTutorial),
-      categories:         catRes.data.data,
-      loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false,categoryCourses: false ,courseDetail:false},
-    });
-  } catch (err: any) {
-    set({
-      error: err?.response?.data?.message || 'Failed to load home data',
-      loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false,categoryCourses: false,courseDetail:false },
-    });
-  }
-},
+      set({
+        loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true, courseDetail: true },
+        error: null,
+      });
+      try {
+        // Fetch home data + categories in parallel
+        const [homeRes, catRes] = await Promise.all([
+          axiosClient.get('/public/home'),
+          axiosClient.get('/public/categories'),
+        ]);
+        const d = homeRes.data.data;
+        set({
+          courses: d.featuredCourses.map(mapCourse),
+          masterPrograms: d.featuredMasterPrograms.map(mapCourse),
+          blogs: d.latestBlogs.map(mapBlog),
+          interviewQuestions: d.latestInterviewQuestions.map(mapInterviewQuestion),
+          tutorials: d.latestTutorials.map(mapTutorial),
+          categories: catRes.data.data,
+          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false, categoryCourses: false, courseDetail: false },
+        });
+      } catch (err: any) {
+        set({
+          error: err?.response?.data?.message || 'Failed to load home data',
+          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false, categoryCourses: false, courseDetail: false },
+        });
+      }
+    },
 
     // Add this separate action too:
     fetchInterviewQuestions: async () => {
