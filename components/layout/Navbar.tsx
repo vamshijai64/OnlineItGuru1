@@ -149,6 +149,14 @@ export default function Navbar() {
                         >
                             Contact
                         </Link>
+                        {user?.roles?.includes("admin") && (
+                            <Link
+                                href="/admin"
+                                className={`text-sm font-bold transition-colors ${isActive("/admin") ? "text-indigo-400" : "text-indigo-400/80 hover:text-indigo-400"}`}
+                            >
+                                Admin Panel
+                            </Link>
+                        )}
                     </nav>
 
                     {/* Auth Buttons */}
@@ -217,6 +225,15 @@ export default function Navbar() {
                                     {item}
                                 </Link>
                             ))}
+                            {user?.roles?.includes("admin") && (
+                                <Link
+                                    href="/admin"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-lg font-bold text-indigo-400 hover:text-indigo-300 py-1"
+                                >
+                                    Admin Panel
+                                </Link>
+                            )}
 
                             {/* Mobile Courses Section */}
                             <div>

@@ -19,7 +19,7 @@ export default function AuthForm({ type }: AuthFormProps) {
     const [name, setName] = useState("");
     const [localError, setLocalError] = useState(""); // Changed error to localError to avoid conflict with storeError
     const router = useRouter();
-    const { register, login, isLoading, error: storeError } = useAuthStore();
+    const { register, login, loginAdmin, isLoading, error: storeError } = useAuthStore();
 
     // Combined error for display
     const errorMsg = storeError || localError;
@@ -28,12 +28,18 @@ export default function AuthForm({ type }: AuthFormProps) {
         e.preventDefault();
         setLocalError("");
 
-        // Mock Authentication Logic
         if (type === "admin") {
-            if (email === "admin@onlineitguru.com" && password === "admin123") {
+            if (!email || !password) {
+                setLocalError("Please fill in all fields.");
+                return;
+            }
+            const res = await loginAdmin({ email, password });
+            if (res.success) {
+                // If loginAdmin was successful, the user should have admin role
+                // Redirecting directly since it's the admin login form
                 router.push("/admin");
             } else {
-                setLocalError("Invalid admin credentials.");
+                setLocalError(res.message || "Admin login failed");
             }
         } else if (type === "signup") {
             if (!email || !password || !name) {
@@ -54,6 +60,16 @@ export default function AuthForm({ type }: AuthFormProps) {
             }
             const res = await login({ email, password });
             if (res.success) {
+                // Check roles if available in the response (though store updates user)
+                // We'll use the result of the login call or check the user role from store
+                // For simplicity, we can just redirect based on what we find in the response
+                // or assume user login goes to home/dashboard.
+                // If an admin logs in via user login, they should still go to admin if that's the logic.
+                
+                // Let's check roles from the store after login (though it might be slightly delayed)
+                // Actually, the res doesn't return the user, but the store is updated.
+                // We can use the logic: if email contains admin or if we want to be strict, check the store.
+                // However, since it's "user login", most will go to "/".
                 router.push("/");
             } else {
                 setLocalError(res.message || "Login failed");
@@ -138,12 +154,17 @@ export default function AuthForm({ type }: AuthFormProps) {
 
             <div className="text-center text-sm">
                 {type === "login" ? (
-                    <p className="text-slate-500">
+                    <div className="text-slate-500">
                         Don&apos;t have an account?{" "}
                         <Link href="/signup" className="font-bold text-indigo-600 hover:text-indigo-500">
                             Sign up
                         </Link>
-                    </p>
+                        <div className="mt-4 pt-4 border-t border-slate-100">
+                            <Link href="/admin-login" className="text-xs font-medium text-slate-400 hover:text-indigo-600 transition-colors">
+                                Admin Access
+                            </Link>
+                        </div>
+                    </div>
                 ) : type === "signup" ? (
                     <p className="text-slate-500">
                         Already have an account?{" "}

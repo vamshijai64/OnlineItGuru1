@@ -13,34 +13,40 @@ export interface LoginUserData {
 }
 
 export interface UserResponse {
+    id: string;
+    name: string;
     email: string;
-    password?: string;
-    name?: string;
-    loginType?: string;
-    _id?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    __v?: number;
+    roles: string[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface AuthResponse {
     success: boolean;
     message?: string;
-    user?: UserResponse;
+    data?: {
+        token: string;
+        user: UserResponse;
+    };
 }
 
 export const registerUser = async (data: RegisterUserData): Promise<AuthResponse> => {
-    const response = await axiosClient.post<AuthResponse>('/users/register', data);
+    const response = await axiosClient.post<AuthResponse>('/auth/user/register', data);
     return response.data;
 };
 
 export const loginUser = async (data: LoginUserData): Promise<AuthResponse> => {
-    const response = await axiosClient.post<AuthResponse>('/users/login', data);
+    const response = await axiosClient.post<AuthResponse>('/auth/user/login', data);
+    return response.data;
+};
+
+export const loginAdmin = async (data: LoginUserData): Promise<AuthResponse> => {
+    const response = await axiosClient.post<AuthResponse>('/auth/admin/login', data);
     return response.data;
 };
 
 export const fetchUserProfile = async (id: string): Promise<AuthResponse> => {
-    const response = await axiosClient.get<AuthResponse>(`/users/profile/${id}`);
+    const response = await axiosClient.get<AuthResponse>(`/auth/user/profile/${id}`);
     return response.data;
 };
 
