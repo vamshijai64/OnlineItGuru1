@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,7 @@ interface AuthFormProps {
     type: "login" | "signup" | "admin";
 }
 
-export default function AuthForm({ type }: AuthFormProps) {
+function AuthFormInner({ type }: AuthFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
@@ -169,5 +169,17 @@ export default function AuthForm({ type }: AuthFormProps) {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function AuthForm({ type }: AuthFormProps) {
+    return (
+        <Suspense fallback={
+            <div className="w-full max-w-md flex justify-center p-10">
+                <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <AuthFormInner type={type} />
+        </Suspense>
     );
 }
