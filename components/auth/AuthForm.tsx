@@ -1,25 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 
 interface AuthFormProps {
     type: "login" | "signup" | "admin";
 }
 
-export default function AuthForm({ type }: AuthFormProps) {
+function AuthFormInner({ type }: AuthFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
     const [localError, setLocalError] = useState(""); // Changed error to localError to avoid conflict with storeError
     const router = useRouter();
-    const { register, login, isLoading, error: storeError } = useAuthStore();
+    const searchParams = useSearchParams();
+    const nextPath = searchParams.get("next");
+    const { register, login, loginAdmin, isLoading, error: storeError } = useAuthStore();
 
     // Combined error for display
     const errorMsg = storeError || localError;
@@ -28,12 +30,16 @@ export default function AuthForm({ type }: AuthFormProps) {
         e.preventDefault();
         setLocalError("");
 
-        // Mock Authentication Logic
         if (type === "admin") {
-            if (email === "admin@onlineitguru.com" && password === "admin123") {
-                router.push("/admin");
+            if (!email || !password) {
+                setLocalError("Please fill in all fields.");
+                return;
+            }
+            const res = await loginAdmin({ email, password });
+            if (res.success) {
+                router.push(nextPath || "/admin");
             } else {
-                setLocalError("Invalid admin credentials.");
+                setLocalError(res.message || "Admin login failed");
             }
         } else if (type === "signup") {
             if (!email || !password || !name) {
@@ -42,7 +48,7 @@ export default function AuthForm({ type }: AuthFormProps) {
             }
             const res = await register({ email, password, name, loginType: "Local" });
             if (res.success) {
-                router.push("/");
+                router.push(nextPath || "/");
             } else {
                 setLocalError(res.message || "Registration failed");
             }
@@ -54,7 +60,7 @@ export default function AuthForm({ type }: AuthFormProps) {
             }
             const res = await login({ email, password });
             if (res.success) {
-                router.push("/");
+                router.push(nextPath || "/dashboard");
             } else {
                 setLocalError(res.message || "Login failed");
             }
@@ -138,12 +144,17 @@ export default function AuthForm({ type }: AuthFormProps) {
 
             <div className="text-center text-sm">
                 {type === "login" ? (
-                    <p className="text-slate-500">
+                    <div className="text-slate-500">
                         Don&apos;t have an account?{" "}
                         <Link href="/signup" className="font-bold text-indigo-600 hover:text-indigo-500">
                             Sign up
                         </Link>
-                    </p>
+                        <div className="mt-4 pt-4 border-t border-slate-100">
+                            <Link href="/admin-login" className="text-xs font-medium text-slate-400 hover:text-indigo-600 transition-colors">
+                                Admin Access
+                            </Link>
+                        </div>
+                    </div>
                 ) : type === "signup" ? (
                     <p className="text-slate-500">
                         Already have an account?{" "}
@@ -158,5 +169,17 @@ export default function AuthForm({ type }: AuthFormProps) {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function AuthForm({ type }: AuthFormProps) {
+    return (
+        <Suspense fallback={
+            <div className="w-full max-w-md flex justify-center p-10">
+                <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <AuthFormInner type={type} />
+        </Suspense>
     );
 }

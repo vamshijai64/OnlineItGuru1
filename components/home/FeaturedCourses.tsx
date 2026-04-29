@@ -126,136 +126,181 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Star, Users, Clock, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronRight, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { useHomeStore } from '@/store/homeStore';
+import { Button } from '@/components/ui/button';
+import HomeCourseCard from './HomeCourseCard';
+import HomeCategoryFilter from './HomeCategoryFilter';
 
 function SectionHeader({ badge, title, subtitle }: { badge: string; title: string; subtitle: string }) {
   return (
     <div className="text-center mb-16">
-      <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-purple-600 bg-purple-100 border border-purple-200 rounded-full">
+      <motion.span 
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="inline-block px-4 py-1.5 mb-4 text-[10px] font-black tracking-[0.2em] text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-full uppercase"
+      >
         {badge}
-      </span>
-      <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{title}</h2>
-      <p className="text-gray-500 max-w-2xl mx-auto text-lg">{subtitle}</p>
+      </motion.span>
+      <motion.h2 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.1 }}
+        className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight"
+      >
+        {title}
+      </motion.h2>
+      <motion.p 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.2 }}
+        className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed"
+      >
+        {subtitle}
+      </motion.p>
     </div>
   );
 }
 
 export default function FeaturedCourses() {
-  const courses = useHomeStore((state) => state.courses);
-const fetchCourses = useHomeStore((state) => state.fetchCourses);
-const loading = useHomeStore((state) => state.loading.courses);
-const error = useHomeStore((state) => state.error);
+  const { 
+    courses, 
+    categories, 
+    fetchCourses, 
+    fetchCategories, 
+    fetchCoursesByCategory,
+    categoryCoursesPage,
+    loading 
+  } = useHomeStore();
+  
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   useEffect(() => {
-    fetchCourses(); // ✅ fetch from API on mount
-  }, [fetchCourses]);
+    if (courses.length === 0) fetchCourses();
+    if (categories.length === 0) fetchCategories();
+    
+    // Fetch courses for the selected category
+    const categorySlug = selectedCategory === 'all' ? "" : selectedCategory;
+    fetchCoursesByCategory(categorySlug, 1);
+  }, [selectedCategory, fetchCourses, fetchCategories, fetchCoursesByCategory]);
+
+  // If "all" is selected, we combine featured and some general courses
+  // If a category is selected, we show what came back from the API
+  const categoryItems = categoryCoursesPage?.items || [];
+  
+  let displayCourses = [];
+  if (selectedCategory === 'all') {
+    const featured = [...courses];
+    categoryItems.forEach(gc => {
+      if (featured.length < 6 && !featured.find(c => c.id === gc.id)) {
+        featured.push(gc);
+      }
+    });
+    displayCourses = featured.slice(0, 6);
+  } else {
+    // Show up to 6 from the selected category
+    displayCourses = categoryItems.slice(0, 6);
+  }
 
   return (
-    <section className="relative py-24 px-6 bg-white">
-      <div className="container mx-auto max-w-6xl">
-        <SectionHeader
-          badge="Featured Courses"
-          title="Learn From The Best"
-          subtitle="Explore our top-rated courses designed by industry experts to help you land your dream job."
+    <section className="relative py-24 px-6 bg-[#030303] overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] -z-10 animate-pulse" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }} />
+
+      <div className="container mx-auto max-w-7xl relative z-10">
+        <SectionHeader 
+          badge="Our Courses"
+          title="Explore Our Popular Programs"
+          subtitle="Industry-relevant curriculum designed in collaboration with leading tech companies."
         />
-
-        {/* Loading State */}
-        {loading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-80 rounded-3xl bg-gray-100 animate-pulse" />
-            ))}
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-12">
-            <p className="text-red-500 font-medium">{error}</p>
-            <button
-              onClick={fetchCourses}
-              className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {/* Courses Grid */}
-        {!loading && !error && courses.length > 0 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                className="group bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 hover:translate-y-[-6px] transition-all duration-500"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                {/* Image */}
-                <div className="relative h-48 bg-gradient-to-br from-purple-100 to-blue-100 overflow-hidden">
-                  {course.image && (
-                    <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-                  )}
-                  {course.badge && (
-                    <span className="absolute top-3 left-3 px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded-full">
-                      {course.badge}
-                    </span>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <span className="text-xs font-semibold text-purple-500 uppercase tracking-wider">
-                    {course.category}
-                  </span>
-                  <h3 className="text-lg font-bold text-gray-900 mt-1 mb-3 group-hover:text-purple-600 transition-colors duration-300">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-4">by {course.instructor}</p>
-
-                  {/* Meta */}
-                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                    <span className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" /> {course.rating}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-4 h-4" /> {course.students.toLocaleString()}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" /> {course.duration}
-                    </span>
-                  </div>
-
-                  {/* Price + CTA */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xl font-bold text-gray-900">₹{course.price}</span>
-                      {course.originalPrice && (
-                        <span className="ml-2 text-sm text-gray-400 line-through">₹{course.originalPrice}</span>
-                      )}
-                    </div>
-                    <button className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors">
-                      Enroll <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
+        
+        <div className="mb-16">
+          <HomeCategoryFilter 
+            categories={categories} 
+            selected={selectedCategory} 
+            onSelect={setSelectedCategory} 
+          />
+        </div>
+        
+        <div key={`${selectedCategory}-${loading.categoryCourses}`} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <AnimatePresence mode="popLayout">
+            {(loading.courses || loading.categoryCourses) ? (
+              // Loading Skeletons
+              [...Array(6)].map((_, i) => (
+                <div key={`skeleton-${i}`} className="h-[420px] rounded-3xl bg-white/5 border border-white/10 animate-pulse" />
+              ))
+            ) : (
+              displayCourses.map((course, index) => (
+                <motion.div
+                  key={course.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  <HomeCourseCard 
+                    id={course.id}
+                    title={course.title}
+                    slug={course.slug}
+                    category={course.category}
+                    rating={course.rating}
+                    reviews={course.totalReviews || 1200}
+                    duration={course.duration}
+                    students={course.students}
+                    image={course.image}
+                    delay={index}
+                    isTrending={index === 0}
+                    isNew={index === 2}
+                  />
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Empty State */}
-        {!loading && !error && courses.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            No courses available right now.
-          </div>
+        {!loading.courses && displayCourses.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <p className="text-gray-500 text-lg">No courses found in this category.</p>
+            <Button 
+              variant="link" 
+              className="text-purple-500 font-bold mt-2"
+              onClick={() => setSelectedCategory('all')}
+            >
+              View all courses
+            </Button>
+          </motion.div>
         )}
+        
+        <motion.div 
+          className="text-center mt-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <Link href="/courses">
+            <Button 
+              className="px-8 h-14 rounded-2xl bg-white text-black hover:bg-gray-200 font-bold text-lg transition-all group shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+            >
+              View All Courses
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
 }
+

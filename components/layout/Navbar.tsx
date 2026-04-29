@@ -87,8 +87,8 @@ export default function Navbar() {
     // so white text stays readable regardless of scroll position.
     const isHomePage = pathname === "/";
     const navBg = isScrolled || !isHomePage
-        ? "bg-gray-950 shadow-lg shadow-black/20"
-        : "bg-transparent";
+        ? "bg-gray-950/70 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
+        : "bg-transparent backdrop-blur-[2px]";
 
     return (
         <motion.header
@@ -102,7 +102,7 @@ export default function Navbar() {
 
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-all shadow-lg shadow-purple-500/30">
                             <GraduationCap className="w-6 h-6 text-white" />
                         </div>
                         <span className="text-xl font-bold text-white tracking-tight">
@@ -112,13 +112,6 @@ export default function Navbar() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center gap-8">
-                        <Link
-                            href="/"
-                            className={`text-sm font-medium transition-colors ${isActive("/") ? "text-white" : "text-gray-400 hover:text-white"}`}
-                        >
-                            Home
-                        </Link>
-
                         {/* Courses with mega menu */}
                         <div ref={courseMenuRef} className="relative">
                             <button
@@ -139,16 +132,26 @@ export default function Navbar() {
 
                         <Link
                             href="/blog"
-                            className={`text-sm font-medium transition-colors ${isActive("/blog") ? "text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/blog") ? "text-white" : "text-gray-400 hover:text-white"}`}
                         >
                             Blog
+                            <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 group-hover:w-full ${isActive("/blog") ? "w-full" : ""}`} />
                         </Link>
                         <Link
                             href="/contact"
-                            className={`text-sm font-medium transition-colors ${isActive("/contact") ? "text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/contact") ? "text-white" : "text-gray-400 hover:text-white"}`}
                         >
                             Contact
+                            <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 group-hover:w-full ${isActive("/contact") ? "w-full" : ""}`} />
                         </Link>
+                        {user?.roles?.includes("admin") && (
+                            <Link
+                                href="/admin"
+                                className={`text-sm font-bold transition-colors ${isActive("/admin") ? "text-indigo-400" : "text-indigo-400/80 hover:text-indigo-400"}`}
+                            >
+                                Admin Panel
+                            </Link>
+                        )}
                     </nav>
 
                     {/* Auth Buttons */}
@@ -179,7 +182,7 @@ export default function Navbar() {
                                     </Button>
                                 </Link>
                                 <Link href="/signup">
-                                    <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-lg shadow-purple-500/20">
+                                    <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border border-white/20 shadow-lg shadow-purple-500/20 rounded-full">
                                         Get Started <ChevronRight className="w-4 h-4 ml-1" />
                                     </Button>
                                 </Link>
@@ -217,6 +220,15 @@ export default function Navbar() {
                                     {item}
                                 </Link>
                             ))}
+                            {user?.roles?.includes("admin") && (
+                                <Link
+                                    href="/admin"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block text-lg font-bold text-indigo-400 hover:text-indigo-300 py-1"
+                                >
+                                    Admin Panel
+                                </Link>
+                            )}
 
                             {/* Mobile Courses Section */}
                             <div>

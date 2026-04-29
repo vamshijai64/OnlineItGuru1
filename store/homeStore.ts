@@ -366,7 +366,7 @@ export const useHomeStore = create<HomeState>()(
       try {
         // ← make sure URL matches exactly what your API expects
         const url = slug
-          ? `/public/courses?categorySlug=${slug}&page=${page}&limit=12`
+          ? `/public/courses?category=${slug}&page=${page}&limit=12`
           : `/public/courses?page=${page}&limit=12`;
 
         const { data } = await axiosClient.get(url);

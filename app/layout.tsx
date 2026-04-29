@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,6 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
+import AppWrapper from "@/components/layout/AppWrapper";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -34,9 +34,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${outfit.variable} font-inter antialiased`}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <AppWrapper>
+          {children}
+        </AppWrapper>
       </body>
     </html>
   );
