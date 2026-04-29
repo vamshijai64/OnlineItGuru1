@@ -1,5 +1,29 @@
 import axiosClient from './axios-client';
 
+export interface LoginUserData {
+  email: string;
+  password?: string;
+}
+
+export interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+      token: string;
+      user: UserResponse;
+  };
+}
+
+
 export interface CreateCourseData {
   title: string;
   slug: string;
@@ -59,5 +83,10 @@ export const fetchAdminInterviewQuestions = async (page: number = 1, limit: numb
 
 export const fetchAdminReviews = async (page: number = 1, limit: number = 12): Promise<AdminResponse<any>> => {
     const response = await axiosClient.get<AdminResponse<any>>(`/public/reviews?page=${page}&limit=${limit}`);
+    return response.data;
+};
+
+export const loginAdmin = async (data: LoginUserData): Promise<AuthResponse> => {
+    const response = await axiosClient.post<AuthResponse>('/auth/admin/login', data);
     return response.data;
 };

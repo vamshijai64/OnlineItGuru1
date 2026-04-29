@@ -15,6 +15,21 @@ interface AuthState {
 
 const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY ?? 'oit_auth_token';
 
+const setAuthToken = (token: string) => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem(TOKEN_KEY, token);
+        document.cookie = `${TOKEN_KEY}=${token}; path=/; max-age=86400; SameSite=Lax`;
+    }
+};
+
+const removeAuthToken = () => {
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem(TOKEN_KEY);
+        document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
+    }
+};
+
+
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     isLoading: false,
@@ -26,7 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await registerUser(data);
             if (response.success && response.data) {
                 const { user, token } = response.data;
-                localStorage.setItem(TOKEN_KEY, token);
+                setAuthToken(token);
                 set({ user: user, isLoading: false });
                 return { success: true, message: response.message };
             }
@@ -49,7 +64,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             const response = await loginUser(data);
             if (response.success && response.data) {
                 const { user, token } = response.data;
-                localStorage.setItem(TOKEN_KEY, token);
+                setAuthToken(token);
                 set({ user: user, isLoading: false });
                 return { success: true, message: response.message };
             }
@@ -69,26 +84,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     loginAdmin: async (data: LoginUserData) => {
         set({ isLoading: true, error: null });
         
-        // Mock Logic for testing
-        if (data.email === "admin@email.com" && data.password === "admin1234") {
-            const mockUser: UserResponse = {
-                id: "admin-id",
-                name: "System Admin",
-                email: "admin@email.com",
-                roles: ["admin"],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            localStorage.setItem(TOKEN_KEY, "mock-admin-token");
-            set({ user: mockUser, isLoading: false });
-            return { success: true, message: "Mock admin login successful" };
-        }
-
         try {
             const response = await loginAdmin(data);
             if (response.success && response.data) {
                 const { user, token } = response.data;
-                localStorage.setItem(TOKEN_KEY, token);
+                setAuthToken(token);
                 set({ user: user, isLoading: false });
                 return { success: true, message: response.message };
             }
@@ -127,7 +127,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     logout: () => {
-        localStorage.removeItem(TOKEN_KEY);
+        removeAuthToken();
         set({ user: null, error: null });
     }
 }));

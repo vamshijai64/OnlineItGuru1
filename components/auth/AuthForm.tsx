@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 
 interface AuthFormProps {
@@ -19,6 +19,8 @@ export default function AuthForm({ type }: AuthFormProps) {
     const [name, setName] = useState("");
     const [localError, setLocalError] = useState(""); // Changed error to localError to avoid conflict with storeError
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const nextPath = searchParams.get("next");
     const { register, login, loginAdmin, isLoading, error: storeError } = useAuthStore();
 
     // Combined error for display
@@ -35,9 +37,7 @@ export default function AuthForm({ type }: AuthFormProps) {
             }
             const res = await loginAdmin({ email, password });
             if (res.success) {
-                // If loginAdmin was successful, the user should have admin role
-                // Redirecting directly since it's the admin login form
-                router.push("/admin");
+                router.push(nextPath || "/admin");
             } else {
                 setLocalError(res.message || "Admin login failed");
             }
@@ -48,7 +48,7 @@ export default function AuthForm({ type }: AuthFormProps) {
             }
             const res = await register({ email, password, name, loginType: "Local" });
             if (res.success) {
-                router.push("/");
+                router.push(nextPath || "/");
             } else {
                 setLocalError(res.message || "Registration failed");
             }
@@ -60,17 +60,7 @@ export default function AuthForm({ type }: AuthFormProps) {
             }
             const res = await login({ email, password });
             if (res.success) {
-                // Check roles if available in the response (though store updates user)
-                // We'll use the result of the login call or check the user role from store
-                // For simplicity, we can just redirect based on what we find in the response
-                // or assume user login goes to home/dashboard.
-                // If an admin logs in via user login, they should still go to admin if that's the logic.
-                
-                // Let's check roles from the store after login (though it might be slightly delayed)
-                // Actually, the res doesn't return the user, but the store is updated.
-                // We can use the logic: if email contains admin or if we want to be strict, check the store.
-                // However, since it's "user login", most will go to "/".
-                router.push("/");
+                router.push(nextPath || "/dashboard");
             } else {
                 setLocalError(res.message || "Login failed");
             }

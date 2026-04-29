@@ -13,6 +13,7 @@ const PROTECTED_PATHS = [
     '/profile',
     '/my-courses',
     '/settings',
+    '/admin',
 ];
 
 /**
@@ -56,8 +57,8 @@ export function middleware(req: NextRequest) {
 
     if (isProtected && !isAuthenticated) {
         const loginUrl = req.nextUrl.clone();
-        loginUrl.pathname = '/login';
-        // Preserve the original destination so we can redirect back after login
+        // Redirect to /admin-login if it's an admin route, otherwise /login
+        loginUrl.pathname = pathname.startsWith('/admin') ? '/admin-login' : '/login';
         loginUrl.searchParams.set('next', pathname);
         return NextResponse.redirect(loginUrl);
     }
