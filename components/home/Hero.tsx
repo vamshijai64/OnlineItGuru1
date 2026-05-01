@@ -292,7 +292,7 @@ export default function Hero() {
               </div>
 
               {/* Stats — from store */}
-              <div className="flex flex-wrap gap-8 mt-14 pt-8 border-t border-white/10">
+              {/* <div className="flex flex-wrap gap-8 mt-14 pt-8 border-t border-white/10">
                 {stats.map((stat) => (
                   <div key={stat.label} className="flex items-center gap-3 group">
                     <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-purple-500/50 transition-colors shadow-sm">
@@ -304,7 +304,7 @@ export default function Hero() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </div> */}
 
             </motion.div>
           </div>

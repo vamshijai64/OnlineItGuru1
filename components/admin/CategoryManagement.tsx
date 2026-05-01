@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { useAdminStore } from "@/store/adminStore";
 
-export default function CategoryManagement() {
+export default function CategoryManagement({ onViewCourses }: { onViewCourses?: (slug: string, title: string) => void }) {
     const { adminCategories, isLoading } = useAdminStore();
 
     return (
@@ -62,6 +62,14 @@ export default function CategoryManagement() {
                                         <TableCell className="text-slate-500">{cat.slug}</TableCell>
                                         <TableCell>{cat.position}</TableCell>
                                         <TableCell className="text-right">
+                                            <Button 
+                                                variant="outline" 
+                                                size="sm" 
+                                                className="mr-2"
+                                                onClick={() => onViewCourses && onViewCourses(cat.slug, cat.title)}
+                                            >
+                                                View Courses
+                                            </Button>
                                             <Button variant="ghost" size="sm" className="text-indigo-600 font-bold">Edit</Button>
                                         </TableCell>
                                     </TableRow>

@@ -97,7 +97,7 @@ export default function Navbar() {
             animate={{ y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <div className="container mx-auto px-6">
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
                 <div className="flex items-center justify-between h-20">
 
                     {/* Logo */}
@@ -209,7 +209,7 @@ export default function Navbar() {
                         exit={{ opacity: 0, height: 0 }}
                         className="md:hidden bg-gray-950/97 backdrop-blur-xl border-t border-white/10 overflow-y-auto max-h-[80vh]"
                     >
-                        <div className="container mx-auto px-6 py-6 space-y-5">
+                        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 space-y-5">
                             {["Home", "Blog", "Contact"].map((item) => (
                                 <Link
                                     key={item}

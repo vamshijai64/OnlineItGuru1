@@ -24,7 +24,7 @@ import CreateCourseForm from "./CreateCourseForm";
 import { useAdminStore } from "@/store/adminStore";
 import { useState } from "react";
 
-export default function CourseManagement() {
+export default function CourseManagement({ onViewSections }: { onViewSections?: (id: string, title: string) => void }) {
     const { adminCourses, fetchAllCourses, coursePagination, isLoading } = useAdminStore();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -98,6 +98,14 @@ export default function CourseManagement() {
                                             </TableCell>
                                             <TableCell>{course.totalLearners}</TableCell>
                                             <TableCell className="text-right">
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    className="mr-2"
+                                                    onClick={() => onViewSections && onViewSections(course.id, course.title)}
+                                                >
+                                                    View Sections
+                                                </Button>
                                                 <Button variant="ghost" size="sm" className="text-indigo-600 font-bold">Edit</Button>
                                             </TableCell>
                                         </TableRow>

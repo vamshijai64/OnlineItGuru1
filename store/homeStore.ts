@@ -109,7 +109,17 @@ export interface CoursesPage {
 export interface CourseSection {
   id: string;
   title: string;
+  sectionId: string;
+  courseId: string;
   position: number;
+  content: string; // JSON string
+  view: string;
+  section: {
+    id: string;
+    title: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CourseDetail {
@@ -131,6 +141,14 @@ export interface CourseDetail {
   previewImage: string | null;
   youtubeDemo: string | null;
   category: { id: string; title: string; slug: string };
+  reviews?: any[];
+}
+
+export interface PublicPage {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
 }
 
 const categoryImageMap: Record<string, string> = {
@@ -216,6 +234,7 @@ interface HomeState {
   categoryCoursesPage: CoursesPage | null;
   currentCategory: Category | null;
   courseDetail: CourseDetail | null;
+  courseSections: CourseSection[];
   loading: {
     courses: boolean;
     masterPrograms: boolean;
@@ -225,8 +244,11 @@ interface HomeState {
     categories: boolean;
     categoryCourses: boolean;
     courseDetail: boolean;
+    courseSections: boolean;
+    publicPages: boolean;
   };
   tutorials: Tutorial[];
+  publicPages: PublicPage[];
 
   error: string | null;
 
@@ -242,6 +264,8 @@ interface HomeState {
   fetchCoursesByCategory: (slug: string, page?: number) => Promise<void>;
   fetchCategoryBySlug: (slug: string) => Promise<void>;
   fetchCourseBySlug: (slug: string) => Promise<void>;
+  fetchCourseSections: (courseId: string) => Promise<void>;
+  fetchPublicPages: () => Promise<void>;
   fetchAll: () => Promise<void>;
 }
 
@@ -279,13 +303,18 @@ export const useHomeStore = create<HomeState>()(
     categories: [],
     categoryCoursesPage: null,
     currentCategory: null,
+    courseSections: [],
+    publicPages: [],
     loading: {
       courses: false,
       masterPrograms: false,
       blogs: false,
       interviewQuestions: false,
       tutorials: false,
-      categoryCourses: false
+      categoryCourses: false,
+      courseDetail: false,
+      courseSections: false,
+      publicPages: false,
     },
     error: null,
 
@@ -410,11 +439,41 @@ export const useHomeStore = create<HomeState>()(
         }));
       }
     },
+    fetchCourseSections: async (courseId) => {
+      set((s) => ({ loading: { ...s.loading, courseSections: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get(`/public/course-sections?courseId=${courseId}`);
+        set((s) => ({
+          courseSections: data.data,
+          loading: { ...s.loading, courseSections: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load course sections',
+          loading: { ...s.loading, courseSections: false },
+        }));
+      }
+    },
+    fetchPublicPages: async () => {
+      set((s) => ({ loading: { ...s.loading, publicPages: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get('/public/pages');
+        set((s) => ({
+          publicPages: data.data,
+          loading: { ...s.loading, publicPages: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load public pages',
+          loading: { ...s.loading, publicPages: false },
+        }));
+      }
+    },
 
     // ─── Fetch All at Once (use this in page.tsx) ────────────────────────────
     fetchAll: async () => {
       set({
-        loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true, courseDetail: true },
+        loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true, courseDetail: true, courseSections: true },
         error: null,
       });
       try {
@@ -431,12 +490,12 @@ export const useHomeStore = create<HomeState>()(
           interviewQuestions: d.latestInterviewQuestions.map(mapInterviewQuestion),
           tutorials: d.latestTutorials.map(mapTutorial),
           categories: catRes.data.data,
-          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false, categoryCourses: false, courseDetail: false },
+          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false, categoryCourses: false, courseDetail: false, courseSections: false, publicPages: false },
         });
       } catch (err: any) {
         set({
           error: err?.response?.data?.message || 'Failed to load home data',
-          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false, categoryCourses: false, courseDetail: false },
+          loading: { courses: false, masterPrograms: false, blogs: false, interviewQuestions: false, tutorials: false, categories: false, categoryCourses: false, courseDetail: false, courseSections: false, publicPages: false },
         });
       }
     },

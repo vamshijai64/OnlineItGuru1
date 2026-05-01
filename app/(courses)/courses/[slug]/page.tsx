@@ -13,6 +13,7 @@ import {
   CircleDot, FolderKanban, Wrench, Layout, Shield,
   Bitcoin, Smartphone, Megaphone, Bot
 } from "lucide-react";
+import CourseDynamicSections from "@/components/courses/CourseDynamicSections";
 
 // ── Icons for Category View ──────────────────────────────────────────────────
 const iconMap: Record<string, React.ElementType> = {
@@ -241,6 +242,7 @@ const TABS = ["Course Syllabus", "Projects", "Training Options", "Upcoming Batch
 
 function CourseDetailView({ slug }: { slug: string }) {
   const fetchCourseBySlug = useHomeStore((s) => s.fetchCourseBySlug);
+  const fetchCourseSections = useHomeStore((s) => s.fetchCourseSections);
   const course = useHomeStore((s) => s.courseDetail);
   const loading = useHomeStore((s) => s.loading.courseDetail);
 
@@ -251,6 +253,12 @@ function CourseDetailView({ slug }: { slug: string }) {
   useEffect(() => {
     fetchCourseBySlug(slug);
   }, [slug]);
+
+  useEffect(() => {
+    if (course?.id) {
+      fetchCourseSections(course.id);
+    }
+  }, [course?.id]);
 
   if (loading) {
     return (
@@ -351,6 +359,36 @@ function CourseDetailView({ slug }: { slug: string }) {
                 {isLongDesc && <button onClick={() => setShowFullDesc(!showFullDesc)} className="text-blue-600 font-semibold mt-2 text-sm hover:underline">{showFullDesc ? 'Show Less' : 'Read More'}</button>}
               </div>
             </section>
+            <CourseDynamicSections />
+            
+            {course.reviews && course.reviews.length > 0 && (
+              <section className="pt-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-8 font-outfit pb-2 border-b-2 border-purple-100 inline-block">Student Reviews</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {course.reviews.map((review: any) => (
+                    <div key={review.id} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-bold">
+                            {review.user_name?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-sm">{review.user_name}</h4>
+                            <span className="text-xs text-gray-500">{new Date(review.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{review.review}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
           <div className="lg:hidden">
             <PricingCard price={price} originalPrice={originalPrice} discount={discount} resources={course.resources} liveProjects={course.liveProjects} duration={course.duration} assignments={course.assignments} />

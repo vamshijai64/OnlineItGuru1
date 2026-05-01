@@ -352,7 +352,7 @@ export default function WhyChooseUs() {
 
   return (
     <section className="relative py-24 px-6 bg-gray-50">
-      <div className="container mx-auto max-w-6xl">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <SectionHeader
           badge="Why Choose Us"
           title="Everything You Need to Succeed"

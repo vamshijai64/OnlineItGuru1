@@ -4,8 +4,22 @@ import Link from "next/link";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEffect } from "react";
+import { useHomeStore } from "@/store/homeStore";
 
 export default function Footer() {
+    const fetchPublicPages = useHomeStore((s) => s.fetchPublicPages);
+    const publicPages = useHomeStore((s) => s.publicPages);
+
+    useEffect(() => {
+        if (publicPages.length === 0) {
+            fetchPublicPages();
+        }
+    }, []);
+
+    const legalSlugs = ['refund-policy', 'reschedule-policy', 'disclaimer', 'privacy-policy', 'terms-of-use'];
+    const legalPages = publicPages.filter(p => legalSlugs.includes(p.slug));
+    const quickPages = publicPages.filter(p => !legalSlugs.includes(p.slug));
     return (
         <footer className="bg-slate-900 border-t border-slate-800 text-slate-300">
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
@@ -34,10 +48,10 @@ export default function Footer() {
                         <h3 className="text-white font-bold font-outfit text-lg mb-6">Quick Links</h3>
                         <ul className="space-y-4 text-sm">
                             <FooterLink href="/courses">All Courses</FooterLink>
-                            <FooterLink href="/corporate">Corporate Training</FooterLink>
                             <FooterLink href="/blog">Success Stories</FooterLink>
-                            <FooterLink href="/about">About Us</FooterLink>
-                            <FooterLink href="/contact">Contact</FooterLink>
+                            {quickPages.map(page => (
+                                <FooterLink key={page.id} href={`/p/${page.slug}`}>{page.title}</FooterLink>
+                            ))}
                         </ul>
                     </div>
 
@@ -81,9 +95,12 @@ export default function Footer() {
 
                 <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
                     <p>&copy; {new Date().getFullYear()} ONLINEITGURU. All rights reserved.</p>
-                    <div className="flex gap-6">
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                    <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+                        {legalPages.map(page => (
+                            <Link key={page.id} href={`/p/${page.slug}`} className="hover:text-white transition-colors">
+                                {page.title}
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>

@@ -71,6 +71,22 @@ export const fetchAdminCourses = async (page: number = 1, limit: number = 12): P
     return response.data;
 };
 
+export const fetchAdminCoursesByCategory = async (categorySlug: string, page: number = 1, limit: number = 12): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.get<AdminResponse<any>>(`/public/courses?category=${categorySlug}&page=${page}&limit=${limit}`);
+    return response.data;
+};
+
+export const fetchAdminCourseSections = async (courseId: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.get<AdminResponse<any>>(`/public/course-sections?courseId=${courseId}`);
+    return response.data;
+};
+
+export const updateSectionPositions = async (courseId: string, positions: {id: string, position: number}[]): Promise<AdminResponse<any>> => {
+    // Mock the response if the backend endpoint doesn't exist yet
+    // return axiosClient.post(`/admin/course-sections/reorder`, { courseId, positions });
+    return new Promise(resolve => setTimeout(() => resolve({ success: true, message: "Positions updated" }), 500));
+};
+
 export const fetchAdminOffers = async (): Promise<AdminResponse<any[]>> => {
     const response = await axiosClient.get<AdminResponse<any[]>>('/public/offers'); // Placeholder path
     return response.data;

@@ -44,7 +44,7 @@ const steps = [
 export default function LearningPath() {
   return (
     <section className="py-24 bg-[#020617]">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-20">
           <div className="inline-flex px-4 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold mb-6 border border-indigo-500/20">
             Our Approach

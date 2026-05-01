@@ -24,7 +24,7 @@ const faqs = [
 export default function HomeFAQ() {
   return (
     <section className="py-24 px-6 bg-[#020617]">
-      <div className="container mx-auto max-w-4xl text-center">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
