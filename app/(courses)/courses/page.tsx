@@ -28,6 +28,7 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
         className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight"
       >
         {title}
+        
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 20 }}
@@ -77,7 +78,7 @@ export default function CoursesPage() {
 
   let displayCourses = [];
   if (selectedCategory === 'all') {
-    // Combine featured courses with whatever is in the current page
+    // Combine featured courses with whatever is in the cudssdrrent page
     const featured = [...courses];
     categoryItems.forEach(gc => {
       if (!featured.find(c => c.id === gc.id)) {
