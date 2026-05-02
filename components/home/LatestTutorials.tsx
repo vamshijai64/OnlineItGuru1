@@ -16,7 +16,7 @@ const cardGradients = [
 
 export default function LatestTutorials() {
   const tutorials = useHomeStore((state) => state.tutorials);
-  const loading   = useHomeStore((state) => state.loading.tutorials);
+  const loading = useHomeStore((state) => state.loading.tutorials);
 
   return (
     <section className="relative py-24 px-6 bg-gradient-to-br from-slate-50 via-white to-purple-50">

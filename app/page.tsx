@@ -17,6 +17,7 @@ import LearningPath from "@/components/home/LearningPath";
 import CTASection from "@/components/home/CTASection";
 import HomeContact from "@/components/home/HomeContact";
 import HomeFAQ from "@/components/home/HomeFAQ";
+import Testimonials from "@/components/home/Testimonials";
 
 export default function Home() {
  const fetchAll = useHomeStore((state) => state.fetchAll);
@@ -38,6 +39,7 @@ export default function Home() {
       <LatestBlogs />     
       <InterviewQuestions />    
       <PlacementModule />
+      <Testimonials />
       <HomeFAQ />
       <HomeContact />
       <CTASection />

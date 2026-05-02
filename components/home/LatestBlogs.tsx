@@ -13,7 +13,7 @@ function formatDate(iso: string) {
 }
 
 export default function LatestBlogs() {
-  const blogs   = useHomeStore((state) => state.blogs);
+  const blogs = useHomeStore((state) => state.blogs);
   const loading = useHomeStore((state) => state.loading.blogs);
 
   return (

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Zap, Shield, BarChart2, Users, Clock, Star, BookOpen, Award, LucideIcon } from 'lucide-react';
+import { Headphones,GraduationCap,Calendar,Video,Code,Cloud,Star,BookOpen,Award, LucideIcon } from 'lucide-react';
 import axiosClient from '@/lib/axios-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -97,8 +97,8 @@ export interface Category {
   image: string;        // fa icon class from API
   position: number;
 }
-export interface CoursesPage {
-  items: Course[];
+export interface ResourcePage<T> {
+  items: T[];
   pagination: {
     page: number;
     limit: number;
@@ -106,6 +106,7 @@ export interface CoursesPage {
     totalPages: number;
   };
 }
+export interface CoursesPage extends ResourcePage<Course> {}
 export interface CourseSection {
   id: string;
   title: string;
@@ -249,6 +250,9 @@ interface HomeState {
   };
   tutorials: Tutorial[];
   publicPages: PublicPage[];
+  blogsPage: ResourcePage<Blog> | null;
+  tutorialsPage: ResourcePage<Tutorial> | null;
+  interviewQuestionsPage: ResourcePage<InterviewQuestion> | null;
 
   error: string | null;
 
@@ -266,6 +270,10 @@ interface HomeState {
   fetchCourseBySlug: (slug: string) => Promise<void>;
   fetchCourseSections: (courseId: string) => Promise<void>;
   fetchPublicPages: () => Promise<void>;
+  fetchPublicBlogs: (page?: number, limit?: number) => Promise<void>;
+  fetchPublicTutorials: (page?: number, limit?: number) => Promise<void>;
+  fetchPublicInterviewQuestions: (page?: number, limit?: number) => Promise<void>;
+  fetchResourceBySlug: (type: string, slug: string) => Promise<any>;
   fetchAll: () => Promise<void>;
 }
 
@@ -278,20 +286,16 @@ export const useHomeStore = create<HomeState>()(
       subtext: 'Industry-aligned courses with guaranteed placement support. Learn from top experts, build real-world projects, and land your dream job in tech.',
       primaryCTA: { label: 'Explore Courses', href: '/courses' },
       secondaryCTA: { label: 'Request Free Demo' },
-      stats: [
-        { icon: Users, value: '15,000+', label: 'Students Trained' },
-        { icon: BookOpen, value: '50+', label: 'Expert Courses' },
-        { icon: Award, value: '95%', label: 'Placement Rate' },
-      ],
+     
     },
 
     features: [
-      { icon: Zap, title: 'Lightning Fast Learning', description: 'Blazing-fast platform optimized for every device and connection speed.', gradient: 'from-yellow-400 to-orange-500' },
-      { icon: Shield, title: 'Secure & Reliable', description: 'Enterprise-grade security ensures your data stays safe at all times.', gradient: 'from-green-400 to-teal-500' },
-      { icon: BarChart2, title: 'Powerful Analytics', description: 'Track your progress with real-time analytics and intuitive dashboards.', gradient: 'from-blue-400 to-indigo-500' },
-      { icon: Users, title: 'Team Collaboration', description: 'Work seamlessly with peers using built-in collaboration tools.', gradient: 'from-pink-400 to-rose-500' },
-      { icon: Clock, title: 'Save Time', description: 'Structured learning paths help you reach your goals faster.', gradient: 'from-purple-400 to-violet-600' },
-      { icon: Star, title: 'Premium Support', description: 'Get 24/7 priority support from our dedicated team of experts.', gradient: 'from-amber-400 to-yellow-500' },
+      { icon: Headphones, title: '24x7 Support', description: 'Round-the-clock assistance from our dedicated support team to help you succeed.', gradient: 'from-blue-500 to-cyan-500' },
+  { icon: GraduationCap, title: 'Expert Trainers', description: 'Learn from industry veterans with 15+ years of real-world experience.', gradient: 'from-purple-500 to-pink-500' },
+  { icon: Calendar, title: 'Flexible Scheduling', description: 'Choose your own pace with batch timings that fit your lifestyle.', gradient: 'from-orange-500 to-amber-500' },
+  { icon: Video, title: 'Live Interactive Classes', description: 'Engage in real-time with instructors and peers through live sessions.', gradient: 'from-green-500 to-emerald-500' },
+  { icon: Code, title: 'Hands-on Projects', description: 'Build real-world applications with guided project-based learning.', gradient: 'from-red-500 to-rose-500' },
+  { icon: Cloud, title: 'Lifetime LMS Access', description: 'Access course materials, recordings, and resources forever.', gradient: 'from-indigo-500 to-violet-500' },
     ],
 
 
@@ -305,6 +309,9 @@ export const useHomeStore = create<HomeState>()(
     currentCategory: null,
     courseSections: [],
     publicPages: [],
+    blogsPage: null,
+    tutorialsPage: null,
+    interviewQuestionsPage: null,
     loading: {
       courses: false,
       masterPrograms: false,
@@ -473,7 +480,7 @@ export const useHomeStore = create<HomeState>()(
     // ─── Fetch All at Once (use this in page.tsx) ────────────────────────────
     fetchAll: async () => {
       set({
-        loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true, courseDetail: true, courseSections: true },
+        loading: { courses: true, masterPrograms: true, blogs: true, interviewQuestions: true, tutorials: true, categories: true, categoryCourses: true, courseDetail: true, courseSections: true, publicPages: true },
         error: null,
       });
       try {
@@ -532,5 +539,68 @@ export const useHomeStore = create<HomeState>()(
       }
     },
 
+    fetchPublicBlogs: async (page = 1, limit = 12) => {
+      set((s) => ({ loading: { ...s.loading, blogs: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get(`/public/blogs?page=${page}&limit=${limit}`);
+        set((s) => ({
+          blogsPage: {
+            items: data.data.items.map(mapBlog),
+            pagination: data.data.pagination,
+          },
+          loading: { ...s.loading, blogs: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load blogs',
+          loading: { ...s.loading, blogs: false },
+        }));
+      }
+    },
+    fetchPublicTutorials: async (page = 1, limit = 12) => {
+      set((s) => ({ loading: { ...s.loading, tutorials: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get(`/public/tutorials?page=${page}&limit=${limit}`);
+        set((s) => ({
+          tutorialsPage: {
+            items: data.data.items.map(mapTutorial),
+            pagination: data.data.pagination,
+          },
+          loading: { ...s.loading, tutorials: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load tutorials',
+          loading: { ...s.loading, tutorials: false },
+        }));
+      }
+    },
+    fetchPublicInterviewQuestions: async (page = 1, limit = 12) => {
+      set((s) => ({ loading: { ...s.loading, interviewQuestions: true }, error: null }));
+      try {
+        const { data } = await axiosClient.get(`/public/interview-questions?page=${page}&limit=${limit}`);
+        set((s) => ({
+          interviewQuestionsPage: {
+            items: data.data.items.map(mapInterviewQuestion),
+            pagination: data.data.pagination,
+          },
+          loading: { ...s.loading, interviewQuestions: false },
+        }));
+      } catch (err: any) {
+        set((s) => ({
+          error: err?.response?.data?.message || 'Failed to load interview questions',
+          loading: { ...s.loading, interviewQuestions: false },
+        }));
+      }
+    },
+    fetchResourceBySlug: async (type, slug) => {
+      try {
+        const { data } = await axiosClient.get(`/public/${type}/${slug}`);
+        return data.data;
+      } catch (err: any) {
+        console.error(`Failed to fetch ${type} by slug`, err);
+        return null;
+      }
+    },
   }))
 );

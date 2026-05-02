@@ -38,7 +38,7 @@ interface HomeCategoryFilterProps {
 
 export default function HomeCategoryFilter({ categories, selected, onSelect }: HomeCategoryFilterProps) {
   return (
-    <div className="flex flex-wrap gap-3 justify-center">
+    <div className="flex flex-nowrap gap-3 justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide no-scrollbar">
       {/* "All Courses" Button */}
       <motion.button
         onClick={() => onSelect('all')}

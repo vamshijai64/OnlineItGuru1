@@ -221,17 +221,39 @@ export default function CourseMegaMenu({ onClose }: Props) {
             </div>
 
             {/* Bottom bar */}
-            <div className="bg-slate-50 border-t border-slate-100 px-6 py-3 flex gap-6">
-                {["Contact Us", "Corporate Training", "Become an Instructor"].map((item) => (
-                    <Link
-                        key={item}
-                        href="/contact"
-                        onClick={onClose}
-                        className="text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
-                    >
-                        {item}
-                    </Link>
-                ))}
+            <div className="bg-slate-50 border-t border-slate-100 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="flex gap-6">
+                    {["Contact Us", "Corporate Training", "Become an Instructor"].map((item) => (
+                        <Link
+                            key={item}
+                            href="/contact"
+                            onClick={onClose}
+                            className="text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors"
+                        >
+                            {item}
+                        </Link>
+                    ))}
+                </div>
+
+                <div className="flex items-center gap-6">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Resources:</span>
+                    <div className="flex gap-5">
+                        {[
+                            { label: "Blogs", href: "/blog" },
+                            { label: "Tutorials", href: "/tutorials" },
+                            { label: "Interview Questions", href: "/interview-questions" }
+                        ].map((res) => (
+                            <Link
+                                key={res.label}
+                                href={res.href}
+                                onClick={onClose}
+                                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                            >
+                                {res.label}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
             </div>
         </motion.div>
     );

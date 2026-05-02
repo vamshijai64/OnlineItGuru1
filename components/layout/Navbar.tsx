@@ -139,13 +139,6 @@ export default function Navbar() {
                         </div>
 
                         <Link
-                            href="/blog"
-                            className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/blog") ? "text-white" : "text-gray-400 hover:text-white"}`}
-                        >
-                            Blog
-                            <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 group-hover:w-full ${isActive("/blog") ? "w-full" : ""}`} />
-                        </Link>
-                        <Link
                             href="/contact"
                             className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/contact") ? "text-white" : "text-gray-400 hover:text-white"}`}
                         >
@@ -218,7 +211,7 @@ export default function Navbar() {
                         className="md:hidden bg-gray-950/97 backdrop-blur-xl border-t border-white/10 overflow-y-auto max-h-[80vh]"
                     >
                         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 space-y-5">
-                            {["Home", "Blog", "Contact"].map((item) => (
+                            {["Home", "Contact"].map((item) => (
                                 <Link
                                     key={item}
                                     href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
@@ -238,8 +231,29 @@ export default function Navbar() {
                                 </Link>
                             )}
 
+                            {/* Mobile Resources Section */}
+                            <div className="pt-2 border-t border-white/10">
+                                <p className="text-lg font-medium text-white mb-3">Resources</p>
+                                <div className="space-y-2">
+                                    {[
+                                        { label: "Blog", href: "/blog" },
+                                        { label: "Tutorials", href: "/tutorials" },
+                                        { label: "Interview Questions", href: "/interview-questions" }
+                                    ].map((res) => (
+                                        <Link
+                                            key={res.label}
+                                            href={res.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="block text-sm text-gray-400 hover:text-white py-1"
+                                        >
+                                            {res.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Mobile Courses Section */}
-                            <div>
+                            <div className="pt-2 border-t border-white/10">
                                 <p className="text-lg font-medium text-white mb-3">Courses</p>
                                 {categories?.map((cat) => {
                                     const Icon = iconMap[cat.image] ?? BookOpen;

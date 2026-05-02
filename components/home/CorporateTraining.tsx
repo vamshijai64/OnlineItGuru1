@@ -36,12 +36,12 @@ export default function CorporateTraining() {
                             </div>
                             <div className="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-xl p-5 border border-slate-100 hidden sm:block">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-xl bg-[#e94560]/10 flex items-center justify-center">
-                                        <Building2 className="w-6 h-6 text-[#e94560]" />
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e94560] to-purple-600 flex items-center justify-center shadow-lg shadow-red-500/10">
+                                        <Building2 className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold text-slate-900">200+</p>
-                                        <p className="text-xs text-slate-500">Corporate Partners</p>
+                                        <p className="text-2xl font-bold text-[#e94560]">200+</p>
+                                        <p className="text-xs text-slate-500 font-medium">Corporate Partners</p>
                                     </div>
                                 </div>
                             </div>
@@ -65,14 +65,14 @@ export default function CorporateTraining() {
                         <div className="mt-8 space-y-3">
                             {benefits.map((item) => (
                                 <div key={item} className="flex items-start gap-3">
-                                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <CheckCircle2 className="w-5 h-5 text-[#e94560] mt-0.5 flex-shrink-0" />
                                     <span className="text-slate-600 text-sm sm:text-base">{item}</span>
                                 </div>
                             ))}
                         </div>
 
                         <Link href="/contact">
-                            <Button size="lg" className="mt-8 bg-[#e94560] hover:bg-[#d63850] text-white rounded-xl px-8 h-12 text-base font-semibold shadow-lg shadow-red-200/40 group">
+                            <Button className="mt-8 w-64 h-14 rounded-full bg-gradient-to-r from-[#e94560] to-purple-600 hover:opacity-90 text-white font-semibold shadow-xl shadow-red-500/20 border border-white/10 group transition-all">
                                 Get a Custom Quote
                                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                             </Button>
