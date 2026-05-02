@@ -138,6 +138,7 @@ export default function CoursesPage() {
               categories={categories}
               selected={selectedCategory}
               onSelect={handleCategorySelect}
+              variant="grid"
             />
           </motion.div>
         </div>
@@ -221,8 +222,8 @@ export default function CoursesPage() {
                     key={p}
                     onClick={() => setPage(p)}
                     className={`w-12 h-12 rounded-xl text-sm font-bold transition-all ${p === page
-                        ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                        : "text-gray-500 hover:bg-white/5 hover:text-white"
+                      ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                      : "text-gray-500 hover:bg-white/5 hover:text-white"
                       }`}
                   >
                     {p}
