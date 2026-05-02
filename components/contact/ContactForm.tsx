@@ -25,7 +25,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
       initial={{ opacity: 0, x: 30 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className="p-10 md:p-14 rounded-[2.5rem] bg-gradient-to-br from-slate-900/80 to-slate-900/40 border border-white/10 backdrop-blur-2xl shadow-2xl w-full max-w-2xl mx-auto"
+      className="p-10 md:p-14 rounded-[2.0rem] bg-gradient-to-br from-slate-900/80 to-slate-900/40 border border-white/10 backdrop-blur-2xl shadow-2xl w-full max-w-2xl mx-auto"
     >
       {showTitle && (
         <div className="text-center mb-10">

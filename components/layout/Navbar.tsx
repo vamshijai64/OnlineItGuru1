@@ -112,6 +112,14 @@ export default function Navbar() {
 
                     {/* Desktop Nav */}
                     <nav className="hidden md:flex items-center gap-8">
+                        <Link
+                            href="/"
+                            className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/") ? "text-white" : "text-gray-400 hover:text-white"}`}
+                        >
+                            Home
+                            <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 group-hover:w-full ${isActive("/") ? "w-full" : ""}`} />
+                        </Link>
+
                         {/* Courses with mega menu */}
                         <div ref={courseMenuRef} className="relative">
                             <button

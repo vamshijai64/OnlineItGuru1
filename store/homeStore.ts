@@ -277,7 +277,7 @@ export const useHomeStore = create<HomeState>()(
       headline: 'Accelerate Your Tech Career With Expert Guidance',
       subtext: 'Industry-aligned courses with guaranteed placement support. Learn from top experts, build real-world projects, and land your dream job in tech.',
       primaryCTA: { label: 'Explore Courses', href: '/courses' },
-      secondaryCTA: { label: 'Watch Demo' },
+      secondaryCTA: { label: 'Request Free Demo' },
       stats: [
         { icon: Users, value: '15,000+', label: 'Students Trained' },
         { icon: BookOpen, value: '50+', label: 'Expert Courses' },
@@ -395,8 +395,8 @@ export const useHomeStore = create<HomeState>()(
       try {
         // ← make sure URL matches exactly what your API expects
         const url = slug
-          ? `/public/courses?category=${slug}&page=${page}&limit=12`
-          : `/public/courses?page=${page}&limit=12`;
+          ? `/public/courses?category=${slug}&page=${page}&limit=9`
+          : `/public/courses?page=${page}&limit=9`;
 
         const { data } = await axiosClient.get(url);
         set((s) => ({
