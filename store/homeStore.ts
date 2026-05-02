@@ -450,8 +450,9 @@ export const useHomeStore = create<HomeState>()(
       set((s) => ({ loading: { ...s.loading, courseSections: true }, error: null }));
       try {
         const { data } = await axiosClient.get(`/public/course-sections?courseId=${courseId}`);
+        const sortedSections = (data.data || []).sort((a: any, b: any) => a.position - b.position);
         set((s) => ({
-          courseSections: data.data,
+          courseSections: sortedSections,
           loading: { ...s.loading, courseSections: false },
         }));
       } catch (err: any) {
