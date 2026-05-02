@@ -95,7 +95,7 @@ export default function MasterPrograms() {
                         <span className="ml-2 text-xs text-gray-400 line-through">₹{program.originalPrice}</span>
                       </div>
                       <Link
-                        href={`/master-programs/${program.slug}`}
+                        href={`/courses/${program.slug}`}
                         className="flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-800 transition-colors"
                       >
                         Enroll <ArrowRight className="w-3.5 h-3.5" />
@@ -118,7 +118,7 @@ export default function MasterPrograms() {
         {/* View All */}
         <div className="text-center mt-12">
           <Link
-            href="/master-programs"
+            href="/courses"
             className="inline-flex items-center gap-2 px-8 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition"
           >
             View All Master Programs <ArrowRight className="w-4 h-4" />

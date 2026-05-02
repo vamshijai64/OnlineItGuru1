@@ -72,7 +72,8 @@ export default function HomeCourseCard({
         style={{ transformStyle: 'preserve-3d' }}
       >
         {/* Front of card */}
-        <div 
+        <Link 
+          href={`/courses/${slug}`}
           className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50"
           style={{ backfaceVisibility: 'hidden' }}
         >
@@ -137,18 +138,19 @@ export default function HomeCourseCard({
           </div>
           
           {/* CTA */}
-          <Link href={`/courses/${slug}`} className="mt-5">
+          <div className="mt-5">
             <Button 
               className={`w-full bg-gradient-to-r ${gradient} hover:brightness-110 text-white border-0 rounded-xl h-12 font-bold transition-all shadow-lg shadow-black/20`}
             >
               Enroll Now
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
-          </Link>
-        </div>
+          </div>
+        </Link>
         
         {/* Back of card */}
-        <div 
+        <Link 
+          href={`/courses/${slug}`}
           className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50"
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
@@ -182,15 +184,15 @@ export default function HomeCourseCard({
             </div>
           </div>
 
-          <Link href={`/courses/${slug}`} className="mt-4">
+          <div className="mt-4">
             <Button 
               variant="outline"
               className="w-full border-white/10 hover:bg-white/5 text-white rounded-xl h-11 font-bold transition-all"
             >
               View Curriculum
             </Button>
-          </Link>
-        </div>
+          </div>
+        </Link>
       </motion.div>
     </motion.div>
   );
