@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Code2, Cloud, Brain, Database, Settings, Briefcase, 
-  BookOpen, PieChart, Cpu, BarChart2, CircleDot, 
-  FolderKanban, Wrench, Layout, Shield, Bitcoin, 
-  Monitor, Smartphone, Megaphone, Bot, LucideIcon 
+import {
+  Code2, Cloud, Brain, Database, Settings, Briefcase,
+  BookOpen, PieChart, Cpu, BarChart2, CircleDot,
+  FolderKanban, Wrench, Layout, Shield, Bitcoin,
+  Monitor, Smartphone, Megaphone, Bot, LucideIcon
 } from 'lucide-react';
 import { Category } from '@/store/homeStore';
 
@@ -34,19 +34,23 @@ interface HomeCategoryFilterProps {
   categories: Category[];
   selected: string;
   onSelect: (slug: string) => void;
+  variant?: 'scroll' | 'grid';
 }
 
-export default function HomeCategoryFilter({ categories, selected, onSelect }: HomeCategoryFilterProps) {
+export default function HomeCategoryFilter({ categories, selected, onSelect, variant = 'scroll' }: HomeCategoryFilterProps) {
+  const containerClasses = variant === 'scroll'
+    ? "flex flex-nowrap gap-3 justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide no-scrollbar"
+    : "flex flex-wrap gap-3 justify-center";
+
   return (
-    <div className="flex flex-wrap gap-3 justify-center">
+    <div className={containerClasses}>
       {/* "All Courses" Button */}
       <motion.button
         onClick={() => onSelect('all')}
-        className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${
-          selected === 'all' 
-            ? 'text-white' 
+        className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${selected === 'all'
+            ? 'text-white'
             : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10'
-        }`}
+          }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -65,19 +69,18 @@ export default function HomeCategoryFilter({ categories, selected, onSelect }: H
       </motion.button>
 
       {/* Dynamic Categories */}
-      {categories.slice(0, 6).map((category) => {
+      {categories.map((category) => {
         const Icon = iconMap[category.image] || Settings;
         const isSelected = selected === category.slug;
-        
+
         return (
           <motion.button
             key={category.id}
             onClick={() => onSelect(category.slug)}
-            className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${
-              isSelected 
-                ? 'text-white' 
+            className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${isSelected
+                ? 'text-white'
                 : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10'
-            }`}
+              }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

@@ -13,12 +13,12 @@ function formatDate(iso: string) {
 }
 
 export default function LatestBlogs() {
-  const blogs   = useHomeStore((state) => state.blogs);
+  const blogs = useHomeStore((state) => state.blogs);
   const loading = useHomeStore((state) => state.loading.blogs);
 
   return (
     <section className="relative py-24 px-6 bg-gray-50">
-      <div className="container mx-auto max-w-6xl">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Header */}
         <div className="text-center mb-16">

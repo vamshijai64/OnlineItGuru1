@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Clock, Users, ChevronRight, Award, LucideIcon, BookOpen, Code2, Cloud, Brain, Database, Briefcase } from 'lucide-react';
+import { Star, Clock, Users, ChevronRight, Award, LucideIcon, BookOpen, Code2, Cloud, Brain, Database, Briefcase, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
@@ -73,131 +73,123 @@ export default function HomeCourseCard({
       >
         {/* Front of card */}
         <div 
-          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden"
+          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50"
           style={{ backfaceVisibility: 'hidden' }}
         >
-          <div className={`h-full bg-gradient-to-br ${gradient} p-[2px]`}>
-            <div className="h-full bg-[#0a0a0f] rounded-[22px] p-6 flex flex-col">
-              {/* Badges */}
-              <div className="flex gap-2 mb-4">
-                {isTrending && (
-                  <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-wider">
-                    🔥 Trending
-                  </span>
-                )}
-                {isNew && (
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                    ✨ New
-                  </span>
-                )}
-                {!isTrending && !isNew && (
-                   <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-bold uppercase tracking-wider">
-                   💎 Premium
-                 </span>
-                )}
-              </div>
-              
-              {/* Icon / Image Placeholder */}
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg shadow-black/20`}>
-                <Icon className="w-7 h-7 text-white" />
-              </div>
-              
-              {/* Category */}
-              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">
-                {category}
+          {/* Badges */}
+          <div className="flex gap-2 mb-4">
+            {isTrending && (
+              <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-wider">
+                🔥 Trending
               </span>
-              
-              {/* Title */}
-              <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight">
-                {title}
-              </h3>
-              
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'}`} 
-                    />
-                  ))}
-                </div>
-                <span className="text-white text-sm font-bold">{rating}</span>
-                <span className="text-gray-600 text-xs">({reviews.toLocaleString()})</span>
-              </div>
-              
-              {/* Stats */}
-              <div className="flex items-center gap-4 text-gray-400 text-xs mt-auto">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-purple-500" />
-                  <span>{duration}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5 text-blue-500" />
-                  <span>{students.toLocaleString()} Students</span>
-                </div>
-              </div>
-              
-              {/* CTA */}
-              <Link href={`/courses/${slug}`} className="mt-5">
-                <Button 
-                  className={`w-full bg-gradient-to-r ${gradient} hover:brightness-110 text-white border-0 rounded-xl h-12 font-bold transition-all shadow-lg shadow-black/20`}
-                >
-                  Enroll Now
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
+            )}
+            {isNew && (
+              <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                ✨ New
+              </span>
+            )}
+            {!isTrending && !isNew && (
+               <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-bold uppercase tracking-wider">
+               💎 Premium
+             </span>
+            )}
+          </div>
+          
+          {/* Icon / Image Placeholder */}
+          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg shadow-black/20`}>
+            <Icon className="w-7 h-7 text-white" />
+          </div>
+          
+          {/* Category */}
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">
+            {category}
+          </span>
+          
+          {/* Title */}
+          <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight">
+            {title}
+          </h3>
+          
+          {/* Rating */}
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'}`} 
+                />
+              ))}
+            </div>
+            <span className="text-white text-sm font-bold">{rating}</span>
+            <span className="text-gray-600 text-xs">({reviews.toLocaleString()})</span>
+          </div>
+          
+          {/* Stats */}
+          <div className="flex items-center gap-4 text-gray-400 text-xs mt-auto">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-purple-500" />
+              <span>{duration}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-blue-500" />
+              <span>{students.toLocaleString()} Students</span>
             </div>
           </div>
+          
+          {/* CTA */}
+          <Link href={`/courses/${slug}`} className="mt-5">
+            <Button 
+              className={`w-full bg-gradient-to-r ${gradient} hover:brightness-110 text-white border-0 rounded-xl h-12 font-bold transition-all shadow-lg shadow-black/20`}
+            >
+              Enroll Now
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
         </div>
         
         {/* Back of card */}
         <div 
-          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden"
+          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50"
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
-          <div className={`h-full bg-gradient-to-br ${gradient} p-[2px]`}>
-            <div className="h-full bg-[#0a0a0f] rounded-[22px] p-6 flex flex-col">
-              <h4 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                <Award className="w-5 h-5 text-yellow-400" />
-                Key Highlights
-              </h4>
-              
-              <ul className="space-y-4 flex-1">
-                {defaultHighlights.map((item, index) => (
-                  <motion.li 
-                    key={index}
-                    className="flex items-start gap-3 text-gray-300"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: isFlipped ? 1 : 0, x: isFlipped ? 0 : -20 }}
-                    transition={{ delay: index * 0.1 + 0.2 }}
-                  >
-                    <span className={`mt-1.5 w-1.5 h-1.5 rounded-full bg-gradient-to-r ${gradient} flex-shrink-0 shadow-[0_0_8px_rgba(168,85,247,0.4)]`} />
-                    <span className="text-sm font-medium leading-tight">{item}</span>
-                  </motion.li>
-                ))}
-              </ul>
-              
-              <div className="mt-auto pt-4 border-t border-white/5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500 font-medium">Certificate Included</span>
-                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Verified
-                  </span>
-                </div>
-              </div>
-
-              <Link href={`/courses/${slug}`} className="mt-4">
-                <Button 
-                  variant="outline"
-                  className="w-full border-white/10 hover:bg-white/5 text-white rounded-xl h-11 font-bold transition-all"
-                >
-                  View Curriculum
-                </Button>
-              </Link>
+          <h4 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+            <Award className="w-5 h-5 text-yellow-400" />
+            Key Highlights
+          </h4>
+          
+          <ul className="space-y-4 flex-1">
+            {defaultHighlights.map((item, index) => (
+              <motion.li 
+                key={index}
+                className="flex items-start gap-3 text-gray-300"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: isFlipped ? 1 : 0, x: isFlipped ? 0 : -20 }}
+                transition={{ delay: index * 0.1 + 0.2 }}
+              >
+                <span className={`mt-1.5 w-1.5 h-1.5 rounded-full bg-gradient-to-r ${gradient} flex-shrink-0 shadow-[0_0_8px_rgba(168,85,247,0.4)]`} />
+                <span className="text-sm font-medium leading-tight">{item}</span>
+              </motion.li>
+            ))}
+          </ul>
+          
+          <div className="mt-auto pt-4 border-t border-white/5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-500 font-medium">Certificate Included</span>
+              <span className="text-emerald-400 font-bold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Verified
+              </span>
             </div>
           </div>
+
+          <Link href={`/courses/${slug}`} className="mt-4">
+            <Button 
+              variant="outline"
+              className="w-full border-white/10 hover:bg-white/5 text-white rounded-xl h-11 font-bold transition-all"
+            >
+              View Curriculum
+            </Button>
+          </Link>
         </div>
       </motion.div>
     </motion.div>

@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 export default function CTASection() {
   return (
     <section className="py-24 px-6 bg-[#020617]">
-      <div className="container mx-auto max-w-5xl">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -26,7 +26,7 @@ export default function CTASection() {
             <p className="text-slate-400 mb-12 max-w-xl mx-auto text-lg md:text-xl font-medium leading-relaxed">
               Join 10,000+ professionals who have transformed their careers with us.
             </p>
-            
+
             <div className="flex flex-wrap justify-center gap-6">
               <Link href="/courses">
                 <button className="h-14 px-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-lg flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(99,102,241,0.4)]">
@@ -34,7 +34,7 @@ export default function CTASection() {
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </Link>
-              
+
               <Link href="/contact">
                 <button className="h-14 px-10 rounded-full bg-white/5 border border-white/10 text-white font-bold text-lg hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
                   Talk to Advisor

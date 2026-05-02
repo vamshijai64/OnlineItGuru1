@@ -8,11 +8,11 @@ import { useHomeStore } from '@/store/homeStore';
 
 export default function MasterPrograms() {
   const masterPrograms = useHomeStore((state) => state.masterPrograms);
-  const loading        = useHomeStore((state) => state.loading.masterPrograms);
+  const loading = useHomeStore((state) => state.loading.masterPrograms);
 
   return (
     <section className="relative py-24 px-6 bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      <div className="container mx-auto max-w-6xl">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
         {/* Header */}
         <div className="text-center mb-16">

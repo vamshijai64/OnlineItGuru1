@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createCourse, CreateCourseData, fetchAdminCategories, fetchAdminCourses, fetchAdminInterviewQuestions, fetchAdminOffers, fetchAdminReviews } from '@/lib/admin-api';
+import { createCourse, CreateCourseData, fetchAdminCategories, fetchAdminCourses, fetchAdminInterviewQuestions, fetchAdminOffers, fetchAdminReviews, fetchAdminCoursesByCategory, fetchAdminCourseSections, updateSectionPositions } from '@/lib/admin-api';
 import axios from 'axios';
 
 interface AdminState {
@@ -11,6 +11,8 @@ interface AdminState {
     adminOffers: any[];
     adminInterviewQuestions: any[];
     adminReviews: any[];
+    categoryCourses: any[];
+    courseSections: any[];
     coursePagination: {
         page: number;
         limit: number;
@@ -36,6 +38,9 @@ interface AdminState {
     fetchOffers: () => Promise<void>;
     fetchInterviewQuestions: (page?: number) => Promise<void>;
     fetchReviews: (page?: number) => Promise<void>;
+    fetchCoursesByCategory: (categorySlug: string, page?: number) => Promise<void>;
+    fetchCourseSections: (courseId: string) => Promise<void>;
+    updateCourseSectionPositions: (courseId: string, positions: {id: string, position: number}[]) => Promise<boolean>;
     clearMessages: () => void;
 }
 
@@ -48,6 +53,8 @@ export const useAdminStore = create<AdminState>((set) => ({
     adminOffers: [],
     adminInterviewQuestions: [],
     adminReviews: [],
+    categoryCourses: [],
+    courseSections: [],
     coursePagination: null,
     interviewPagination: null,
     reviewPagination: null,
@@ -156,6 +163,60 @@ export const useAdminStore = create<AdminState>((set) => ({
             }
         } catch (error: any) {
             set({ isLoading: false });
+        }
+    },
+
+    fetchCoursesByCategory: async (categorySlug: string, page = 1) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminCoursesByCategory(categorySlug, page);
+            if (response.success) {
+                const items = response.data?.items || [];
+                const pagination = response.data?.pagination || null;
+                set({ 
+                    categoryCourses: items, 
+                    coursePagination: pagination,
+                    isLoading: false 
+                });
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
+        }
+    },
+
+    fetchCourseSections: async (courseId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminCourseSections(courseId);
+            if (response.success) {
+                set({ 
+                    courseSections: response.data || [], 
+                    isLoading: false 
+                });
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
+        }
+    },
+
+    updateCourseSectionPositions: async (courseId: string, positions: {id: string, position: number}[]) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await updateSectionPositions(courseId, positions);
+            if (response.success) {
+                // Fetch the updated sections
+                const updatedResponse = await fetchAdminCourseSections(courseId);
+                set({ 
+                    courseSections: updatedResponse.data || [], 
+                    isLoading: false,
+                    successMessage: 'Section positions updated successfully'
+                });
+                return true;
+            }
+            throw new Error('Failed to update positions');
+        } catch (error: any) {
+            set({ isLoading: false, error: error.message });
+            return false;
         }
     },
 

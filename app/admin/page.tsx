@@ -24,9 +24,11 @@ import { useAdminStore } from "@/store/adminStore";
 import DashboardOverview from "@/components/admin/DashboardOverview";
 import CourseManagement from "@/components/admin/CourseManagement";
 import CategoryManagement from "@/components/admin/CategoryManagement";
+import CategoryCourses from "@/components/admin/CategoryCourses";
 import OfferManagement from "@/components/admin/OfferManagement";
 import InterviewManagement from "@/components/admin/InterviewManagement";
 import ReviewManagement from "@/components/admin/ReviewManagement";
+import CourseSections from "@/components/admin/CourseSections";
 
 export default function AdminDashboard() {
     const { user, logout } = useAuthStore();
@@ -38,7 +40,17 @@ export default function AdminDashboard() {
         adminReviews, fetchReviews
     } = useAdminStore();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections'>('overview');
+    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections'>('courses');
+    
+    // State for drill-downs
+    const [selectedCategory, setSelectedCategory] = useState<{slug: string, title: string} | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<{id: string, title: string} | null>(null);
+
+    const navigateToTab = (newTab: typeof activeTab) => {
+        setPreviousTab(activeTab);
+        setActiveTab(newTab);
+    };
 
     useEffect(() => {
         if (activeTab === 'courses' && adminCourses.length === 0) {
@@ -85,7 +97,7 @@ export default function AdminDashboard() {
                 <nav className="flex-1 p-4 space-y-1">
                     <Button 
                         variant="ghost" 
-                        onClick={() => setActiveTab('overview')}
+                        onClick={() => navigateToTab('overview')}
                         className={`w-full justify-start gap-3 ${activeTab === 'overview' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <LayoutDashboard className="h-4 w-4" />
@@ -93,7 +105,7 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
-                        onClick={() => setActiveTab('courses')}
+                        onClick={() => navigateToTab('courses')}
                         className={`w-full justify-start gap-3 ${activeTab === 'courses' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <BookOpen className="h-4 w-4" />
@@ -101,7 +113,7 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
-                        onClick={() => setActiveTab('categories')}
+                        onClick={() => navigateToTab('categories')}
                         className={`w-full justify-start gap-3 ${activeTab === 'categories' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <Settings className="h-4 w-4" />
@@ -109,7 +121,7 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
-                        onClick={() => setActiveTab('offers')}
+                        onClick={() => navigateToTab('offers')}
                         className={`w-full justify-start gap-3 ${activeTab === 'offers' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <Tag className="h-4 w-4" />
@@ -117,7 +129,7 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
-                        onClick={() => setActiveTab('interviews')}
+                        onClick={() => navigateToTab('interviews')}
                         className={`w-full justify-start gap-3 ${activeTab === 'interviews' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <HelpCircle className="h-4 w-4" />
@@ -125,7 +137,7 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
-                        onClick={() => setActiveTab('reviews')}
+                        onClick={() => navigateToTab('reviews')}
                         className={`w-full justify-start gap-3 ${activeTab === 'reviews' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <MessageSquare className="h-4 w-4" />
@@ -176,14 +188,46 @@ export default function AdminDashboard() {
                     </div>
                 </header>
 
-                {/* Content Area - Only this part scrolls */}
                 <div className="flex-1 overflow-auto p-8">
                     {activeTab === 'overview' && <DashboardOverview userName={user.name} />}
-                    {activeTab === 'courses' && <CourseManagement />}
-                    {activeTab === 'categories' && <CategoryManagement />}
+                    {activeTab === 'courses' && (
+                        <CourseManagement 
+                            onViewSections={(id, title) => {
+                                setSelectedCourse({id, title});
+                                navigateToTab('course-sections');
+                            }} 
+                        />
+                    )}
+                    {activeTab === 'categories' && (
+                        <CategoryManagement 
+                            onViewCourses={(slug, title) => {
+                                setSelectedCategory({slug, title});
+                                navigateToTab('category-courses');
+                            }} 
+                        />
+                    )}
                     {activeTab === 'offers' && <OfferManagement />}
                     {activeTab === 'interviews' && <InterviewManagement />}
                     {activeTab === 'reviews' && <ReviewManagement />}
+                    
+                    {activeTab === 'category-courses' && selectedCategory && (
+                        <CategoryCourses 
+                            categorySlug={selectedCategory.slug} 
+                            categoryTitle={selectedCategory.title} 
+                            onBack={() => navigateToTab('categories')} 
+                            onViewSections={(id, title) => {
+                                setSelectedCourse({id, title});
+                                navigateToTab('course-sections');
+                            }}
+                        />
+                    )}
+                    {activeTab === 'course-sections' && selectedCourse && (
+                        <CourseSections 
+                            courseId={selectedCourse.id} 
+                            courseTitle={selectedCourse.title} 
+                            onBack={() => navigateToTab(previousTab)} 
+                        />
+                    )}
                 </div>
             </main>
         </div>
