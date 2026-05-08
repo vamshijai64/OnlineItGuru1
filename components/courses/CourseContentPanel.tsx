@@ -7,20 +7,25 @@ import {
     CheckCircle2, Users, MapPin, Clock3,
     BarChart2, TrendingUp, Zap, MessageSquare,
     BadgeCheck, Phone, Download,
+    Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Course } from "@/lib/data";
+import { CourseDetail, CourseSection } from "@/store/homeStore";
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
-interface Props { course: Course; }
+interface Props {
+    course: CourseDetail;
+    sections: CourseSection[];
+}
 
-const NAV_ITEMS = [
+const FIXED_NAV_ITEMS = [
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
     { id: "projects", label: "Projects", icon: Layers },
     { id: "training-options", label: "Training Options", icon: Video },
@@ -30,63 +35,78 @@ const NAV_ITEMS = [
     { id: "certification", label: "Certification", icon: Award },
 ];
 
-/* ─────────────── Section: Syllabus ─────────────── */
-function SyllabusSection({ course }: { course: Course }) {
-    const syllabus = course.syllabus.length > 0 ? course.syllabus : [
-        { title: "Module 1: Fundamentals & Core Concepts", lessons: ["Introduction & Environment Setup", "Core Architecture & Patterns", "Advanced Concepts Deep Dive", "Industry Best Practices"] },
-        { title: "Module 2: Hands-On Implementation", lessons: ["Real Project Setup", "Building Key Features", "Testing & Debugging", "Peer Code Reviews"] },
-        { title: "Module 3: Real-World Projects", lessons: ["Industry Case Study 1", "Industry Case Study 2", "Portfolio Project Build", "Deployment & CI/CD"] },
-        { title: "Module 4: Career Preparation", lessons: ["Resume & LinkedIn Optimization", "Mock Interview Sessions", "Job Portal Strategy", "Salary Negotiation Tips"] },
+// Helper to parse JSON content safely
+function parseContent(contentStr: string) {
+    try {
+        return JSON.parse(contentStr);
+    } catch (e) {
+        return [];
+    }
+}
+
+/* ─────────────── Section: Syllabus (Dynamic from API) ─────────────── */
+function SyllabusSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
+    // Filter sections that look like syllabus modules or just use the first few if none identified
+    const syllabusSections = sections.filter(s => s.view === 'title-description' || s.title.toLowerCase().includes('module') || s.title.toLowerCase().includes('syllabus'));
+
+    // If no dynamic sections, use mock data
+    const displaySections = syllabusSections.length > 0 ? syllabusSections : [
+        { title: "Module 1: Fundamentals & Core Concepts", content: JSON.stringify([{ itemTitle: "Introduction & Environment Setup" }, { itemTitle: "Core Architecture & Patterns" }, { itemTitle: "Advanced Concepts Deep Dive" }]) },
+        { title: "Module 2: Hands-On Implementation", content: JSON.stringify([{ itemTitle: "Real Project Setup" }, { itemTitle: "Building Key Features" }, { itemTitle: "Testing & Debugging" }]) },
     ];
-    const total = syllabus.reduce((a, m) => a + m.lessons.length, 0);
 
     return (
         <div className="space-y-5">
             <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900 font-outfit">Course Syllabus</h2>
-                    <p className="text-sm text-slate-500 mt-1">{syllabus.length} modules · {total} lessons · {course.duration}</p>
+                    <p className="text-sm text-slate-500 mt-1">
+                        {displaySections.length} modules · {course.duration || "40+ Hours"}
+                    </p>
                 </div>
                 <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 font-semibold px-4 py-1.5 text-sm">
-                    {course.level}
+                    {course.sectionCount > 10 ? "Advanced" : "Beginner"}
                 </Badge>
             </div>
             <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3">
-                {syllabus.map((mod, i) => (
-                    <AccordionItem key={i} value={`item-${i}`}
-                        className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
-                        <AccordionTrigger className="hover:no-underline py-4 gap-3">
-                            <div className="flex items-center gap-3 text-left">
-                                <span className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                    {String(i + 1).padStart(2, "0")}
-                                </span>
-                                <span className="font-semibold text-slate-800">{mod.title}</span>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-4 pl-10">
-                            <ul className="space-y-1.5">
-                                {mod.lessons.map((lesson, lIdx) => (
-                                    <li key={lIdx} className="flex items-center justify-between text-sm text-slate-600 py-2 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
-                                        <span className="flex items-center gap-3">
-                                            <PlayCircle className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
-                                            {lesson}
-                                        </span>
-                                        {lIdx === 0
-                                            ? <span className="text-[10px] font-bold uppercase text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Free</span>
-                                            : <Lock className="h-3.5 w-3.5 text-slate-300" />}
-                                    </li>
-                                ))}
-                            </ul>
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
+                {displaySections.map((mod, i) => {
+                    const items = parseContent(mod.content as string);
+                    return (
+                        <AccordionItem key={i} value={`item-${i}`}
+                            className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
+                            <AccordionTrigger className="hover:no-underline py-4 gap-3">
+                                <div className="flex items-center gap-3 text-left">
+                                    <span className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                        {String(i + 1).padStart(2, "0")}
+                                    </span>
+                                    <span className="font-semibold text-slate-800">{mod.title}</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-4 pl-10">
+                                <ul className="space-y-1.5">
+                                    {items.map((item: any, lIdx: number) => (
+                                        <li key={lIdx} className="flex items-center justify-between text-sm text-slate-600 py-2 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+                                            <span className="flex items-center gap-3">
+                                                <PlayCircle className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
+                                                {item.itemTitle}
+                                            </span>
+                                            {lIdx === 0
+                                                ? <span className="text-[10px] font-bold uppercase text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Free</span>
+                                                : <Lock className="h-3.5 w-3.5 text-slate-300" />}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </AccordionContent>
+                        </AccordionItem>
+                    );
+                })}
             </Accordion>
         </div>
     );
 }
 
 /* ─────────────── Section: Projects ─────────────── */
-function ProjectsSection({ course }: { course: Course }) {
+function ProjectsSection({ course }: { course: CourseDetail }) {
     const projects = [
         { title: "Real-Time Data Pipeline", desc: "Build an end-to-end ETL pipeline processing live data streams and visualizing insights.", tags: ["Backend", "Cloud"], icon: BarChart2, bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100" },
         { title: "E-Commerce Analytics Dashboard", desc: "Design and deploy a full-featured sales analytics dashboard with real-time KPI tracking.", tags: ["Frontend", "API"], icon: TrendingUp, bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-100" },
@@ -98,7 +118,7 @@ function ProjectsSection({ course }: { course: Course }) {
         <div className="space-y-5">
             <div className="mb-2">
                 <h2 className="text-2xl font-bold text-slate-900 font-outfit">Industry-Grade Projects</h2>
-                <p className="text-sm text-slate-500 mt-1">Build {projects.length} real-world projects to power your portfolio</p>
+                <p className="text-sm text-slate-500 mt-1">Build {course.liveProjects || "4+"} real-world projects to power your portfolio</p>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
                 {projects.map((p, i) => {
@@ -123,18 +143,23 @@ function ProjectsSection({ course }: { course: Course }) {
     );
 }
 
-/* ─────────────── Section: Training Options ─────────────── */
-function TrainingSection({ course }: { course: Course }) {
-    const options = [
+/* ─────────────── Section: Training Options (Dynamic) ─────────────── */
+function TrainingSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
+    const trainingSection = sections.find(s => s.view === 'rich-text-card-list');
+    const dynamicItems = trainingSection ? parseContent(trainingSection.content) : [];
+    const priceNum = Number(course.price);
+
+    // Standard fallback options
+    const standardOptions = [
         {
             title: "Self-Paced Online", sub: "Learn at your own speed",
-            price: `₹${course.price.toLocaleString("en-IN")}`, badge: "Most Popular", badgeColor: "bg-indigo-600",
+            price: `₹${priceNum.toLocaleString("en-IN")}`, badge: "Most Popular", badgeColor: "bg-indigo-600",
             features: ["Lifetime video access", "24×7 chat support", "Projects & assignments", "Completion certificate"],
             cta: "Enroll Now", ctaClass: "bg-indigo-600 hover:bg-indigo-700 text-white",
         },
         {
             title: "Live Online Training", sub: "Instructor-led live sessions",
-            price: `₹${(course.price + 100).toLocaleString("en-IN")}`, badge: "Recommended", badgeColor: "bg-emerald-600",
+            price: `₹${(priceNum + 5000).toLocaleString("en-IN")}`, badge: "Recommended", badgeColor: "bg-emerald-600",
             features: ["Weekend & weekday batches", "Real-time Q&A", "1-on-1 code reviews", "Job placement support"],
             cta: "Book Free Demo", ctaClass: "border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50",
         },
@@ -147,53 +172,101 @@ function TrainingSection({ course }: { course: Course }) {
     ];
 
     return (
-        <div className="space-y-5">
+        <div className="space-y-6">
             <div className="mb-2">
                 <h2 className="text-2xl font-bold text-slate-900 font-outfit">Training Options</h2>
                 <p className="text-sm text-slate-500 mt-1">Choose the mode that fits your schedule and goals</p>
             </div>
-            <div className="grid sm:grid-cols-3 gap-5">
-                {options.map((opt, i) => (
-                    <div key={i} className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all flex flex-col overflow-hidden">
-                        <div className="p-5 flex-1 space-y-4">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h4 className="font-bold text-slate-900">{opt.title}</h4>
-                                    <p className="text-xs text-slate-400 mt-0.5">{opt.sub}</p>
+
+            {dynamicItems.length > 0 ? (
+                <div className="grid md:grid-cols-2 gap-8">
+                    {dynamicItems.map((item: any, i: number) => (
+                        <div key={i} className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-500 overflow-hidden flex flex-col">
+                            {/* Accent Header */}
+                            <div className={`h-1.5 w-full ${i === 0 ? 'bg-indigo-600' : 'bg-emerald-600'}`} />
+                            
+                            <div className="p-8 flex-1">
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${i === 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                                        {item.flag || (i === 0 ? "Preferred" : "For Business")}
+                                    </div>
+                                    <div className="h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        {i === 0 ? <Users className="h-5 w-5 text-indigo-600" /> : <Monitor className="h-5 w-5 text-emerald-600" />}
+                                    </div>
                                 </div>
-                                <span className={`text-[10px] font-bold text-white px-2 py-0.5 rounded-full ${opt.badgeColor}`}>{opt.badge}</span>
+
+                                <h3 className="text-xl font-bold text-slate-900 mb-4 font-outfit">
+                                    {i === 0 ? "Individual Training" : "Corporate Training"}
+                                </h3>
+
+                                <div 
+                                    className="text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none 
+                                    [&_ul]:list-none [&_ul]:space-y-4 [&_ul]:m-0 [&_ul]:p-0
+                                    [&_li]:relative [&_li]:pl-7
+                                    [&_li::before]:content-[''] [&_li::before]:absolute [&_li::before]:left-0 [&_li::before]:top-1 
+                                    [&_li::before]:h-4 [&_li::before]:w-4 [&_li::before]:bg-indigo-50 [&_li::before]:rounded-full
+                                    [&_li::after]:content-['✓'] [&_li::after]:absolute [&_li::after]:left-1 [&_li::after]:top-0 
+                                    [&_li::after]:text-[10px] [&_li::after]:font-bold [&_li::after]:text-indigo-600
+                                    [&_strong]:text-slate-900 [&_strong]:font-bold"
+                                    dangerouslySetInnerHTML={{ __html: item.htmlText }} 
+                                />
                             </div>
-                            <p className="text-2xl font-extrabold text-slate-900">{opt.price}</p>
-                            <ul className="space-y-2.5">
-                                {opt.features.map((f, j) => (
-                                    <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
-                                        <CheckCircle2 className="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" />
-                                        {f}
-                                    </li>
-                                ))}
-                            </ul>
+
+                            <div className="p-8 pt-0 mt-auto">
+                                <Button className={`w-full py-6 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] ${i === 0 ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100' : 'bg-white border-2 border-slate-100 text-slate-700 hover:bg-slate-50 hover:border-emerald-200'}`}>
+                                    {i === 0 ? "Enroll Now" : "Request a Quote"}
+                                </Button>
+                            </div>
                         </div>
-                        <div className="p-5 pt-0">
-                            <Button className={`w-full font-bold ${opt.ctaClass}`}>{opt.cta}</Button>
+                    ))}
+                </div>
+            ) : (
+                <div className="grid sm:grid-cols-3 gap-5">
+                    {standardOptions.map((opt, i) => (
+                        <div key={i} className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all flex flex-col overflow-hidden">
+                            <div className="p-5 flex-1 space-y-4">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <h4 className="font-bold text-slate-900">{opt.title}</h4>
+                                        <p className="text-xs text-slate-400 mt-0.5">{opt.sub}</p>
+                                    </div>
+                                    <span className={`text-[10px] font-bold text-white px-2 py-0.5 rounded-full ${opt.badgeColor}`}>{opt.badge}</span>
+                                </div>
+                                <p className="text-2xl font-extrabold text-slate-900">{opt.price}</p>
+                                <ul className="space-y-2.5">
+                                    {opt.features.map((f, j) => (
+                                        <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
+                                            <CheckCircle2 className="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" />
+                                            {f}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="p-5 pt-0">
+                                <Button className={`w-full font-bold ${opt.ctaClass}`}>{opt.cta}</Button>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
 
-/* ─────────────── Section: Upcoming Batches ─────────────── */
-function BatchesSection() {
-    const batches = [
-        { date: "Mar 15, 2026", type: "Weekday", time: "7:00 AM – 9:00 AM IST", seats: 5, mode: "Online", status: "Filling Fast" },
-        { date: "Mar 22, 2026", type: "Weekend", time: "10:00 AM – 1:00 PM IST", seats: 12, mode: "Hybrid", status: "Open" },
-        { date: "Apr 5, 2026", type: "Weekday", time: "8:00 PM – 10:00 PM IST", seats: 20, mode: "Online", status: "Open" },
-        { date: "Apr 19, 2026", type: "Weekend", time: "10:00 AM – 1:00 PM IST", seats: 25, mode: "Online", status: "Open" },
+/* ─────────────── Section: Upcoming Batches (Dynamic) ─────────────── */
+function BatchesSection({ sections }: { sections: CourseSection[] }) {
+    const batchSection = sections.find(s => s.view === 'schedule-card-list');
+    const dynamicBatches = batchSection ? parseContent(batchSection.content) : [];
+
+    const mockBatches = [
+        { date: "May 15, 2026", type: "Weekday", time: "7:00 AM – 9:00 AM IST", seats: 5, mode: "Online", status: "Filling Fast" },
+        { date: "May 22, 2026", type: "Weekend", time: "10:00 AM – 1:00 PM IST", seats: 12, mode: "Hybrid", status: "Open" },
     ];
+
     const statusStyle: Record<string, string> = {
         "Filling Fast": "bg-red-100 text-red-700",
         "Open": "bg-green-100 text-green-700",
+        "Upcoming": "bg-indigo-100 text-indigo-700",
     };
 
     return (
@@ -203,42 +276,92 @@ function BatchesSection() {
                 <p className="text-sm text-slate-500 mt-1">Register early to lock in the best price</p>
             </div>
             <div className="space-y-4">
-                {batches.map((b, i) => (
-                    <div key={i} className="flex items-center gap-5 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all flex-wrap">
-                        <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center flex-shrink-0 border border-indigo-100">
-                            <span className="text-[10px] font-bold text-indigo-400 uppercase">{b.date.split(" ")[0]}</span>
-                            <span className="text-2xl font-extrabold text-indigo-700">{b.date.split(" ")[1].replace(",", "")}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="font-bold text-slate-900">{b.type} Batch</span>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusStyle[b.status]}`}>{b.status}</span>
+                {dynamicBatches.length > 0 ? (
+                    dynamicBatches.map((b: any, i: number) => {
+                        const dateObj = new Date(b.date);
+                        const isInvalidDate = isNaN(dateObj.getTime());
+                        const displayMonth = isInvalidDate ? "TBA" : dateObj.toLocaleString('en-US', { month: 'short' });
+                        const displayDay = isInvalidDate ? "" : dateObj.getDate();
+
+                        return (
+                            <div key={i} className="group flex items-center gap-6 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex-wrap md:flex-nowrap">
+                                <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-indigo-50 to-white flex flex-col items-center justify-center flex-shrink-0 border border-indigo-100 shadow-inner group-hover:from-indigo-600 group-hover:to-indigo-500 transition-colors duration-500">
+                                    <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-tighter group-hover:text-indigo-100">
+                                        {b.week_label || "Batch"}
+                                    </span>
+                                    <div className="flex flex-col items-center leading-none">
+                                        <span className="text-sm font-bold text-indigo-600 group-hover:text-white">{displayMonth}</span>
+                                        <span className="text-2xl font-black text-indigo-800 group-hover:text-white">{displayDay}</span>
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-[200px]">
+                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                        <span className="text-lg font-bold text-slate-900">{b.date || "Date TBA"}</span>
+                                        <span className="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                            Open for Enrollment
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-6 text-sm text-slate-500 flex-wrap">
+                                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                                            <Clock3 className="h-4 w-4 text-indigo-400" />
+                                            <span className="font-medium text-slate-700">{b.time || "Timings TBA"}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                                            <span className="font-medium">Live Online Class</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-center gap-2 ml-auto w-full md:w-auto mt-4 md:mt-0">
+                                    <Button className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-6 rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-all">
+                                        Enroll Now
+                                    </Button>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                        <Users className="h-3 w-3" /> Limited Seats Left
+                                    </p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
-                                <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />{b.time}</span>
-                                <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{b.mode}</span>
-                                <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{b.seats} seats left</span>
+                        );
+                    })
+                ) : (
+                    mockBatches.map((b, i) => (
+                        <div key={i} className="flex items-center gap-5 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all flex-wrap">
+                            <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center flex-shrink-0 border border-indigo-100">
+                                <span className="text-[10px] font-bold text-indigo-400 uppercase">{b.date.split(" ")[0]}</span>
+                                <span className="text-2xl font-extrabold text-indigo-700">{b.date.split(" ")[1].replace(",", "")}</span>
                             </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                    <span className="font-bold text-slate-900">{b.type} Batch</span>
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusStyle[b.status]}`}>{b.status}</span>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
+                                    <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />{b.time}</span>
+                                    <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{b.mode}</span>
+                                    <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{b.seats} seats left</span>
+                                </div>
+                            </div>
+                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex-shrink-0">
+                                Register
+                            </Button>
                         </div>
-                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex-shrink-0">
-                            Register
-                        </Button>
-                    </div>
-                ))}
+                    ))
+                )}
             </div>
         </div>
     );
 }
 
 /* ─────────────── Section: FAQs ─────────────── */
-function FaqSection({ course }: { course: Course }) {
-    const faqs = [
+function FaqSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
+    const faqSection = sections.find(s => s.title.toLowerCase().includes('faq'));
+    const dynamicFaqs = faqSection ? parseContent(faqSection.content) : [];
+
+    const faqs = dynamicFaqs.length > 0 ? dynamicFaqs.map((f: any) => ({ q: f.itemTitle, a: f.itemDescription })) : [
         { q: "Who is this course for?", a: "Anyone looking to start or advance their career. We go from complete basics to advanced real-world applications." },
         { q: "Do you offer placement assistance?", a: "Yes — 100% placement support including resume building, mock interviews, and direct recruiter referrals." },
-        { q: "What is the mode of training?", a: `Delivered in ${course.mode} mode with both self-paced and live instructor-led options available.` },
         { q: "How long is the course access?", a: "You get lifetime access to all videos, resources, and future updates — even after course completion." },
         { q: "Is there a money-back guarantee?", a: "Absolutely. We offer a 14-day, no-questions-asked refund if you're not satisfied." },
-        { q: "What certificate will I receive?", a: "An industry-recognised digital certificate verified by OnlineITGuru and accepted by 500+ hiring partners." },
     ];
 
     return (
@@ -248,7 +371,7 @@ function FaqSection({ course }: { course: Course }) {
                 <p className="text-sm text-slate-500 mt-1">Quick answers to common questions</p>
             </div>
             <Accordion type="single" collapsible className="space-y-3">
-                {faqs.map((faq, i) => (
+                {faqs.map((faq: any, i: number) => (
                     <AccordionItem key={i} value={`faq-${i}`}
                         className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
                         <AccordionTrigger className="hover:no-underline py-4 text-left font-semibold text-slate-800 gap-3">
@@ -257,7 +380,9 @@ function FaqSection({ course }: { course: Course }) {
                                 {faq.q}
                             </span>
                         </AccordionTrigger>
-                        <AccordionContent className="pb-4 pl-9 text-slate-600 leading-7">{faq.a}</AccordionContent>
+                        <AccordionContent className="pb-4 pl-9 text-slate-600 leading-7">
+                            <div dangerouslySetInnerHTML={{ __html: faq.a }} />
+                        </AccordionContent>
                     </AccordionItem>
                 ))}
             </Accordion>
@@ -266,12 +391,10 @@ function FaqSection({ course }: { course: Course }) {
 }
 
 /* ─────────────── Section: Reviews ─────────────── */
-function ReviewsSection({ course }: { course: Course }) {
-    const reviews = [
-        { name: "Priya Menon", role: "Software Engineer", date: "Feb 2026", rating: 5, text: "Top-notch course! Responsive mentors, practical projects. Got placed in 3 weeks after completion." },
-        { name: "Arjun Reddy", role: "Data Analyst", date: "Jan 2026", rating: 5, text: "Curriculum is perfectly up-to-date. Live sessions were engaging and doubt resolution is lightning fast." },
-        { name: "Deepika Nair", role: "Fresher · Now at TCS", date: "Jan 2026", rating: 4, text: "Great well-structured content. Would love more advanced projects, but overall an excellent experience." },
-        { name: "Karthik Suresh", role: "Career Switcher", date: "Dec 2025", rating: 5, text: "Switched from non-tech to software dev. Placement support was exceptional — absolutely worth it!" },
+function ReviewsSection({ course }: { course: CourseDetail }) {
+    const reviews = course.reviews && course.reviews.length > 0 ? course.reviews : [
+        { user_name: "Priya Menon", role: "Software Engineer", created_at: "2026-02-10", rating: 5, review: "Top-notch course! Responsive mentors, practical projects. Got placed in 3 weeks after completion." },
+        { user_name: "Arjun Reddy", role: "Data Analyst", created_at: "2026-01-15", rating: 5, review: "Curriculum is perfectly up-to-date. Live sessions were engaging and doubt resolution is lightning fast." },
     ];
 
     const GRAD = ["from-indigo-500 to-violet-600", "from-pink-500 to-rose-600", "from-amber-500 to-orange-600", "from-teal-500 to-emerald-600"];
@@ -312,23 +435,23 @@ function ReviewsSection({ course }: { course: Course }) {
                         <div className="flex items-start justify-between mb-3 gap-3">
                             <div className="flex items-center gap-3">
                                 <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${GRAD[i % GRAD.length]} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                                    {r.name.charAt(0)}
+                                    {r.user_name?.charAt(0) || "U"}
                                 </div>
                                 <div>
-                                    <p className="font-bold text-slate-900 text-sm">{r.name}</p>
-                                    <p className="text-xs text-slate-500">{r.role}</p>
+                                    <p className="font-bold text-slate-900 text-sm">{r.user_name || "Anonymous"}</p>
+                                    <p className="text-xs text-slate-500">{r.role || "Verified Student"}</p>
                                 </div>
                             </div>
                             <div className="text-right flex-shrink-0">
                                 <div className="flex text-yellow-400 justify-end">
-                                    {[...Array(r.rating)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-current" />)}
+                                    {[...Array(r.rating || 5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-current" />)}
                                 </div>
-                                <p className="text-xs text-slate-400 mt-0.5">{r.date}</p>
+                                <p className="text-xs text-slate-400 mt-0.5">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recently"}</p>
                             </div>
                         </div>
                         <p className="text-sm text-slate-600 leading-6 flex items-start gap-2">
                             <MessageSquare className="h-4 w-4 text-indigo-300 flex-shrink-0 mt-0.5" />
-                            {r.text}
+                            {r.review}
                         </p>
                     </div>
                 ))}
@@ -338,7 +461,7 @@ function ReviewsSection({ course }: { course: Course }) {
 }
 
 /* ─────────────── Section: Certification ─────────────── */
-function CertificationSection({ course }: { course: Course }) {
+function CertificationSection({ course }: { course: CourseDetail }) {
     const highlights = [
         "Globally recognised & industry-validated",
         "Digital certificate with unique verification ID",
@@ -394,15 +517,18 @@ function CertificationSection({ course }: { course: Course }) {
 /* ═══════════════════════════════════════════════
    MAIN PANEL — scroll-spy + smooth scroll
 ═══════════════════════════════════════════════ */
-export default function CourseContentPanel({ course }: Props) {
+export default function CourseContentPanel({ course, sections }: Props) {
     const [activeId, setActiveId] = useState("syllabus");
     const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
     const containerRef = useRef<HTMLDivElement>(null);
 
+    // Filter nav items based on availability of reviews or other dynamic content
+    const navItems = FIXED_NAV_ITEMS;
+
     /* ── Scroll-spy via IntersectionObserver ── */
     useEffect(() => {
         const observers: IntersectionObserver[] = [];
-        NAV_ITEMS.forEach(({ id }) => {
+        navItems.forEach(({ id }) => {
             const el = sectionRefs.current[id];
             if (!el) return;
             const obs = new IntersectionObserver(
@@ -413,7 +539,7 @@ export default function CourseContentPanel({ course }: Props) {
             observers.push(obs);
         });
         return () => observers.forEach((o) => o.disconnect());
-    }, []);
+    }, [navItems]);
 
     /* ── Smooth scroll on nav click ── */
     const scrollTo = (id: string) => {
@@ -423,6 +549,9 @@ export default function CourseContentPanel({ course }: Props) {
         const top = el.getBoundingClientRect().top + window.scrollY - offset;
         window.scrollTo({ top, behavior: "smooth" });
     };
+
+    const priceNum = Number(course.price);
+    const originalPriceNum = Number(course.livePrice);
 
     return (
         <section className="bg-white border-t border-slate-100">
@@ -438,7 +567,7 @@ export default function CourseContentPanel({ course }: Props) {
                                     <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Course Content</p>
                                 </div>
                                 <ul className="divide-y divide-slate-100">
-                                    {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+                                    {navItems.map(({ id, label, icon: Icon }) => {
                                         const active = activeId === id;
                                         return (
                                             <li key={id} className="relative">
@@ -447,12 +576,14 @@ export default function CourseContentPanel({ course }: Props) {
                                                 )}
                                                 <button
                                                     onClick={() => scrollTo(id)}
-                                                    className={`w-full flex items-center gap-3.5 px-5 py-4 text-sm font-semibold transition-all duration-200 group ${active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
-                                                        }`}
+                                                    className={cn(
+                                                        "w-full flex items-center gap-3.5 px-5 py-4 text-sm font-semibold transition-all duration-200 group",
+                                                        active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                                                    )}
                                                 >
-                                                    <Icon className={`h-4 w-4 flex-shrink-0 transition-colors ${active ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500"}`} />
+                                                    <Icon className={cn("h-4 w-4 flex-shrink-0 transition-colors", active ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500")} />
                                                     <span className="text-left">{label}</span>
-                                                    <ChevronRight className={`ml-auto h-4 w-4 transition-all flex-shrink-0 ${active ? "text-indigo-500 translate-x-0.5" : "text-slate-300 group-hover:text-indigo-400 group-hover:translate-x-0.5"}`} />
+                                                    <ChevronRight className={cn("ml-auto h-4 w-4 transition-all flex-shrink-0", active ? "text-indigo-500 translate-x-0.5" : "text-slate-300 group-hover:text-indigo-400 group-hover:translate-x-0.5")} />
                                                 </button>
                                             </li>
                                         );
@@ -464,8 +595,8 @@ export default function CourseContentPanel({ course }: Props) {
                             <div className="mt-6 rounded-2xl overflow-hidden bg-gradient-to-br from-[#0f1f45] to-[#1a3270] text-white p-6 shadow-xl">
                                 <p className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-1">Limited Offer</p>
                                 <div className="flex items-baseline gap-2 mb-1">
-                                    <span className="text-3xl font-extrabold font-outfit">₹{course.price.toLocaleString("en-IN")}</span>
-                                    <span className="text-sm text-slate-400 line-through">₹{course.originalPrice.toLocaleString("en-IN")}</span>
+                                    <span className="text-3xl font-extrabold font-outfit">₹{priceNum.toLocaleString("en-IN")}</span>
+                                    <span className="text-sm text-slate-400 line-through">₹{originalPriceNum.toLocaleString("en-IN")}</span>
                                 </div>
                                 <p className="text-xs text-indigo-300 mb-4">⚡ Offer ends soon</p>
                                 <Button className="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold shadow-lg">
@@ -485,18 +616,21 @@ export default function CourseContentPanel({ course }: Props) {
 
                     {/* ─── RIGHT: Scrollable Sections ─── */}
                     <div ref={containerRef} className="flex-1 min-w-0 py-10 space-y-0">
-                        {NAV_ITEMS.map(({ id }, idx) => (
+                        {navItems.map(({ id }, idx) => (
                             <section
                                 key={id}
                                 id={id}
                                 ref={(el) => { sectionRefs.current[id] = el; }}
-                                className={`scroll-section min-h-[80vh] flex flex-col justify-center py-14 ${idx < NAV_ITEMS.length - 1 ? "border-b border-slate-100" : ""}`}
+                                className={cn(
+                                    "scroll-section min-h-[50vh] flex flex-col justify-center py-14",
+                                    idx < navItems.length - 1 ? "border-b border-slate-100" : ""
+                                )}
                             >
-                                {id === "syllabus" && <SyllabusSection course={course} />}
+                                {id === "syllabus" && <SyllabusSection course={course} sections={sections} />}
                                 {id === "projects" && <ProjectsSection course={course} />}
-                                {id === "training-options" && <TrainingSection course={course} />}
-                                {id === "batches" && <BatchesSection />}
-                                {id === "faqs" && <FaqSection course={course} />}
+                                {id === "training-options" && <TrainingSection course={course} sections={sections} />}
+                                {id === "batches" && <BatchesSection sections={sections} />}
+                                {id === "faqs" && <FaqSection course={course} sections={sections} />}
                                 {id === "reviews" && <ReviewsSection course={course} />}
                                 {id === "certification" && <CertificationSection course={course} />}
                             </section>
@@ -508,13 +642,16 @@ export default function CourseContentPanel({ course }: Props) {
             {/* Mobile bottom tab bar */}
             <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 shadow-lg">
                 <div className="flex items-center overflow-x-auto no-scrollbar">
-                    {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
+                    {navItems.map(({ id, label, icon: Icon }) => {
                         const active = activeId === id;
                         return (
                             <button
                                 key={id}
                                 onClick={() => scrollTo(id)}
-                                className={`flex flex-col items-center gap-0.5 px-4 py-3 text-[10px] font-semibold flex-shrink-0 transition-colors ${active ? "text-indigo-600 border-t-2 border-indigo-600" : "text-slate-400 border-t-2 border-transparent"}`}
+                                className={cn(
+                                    "flex flex-col items-center gap-0.5 px-4 py-3 text-[10px] font-semibold flex-shrink-0 transition-colors",
+                                    active ? "text-indigo-600 border-t-2 border-indigo-600" : "text-slate-400 border-t-2 border-transparent"
+                                )}
                             >
                                 <Icon className="h-4 w-4" />
                                 <span className="whitespace-nowrap">{label}</span>
