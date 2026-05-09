@@ -7,7 +7,7 @@ import {
     CheckCircle2, Users, MapPin, Clock3,
     BarChart2, TrendingUp, Zap, MessageSquare,
     BadgeCheck, Phone, Download,
-    Monitor,Layout, Target, ListChecks
+    Monitor, Layout, Target, ListChecks
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -130,7 +130,7 @@ function SyllabusSection({ course, sections }: { course: CourseDetail; sections:
                         {displayModules.length} modules · {course.duration || "40+ Hours"}
                     </p>
                 </div>
-               
+
             </div>
             <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3">
                 {displayModules.map((mod: any, i: number) => (
@@ -148,7 +148,7 @@ function SyllabusSection({ course, sections }: { course: CourseDetail; sections:
                             {(() => {
                                 // Extract list items from HTML string
                                 const lessons = mod.itemDescription?.match(/<li>(.*?)<\/li>/g)?.map((l: string) => l.replace(/<\/?li>/g, '')) || [];
-                                
+
                                 if (lessons.length > 0) {
                                     return (
                                         <ul className="space-y-3">
@@ -161,7 +161,7 @@ function SyllabusSection({ course, sections }: { course: CourseDetail; sections:
                                         </ul>
                                     );
                                 }
-                                
+
                                 // Fallback for non-list HTML
                                 return (
                                     <div
@@ -257,7 +257,7 @@ function TrainingSection({ course, sections }: { course: CourseDetail; sections:
                         <div key={i} className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-500 overflow-hidden flex flex-col">
                             {/* Accent Header */}
                             <div className={`h-1.5 w-full ${i === 0 ? 'bg-indigo-600' : 'bg-emerald-600'}`} />
-                            
+
                             <div className="p-8 flex-1">
                                 <div className="flex items-start justify-between mb-6">
                                     <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${i === 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
@@ -272,7 +272,7 @@ function TrainingSection({ course, sections }: { course: CourseDetail; sections:
                                     {i === 0 ? "Individual Training" : "Corporate Training"}
                                 </h3>
 
-                                <div 
+                                <div
                                     className="text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none 
                                     [&_ul]:list-none [&_ul]:space-y-4 [&_ul]:m-0 [&_ul]:p-0
                                     [&_li]:relative [&_li]:pl-7
@@ -281,7 +281,7 @@ function TrainingSection({ course, sections }: { course: CourseDetail; sections:
                                     [&_li::after]:content-['✓'] [&_li::after]:absolute [&_li::after]:left-1 [&_li::after]:top-0 
                                     [&_li::after]:text-[10px] [&_li::after]:font-bold [&_li::after]:text-indigo-600
                                     [&_strong]:text-slate-900 [&_strong]:font-bold"
-                                    dangerouslySetInnerHTML={{ __html: item.htmlText }} 
+                                    dangerouslySetInnerHTML={{ __html: item.htmlText }}
                                 />
                             </div>
 
@@ -327,8 +327,8 @@ function TrainingSection({ course, sections }: { course: CourseDetail; sections:
 }
 
 /* ─────────────── Section: Upcoming Batches (Dynamic) ─────────────── */
-function BatchesSection({ sections }: { sections: CourseSection[] }) {
-    const batchSection = sections.find(s => s.view === 'schedule-card-list');
+function BatchesSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
+    const batchSection = sections.find(s => s.view === 'schedule-card-list' || s.title.toLowerCase().includes('batch'));
     const dynamicBatches = batchSection ? parseContent(batchSection.content) : [];
 
     const mockBatches = [
@@ -336,90 +336,92 @@ function BatchesSection({ sections }: { sections: CourseSection[] }) {
         { date: "May 22, 2026", type: "Weekend", time: "10:00 AM – 1:00 PM IST", seats: 12, mode: "Hybrid", status: "Open" },
     ];
 
-    const statusStyle: Record<string, string> = {
-        "Filling Fast": "bg-red-100 text-red-700",
-        "Open": "bg-green-100 text-green-700",
-        "Upcoming": "bg-indigo-100 text-indigo-700",
-    };
+    const displayBatches = dynamicBatches.length > 0 ? dynamicBatches : mockBatches;
+    const price = Number(course.price).toLocaleString("en-IN");
+    const originalPrice = Number(course.livePrice).toLocaleString("en-IN");
 
     return (
-        <div className="space-y-5">
+        <div className="space-y-6">
             <div className="mb-2">
                 <h2 className="text-2xl font-bold text-slate-900 font-outfit">Upcoming Batches</h2>
-                <p className="text-sm text-slate-500 mt-1">Register early to lock in the best price</p>
+                <p className="text-sm text-slate-500 mt-1">Choose a cohort that fits your schedule</p>
             </div>
-            <div className="space-y-4">
-                {dynamicBatches.length > 0 ? (
-                    dynamicBatches.map((b: any, i: number) => {
-                        const dateObj = new Date(b.date);
-                        const isInvalidDate = isNaN(dateObj.getTime());
-                        const displayMonth = isInvalidDate ? "TBA" : dateObj.toLocaleString('en-US', { month: 'short' });
-                        const displayDay = isInvalidDate ? "" : dateObj.getDate();
 
-                        return (
-                            <div key={i} className="group flex items-center gap-6 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex-wrap md:flex-nowrap">
-                                <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-indigo-50 to-white flex flex-col items-center justify-center flex-shrink-0 border border-indigo-100 shadow-inner group-hover:from-indigo-600 group-hover:to-indigo-500 transition-colors duration-500">
-                                    <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-tighter group-hover:text-indigo-100">
-                                        {b.week_label || "Batch"}
-                                    </span>
-                                    <div className="flex flex-col items-center leading-none">
-                                        <span className="text-sm font-bold text-indigo-600 group-hover:text-white">{displayMonth}</span>
-                                        <span className="text-2xl font-black text-indigo-800 group-hover:text-white">{displayDay}</span>
-                                    </div>
-                                </div>
-                                <div className="flex-1 min-w-[200px]">
-                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                        <span className="text-lg font-bold text-slate-900">{b.date || "Date TBA"}</span>
+            <div className="grid lg:grid-cols-2 gap-8">
+                {/* Left Card: Cohort Schedules */}
+                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-100/50 transition-colors" />
+
+                    <div className="relative z-10 space-y-6">
+                        <div className="flex items-center gap-2">
+                            <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                <Calendar className="h-5 w-5" />
+                            </div>
+                            <h3 className="font-bold text-slate-900 text-lg">Batch Schedules</h3>
+                        </div>
+
+                        <div className="space-y-4">
+                            {displayBatches.slice(0, 2).map((b: any, i: number) => (
+                                <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-300 hover:bg-white hover:shadow-md transition-all duration-300">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">COHORT 0{i + 1}</span>
+                                            <span className="text-lg font-extrabold text-slate-900">{b.date || "Date TBA"}</span>
+                                        </div>
                                         <span className="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                            Open for Enrollment
+                                            {b.status || "Open"}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-6 text-sm text-slate-500 flex-wrap">
-                                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                            <Clock3 className="h-4 w-4 text-indigo-400" />
-                                            <span className="font-medium text-slate-700">{b.time || "Timings TBA"}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-                                            <span className="font-medium">Live Online Class</span>
-                                        </div>
+                                    <div className="flex items-center gap-3 text-sm text-slate-600">
+                                        <Clock3 className="h-4 w-4 text-indigo-400" />
+                                        <span className="font-semibold">{b.time || "Timings TBA"}</span>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-center gap-2 ml-auto w-full md:w-auto mt-4 md:mt-0">
-                                    <Button className="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-6 rounded-2xl shadow-lg shadow-indigo-100 active:scale-95 transition-all">
-                                        Enroll Now
-                                    </Button>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                        <Users className="h-3 w-3" /> Limited Seats Left
-                                    </p>
-                                </div>
-                            </div>
-                        );
-                    })
-                ) : (
-                    mockBatches.map((b, i) => (
-                        <div key={i} className="flex items-center gap-5 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all flex-wrap">
-                            <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex flex-col items-center justify-center flex-shrink-0 border border-indigo-100">
-                                <span className="text-[10px] font-bold text-indigo-400 uppercase">{b.date.split(" ")[0]}</span>
-                                <span className="text-2xl font-extrabold text-indigo-700">{b.date.split(" ")[1].replace(",", "")}</span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <span className="font-bold text-slate-900">{b.type} Batch</span>
-                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusStyle[b.status]}`}>{b.status}</span>
-                                </div>
-                                <div className="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
-                                    <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" />{b.time}</span>
-                                    <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{b.mode}</span>
-                                    <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{b.seats} seats left</span>
-                                </div>
-                            </div>
-                            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex-shrink-0">
-                                Register
+                            ))}
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-100 mt-2">
+                            <Button variant="outline" className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-600 hover:text-white font-bold py-5 rounded-xl transition-all active:scale-95">
+                                Select Schedule & Enroll
                             </Button>
                         </div>
-                    ))
-                )}
+                    </div>
+                </div>
+
+                {/* Right Card: Pricing & Enrollment */}
+                <div className="bg-gradient-to-br from-[#0f1f45] to-[#1a3270] rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-100/50 flex flex-col justify-center">
+                    {/* Decorative Elements */}
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                        <Zap className="h-32 w-32 rotate-12" />
+                    </div>
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-6">
+                            <span className="px-3 py-1 bg-indigo-500/30 border border-indigo-400/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-indigo-200">
+                                All-Inclusive Package
+                            </span>
+                        </div>
+
+                        <h3 className="text-2xl font-bold mb-4 font-outfit">Join the next cohort</h3>
+                        <p className="text-indigo-200/80 text-sm mb-8 leading-relaxed max-w-xs">
+                            Secure your spot today and get complete access to live training, real-world projects, and lifetime support.
+                        </p>
+
+                        <div className="flex items-baseline gap-3 mb-8">
+                            <span className="text-4xl font-black font-outfit text-white">₹{price}</span>
+                            <span className="text-xl text-indigo-300/40 line-through font-medium">₹{originalPrice}</span>
+                        </div>
+
+                        <Button className="w-full bg-white hover:bg-indigo-50 text-indigo-950 font-black text-base py-7 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-wider">
+                            ENROLL NOW
+                        </Button>
+
+                        <div className="mt-6 flex items-center justify-center gap-4 text-[10px] font-bold text-indigo-300/60 uppercase tracking-widest">
+                            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Live Training</span>
+                            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Certifications</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -704,7 +706,7 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                 {id === "syllabus" && <SyllabusSection course={course} sections={sections} />}
                                 {id === "projects" && <ProjectsSection course={course} />}
                                 {id === "training-options" && <TrainingSection course={course} sections={sections} />}
-                                {id === "batches" && <BatchesSection sections={sections} />}
+                                {id === "batches" && <BatchesSection course={course} sections={sections} />}
                                 {id === "faqs" && <FaqSection course={course} sections={sections} />}
                                 {id === "reviews" && <ReviewsSection course={course} />}
                                 {id === "certification" && <CertificationSection course={course} />}
