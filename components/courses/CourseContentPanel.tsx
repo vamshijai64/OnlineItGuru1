@@ -7,7 +7,7 @@ import {
     CheckCircle2, Users, MapPin, Clock3,
     BarChart2, TrendingUp, Zap, MessageSquare,
     BadgeCheck, Phone, Download,
-    Monitor,
+    Monitor,Layout, Target, ListChecks
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,8 @@ interface Props {
 }
 
 const FIXED_NAV_ITEMS = [
+    { id: "overview", label: "Course Overview", icon: Layout },
+    { id: "objectives", label: "Course Objectives", icon: Target },
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
     { id: "projects", label: "Projects", icon: Layers },
     { id: "training-options", label: "Training Options", icon: Video },
@@ -44,15 +46,79 @@ function parseContent(contentStr: string) {
     }
 }
 
+/* ─────────────── Section: Overview ─────────────── */
+function OverviewSection({ course }: { course: CourseDetail }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <div className="space-y-5">
+            <div className="mb-2">
+                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Course Overview</h2>
+            </div>
+            <div className="relative">
+                <div
+                    className={cn(
+                        "text-slate-600 leading-relaxed prose prose-slate max-w-none transition-all duration-500",
+                        !isExpanded && "line-clamp-6"
+                    )}
+                    dangerouslySetInnerHTML={{ __html: course.description }}
+                />
+                {!isExpanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+                )}
+            </div>
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-sky-500 font-bold text-sm hover:text-sky-600 transition-colors flex items-center gap-1 group"
+            >
+                {isExpanded ? "Read Less" : "Read More"}
+                <ChevronRight className={cn("w-4 h-4 transition-transform", isExpanded ? "rotate-90" : "")} />
+            </button>
+        </div>
+    );
+}
+
+/* ─────────────── Section: Objectives ─────────────── */
+function ObjectivesSection({ sections }: { sections: CourseSection[] }) {
+    const section = sections.find(s => s.title.toLowerCase().includes('objectives'));
+    const items = section ? parseContent(section.content) : [];
+
+    if (items.length === 0) return null;
+
+    return (
+        <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900 font-outfit">{section?.title || "Course Objectives"}</h2>
+            <Accordion type="single" collapsible className="space-y-3">
+                {items.map((item: any, i: number) => (
+                    <AccordionItem key={i} value={`obj-${i}`}
+                        className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
+                        <AccordionTrigger className="hover:no-underline py-4 text-left font-semibold text-slate-800">
+                            {item.itemTitle}
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-4 text-slate-600 leading-7">
+                            <div dangerouslySetInnerHTML={{ __html: item.itemDescription }} />
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </div>
+    );
+}
+
 /* ─────────────── Section: Syllabus (Dynamic from API) ─────────────── */
 function SyllabusSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
-    // Filter sections that look like syllabus modules or just use the first few if none identified
-    const syllabusSections = sections.filter(s => s.view === 'title-description' || s.title.toLowerCase().includes('module') || s.title.toLowerCase().includes('syllabus'));
+    // Find the specific syllabus section from API
+    const syllabusApiSection = sections.find(s =>
+        s.view === 'title-rich-description' ||
+        s.title.toLowerCase().includes('syllabus')
+    );
+
+    const dynamicModules = syllabusApiSection ? parseContent(syllabusApiSection.content) : [];
 
     // If no dynamic sections, use mock data
-    const displaySections = syllabusSections.length > 0 ? syllabusSections : [
-        { title: "Module 1: Fundamentals & Core Concepts", content: JSON.stringify([{ itemTitle: "Introduction & Environment Setup" }, { itemTitle: "Core Architecture & Patterns" }, { itemTitle: "Advanced Concepts Deep Dive" }]) },
-        { title: "Module 2: Hands-On Implementation", content: JSON.stringify([{ itemTitle: "Real Project Setup" }, { itemTitle: "Building Key Features" }, { itemTitle: "Testing & Debugging" }]) },
+    const displayModules = dynamicModules.length > 0 ? dynamicModules : [
+        { itemTitle: "Module 1: Fundamentals & Core Concepts", itemDescription: "<ul><li>Introduction & Environment Setup</li><li>Core Architecture & Patterns</li><li>Advanced Concepts Deep Dive</li></ul>" },
+        { itemTitle: "Module 2: Hands-On Implementation", itemDescription: "<ul><li>Real Project Setup</li><li>Building Key Features</li><li>Testing & Debugging</li></ul>" },
     ];
 
     return (
@@ -61,45 +127,52 @@ function SyllabusSection({ course, sections }: { course: CourseDetail; sections:
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900 font-outfit">Course Syllabus</h2>
                     <p className="text-sm text-slate-500 mt-1">
-                        {displaySections.length} modules · {course.duration || "40+ Hours"}
+                        {displayModules.length} modules · {course.duration || "40+ Hours"}
                     </p>
                 </div>
-                <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 font-semibold px-4 py-1.5 text-sm">
-                    {course.sectionCount > 10 ? "Advanced" : "Beginner"}
-                </Badge>
+               
             </div>
             <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3">
-                {displaySections.map((mod, i) => {
-                    const items = parseContent(mod.content as string);
-                    return (
-                        <AccordionItem key={i} value={`item-${i}`}
-                            className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
-                            <AccordionTrigger className="hover:no-underline py-4 gap-3">
-                                <div className="flex items-center gap-3 text-left">
-                                    <span className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                        {String(i + 1).padStart(2, "0")}
-                                    </span>
-                                    <span className="font-semibold text-slate-800">{mod.title}</span>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pb-4 pl-10">
-                                <ul className="space-y-1.5">
-                                    {items.map((item: any, lIdx: number) => (
-                                        <li key={lIdx} className="flex items-center justify-between text-sm text-slate-600 py-2 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
-                                            <span className="flex items-center gap-3">
-                                                <PlayCircle className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
-                                                {item.itemTitle}
-                                            </span>
-                                            {lIdx === 0
-                                                ? <span className="text-[10px] font-bold uppercase text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Free</span>
-                                                : <Lock className="h-3.5 w-3.5 text-slate-300" />}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </AccordionContent>
-                        </AccordionItem>
-                    );
-                })}
+                {displayModules.map((mod: any, i: number) => (
+                    <AccordionItem key={i} value={`item-${i}`}
+                        className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
+                        <AccordionTrigger className="hover:no-underline py-4 gap-3">
+                            <div className="flex items-center gap-3 text-left">
+                                <span className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                    {String(i + 1).padStart(2, "0")}
+                                </span>
+                                <span className="font-semibold text-slate-800">{mod.itemTitle}</span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-4 pl-10">
+                            {(() => {
+                                // Extract list items from HTML string
+                                const lessons = mod.itemDescription?.match(/<li>(.*?)<\/li>/g)?.map((l: string) => l.replace(/<\/?li>/g, '')) || [];
+                                
+                                if (lessons.length > 0) {
+                                    return (
+                                        <ul className="space-y-3">
+                                            {lessons.map((lesson: string, idx: number) => (
+                                                <li key={idx} className="flex items-start gap-3 text-sm text-slate-600 group">
+                                                    <PlayCircle className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 transition-colors flex-shrink-0 mt-0.5" />
+                                                    <span dangerouslySetInnerHTML={{ __html: lesson }} />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    );
+                                }
+                                
+                                // Fallback for non-list HTML
+                                return (
+                                    <div
+                                        className="prose prose-sm max-w-none text-slate-600"
+                                        dangerouslySetInnerHTML={{ __html: mod.itemDescription }}
+                                    />
+                                );
+                            })()}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
             </Accordion>
         </div>
     );
@@ -518,7 +591,7 @@ function CertificationSection({ course }: { course: CourseDetail }) {
    MAIN PANEL — scroll-spy + smooth scroll
 ═══════════════════════════════════════════════ */
 export default function CourseContentPanel({ course, sections }: Props) {
-    const [activeId, setActiveId] = useState("syllabus");
+    const [activeId, setActiveId] = useState("overview");
     const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -622,10 +695,12 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                 id={id}
                                 ref={(el) => { sectionRefs.current[id] = el; }}
                                 className={cn(
-                                    "scroll-section min-h-[50vh] flex flex-col justify-center py-14",
-                                    idx < navItems.length - 1 ? "border-b border-slate-100" : ""
+                                    "scroll-section pb-20",
+                                    idx < navItems.length - 1 ? "border-b border-slate-100 mb-10" : ""
                                 )}
                             >
+                                {id === "overview" && <OverviewSection course={course} />}
+                                {id === "objectives" && <ObjectivesSection sections={sections} />}
                                 {id === "syllabus" && <SyllabusSection course={course} sections={sections} />}
                                 {id === "projects" && <ProjectsSection course={course} />}
                                 {id === "training-options" && <TrainingSection course={course} sections={sections} />}
