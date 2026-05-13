@@ -93,7 +93,7 @@ export default function ResourceDetail({ slug, type }: Props) {
 
                 <div 
                     className="prose prose-lg max-w-none text-slate-600 leading-relaxed font-inter"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                    dangerouslySetInnerHTML={{ __html: post.content || "<p><i>Full content for this post is not available yet.</i></p>" }}
                 />
 
                 <div className="mt-16 pt-12 border-t border-slate-100">

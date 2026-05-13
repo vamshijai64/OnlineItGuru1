@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 
 interface SectionHeaderProps {
   badge?: string;
-  title: string;
-  subtitle?: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
   align?: "left" | "center" | "right";
   className?: string;
 }
@@ -28,7 +28,7 @@ export default function SectionHeader({
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="inline-flex px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-semibold mb-4"
+          className="inline-block px-6 py-2 mb-6 text-sm font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30 rounded-full shadow-lg"
         >
           {badge}
         </motion.span>
@@ -38,7 +38,7 @@ export default function SectionHeader({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.1 }}
-        className="text-3xl md:text-5xl font-bold text-white mb-4 font-outfit tracking-tight"
+        className="text-3xl md:text-5xl font-bold text-white mb-6 font-outfit tracking-tight leading-[1.1]"
       >
         {title}
       </motion.h2>

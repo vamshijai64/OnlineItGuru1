@@ -46,7 +46,7 @@ export default function HomeContact() {
           >
             <SectionHeader 
               badge="Get Started"
-              title="Ready to Transform Your Career?"
+              title={<>Ready to Transform <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Your Career?</span></>}
               subtitle="Take the first step towards your dream career. Our counselors are here to guide you."
               align="left"
             />

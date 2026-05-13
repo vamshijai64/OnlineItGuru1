@@ -27,11 +27,10 @@ interface Props {
 
 const FIXED_NAV_ITEMS = [
     { id: "overview", label: "Course Overview", icon: Layout },
-    { id: "objectives", label: "Course Objectives", icon: Target },
+    // { id: "objectives", label: "Course Objectives", icon: Target },
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
     { id: "projects", label: "Projects", icon: Layers },
-    { id: "training-options", label: "Training Options", icon: Video },
-    { id: "batches", label: "Upcoming Batches", icon: Calendar },
+    { id: "enrollment", label: "Enrollment Options", icon: Calendar },
     { id: "faqs", label: "FAQ's", icon: HelpCircle },
     { id: "reviews", label: "Reviews", icon: Star },
     { id: "certification", label: "Certification", icon: Award },
@@ -216,118 +215,8 @@ function ProjectsSection({ course }: { course: CourseDetail }) {
     );
 }
 
-/* ─────────────── Section: Training Options (Dynamic) ─────────────── */
-function TrainingSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
-    const trainingSection = sections.find(s => s.view === 'rich-text-card-list');
-    const dynamicItems = trainingSection ? parseContent(trainingSection.content) : [];
-    const priceNum = Number(course.price);
-
-    // Standard fallback options
-    const standardOptions = [
-        {
-            title: "Self-Paced Online", sub: "Learn at your own speed",
-            price: `₹${priceNum.toLocaleString("en-IN")}`, badge: "Most Popular", badgeColor: "bg-indigo-600",
-            features: ["Lifetime video access", "24×7 chat support", "Projects & assignments", "Completion certificate"],
-            cta: "Enroll Now", ctaClass: "bg-indigo-600 hover:bg-indigo-700 text-white",
-        },
-        {
-            title: "Live Online Training", sub: "Instructor-led live sessions",
-            price: `₹${(priceNum + 5000).toLocaleString("en-IN")}`, badge: "Recommended", badgeColor: "bg-emerald-600",
-            features: ["Weekend & weekday batches", "Real-time Q&A", "1-on-1 code reviews", "Job placement support"],
-            cta: "Book Free Demo", ctaClass: "border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50",
-        },
-        {
-            title: "Corporate Training", sub: "Customized team programs",
-            price: "Custom", badge: "Enterprise", badgeColor: "bg-slate-800",
-            features: ["Custom curriculum", "Dedicated trainer", "On-site or virtual", "Progress analytics"],
-            cta: "Get a Quote", ctaClass: "border-2 border-slate-700 text-slate-700 hover:bg-slate-50",
-        },
-    ];
-
-    return (
-        <div className="space-y-6">
-            <div className="mb-2">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Training Options</h2>
-                <p className="text-sm text-slate-500 mt-1">Choose the mode that fits your schedule and goals</p>
-            </div>
-
-            {dynamicItems.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-8">
-                    {dynamicItems.map((item: any, i: number) => (
-                        <div key={i} className="group relative bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all duration-500 overflow-hidden flex flex-col">
-                            {/* Accent Header */}
-                            <div className={`h-1.5 w-full ${i === 0 ? 'bg-indigo-600' : 'bg-emerald-600'}`} />
-
-                            <div className="p-8 flex-1">
-                                <div className="flex items-start justify-between mb-6">
-                                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${i === 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                                        {item.flag || (i === 0 ? "Preferred" : "For Business")}
-                                    </div>
-                                    <div className="h-10 w-10 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        {i === 0 ? <Users className="h-5 w-5 text-indigo-600" /> : <Monitor className="h-5 w-5 text-emerald-600" />}
-                                    </div>
-                                </div>
-
-                                <h3 className="text-xl font-bold text-slate-900 mb-4 font-outfit">
-                                    {i === 0 ? "Individual Training" : "Corporate Training"}
-                                </h3>
-
-                                <div
-                                    className="text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none 
-                                    [&_ul]:list-none [&_ul]:space-y-4 [&_ul]:m-0 [&_ul]:p-0
-                                    [&_li]:relative [&_li]:pl-7
-                                    [&_li::before]:content-[''] [&_li::before]:absolute [&_li::before]:left-0 [&_li::before]:top-1 
-                                    [&_li::before]:h-4 [&_li::before]:w-4 [&_li::before]:bg-indigo-50 [&_li::before]:rounded-full
-                                    [&_li::after]:content-['✓'] [&_li::after]:absolute [&_li::after]:left-1 [&_li::after]:top-0 
-                                    [&_li::after]:text-[10px] [&_li::after]:font-bold [&_li::after]:text-indigo-600
-                                    [&_strong]:text-slate-900 [&_strong]:font-bold"
-                                    dangerouslySetInnerHTML={{ __html: item.htmlText }}
-                                />
-                            </div>
-
-                            <div className="p-8 pt-0 mt-auto">
-                                <Button className={`w-full py-6 rounded-2xl font-bold shadow-lg transition-all active:scale-[0.98] ${i === 0 ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100' : 'bg-white border-2 border-slate-100 text-slate-700 hover:bg-slate-50 hover:border-emerald-200'}`}>
-                                    {i === 0 ? "Enroll Now" : "Request a Quote"}
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="grid sm:grid-cols-3 gap-5">
-                    {standardOptions.map((opt, i) => (
-                        <div key={i} className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all flex flex-col overflow-hidden">
-                            <div className="p-5 flex-1 space-y-4">
-                                <div className="flex items-start justify-between">
-                                    <div>
-                                        <h4 className="font-bold text-slate-900">{opt.title}</h4>
-                                        <p className="text-xs text-slate-400 mt-0.5">{opt.sub}</p>
-                                    </div>
-                                    <span className={`text-[10px] font-bold text-white px-2 py-0.5 rounded-full ${opt.badgeColor}`}>{opt.badge}</span>
-                                </div>
-                                <p className="text-2xl font-extrabold text-slate-900">{opt.price}</p>
-                                <ul className="space-y-2.5">
-                                    {opt.features.map((f, j) => (
-                                        <li key={j} className="flex items-start gap-2 text-sm text-slate-600">
-                                            <CheckCircle2 className="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" />
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="p-5 pt-0">
-                                <Button className={`w-full font-bold ${opt.ctaClass}`}>{opt.cta}</Button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
-
-/* ─────────────── Section: Upcoming Batches (Dynamic) ─────────────── */
-function BatchesSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
+/* ─────────────── Section: Enrollment & Batches (Merged) ─────────────── */
+function EnrollmentSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
     const batchSection = sections.find(s => s.view === 'schedule-card-list' || s.title.toLowerCase().includes('batch'));
     const dynamicBatches = batchSection ? parseContent(batchSection.content) : [];
 
@@ -341,85 +230,118 @@ function BatchesSection({ course, sections }: { course: CourseDetail; sections: 
     const originalPrice = Number(course.livePrice).toLocaleString("en-IN");
 
     return (
-        <div className="space-y-6">
-            <div className="mb-2">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Upcoming Batches</h2>
-                <p className="text-sm text-slate-500 mt-1">Choose a cohort that fits your schedule</p>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-8">
-                {/* Left Card: Cohort Schedules */}
-                <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-100/50 transition-colors" />
-
-                    <div className="relative z-10 space-y-6">
-                        <div className="flex items-center gap-2">
-                            <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                <Calendar className="h-5 w-5" />
-                            </div>
-                            <h3 className="font-bold text-slate-900 text-lg">Batch Schedules</h3>
-                        </div>
-
-                        <div className="space-y-4">
-                            {displayBatches.slice(0, 2).map((b: any, i: number) => (
-                                <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-300 hover:bg-white hover:shadow-md transition-all duration-300">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">COHORT 0{i + 1}</span>
-                                            <span className="text-lg font-extrabold text-slate-900">{b.date || "Date TBA"}</span>
-                                        </div>
-                                        <span className="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                            {b.status || "Open"}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-sm text-slate-600">
-                                        <Clock3 className="h-4 w-4 text-indigo-400" />
-                                        <span className="font-semibold">{b.time || "Timings TBA"}</span>
-                                    </div>
+        <div className="space-y-10">
+            {/* 1. Individual Training & Cohorts */}
+            <div>
+                <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-slate-900 font-outfit">Individual Training</h2>
+                    <p className="text-sm text-slate-500 mt-1">Join a live cohort and learn with experts</p>
+                </div>
+                
+                <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Left Card: Cohort Schedules */}
+                    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-100/50 transition-colors" />
+                        
+                        <div className="relative z-10 space-y-6">
+                            <div className="flex items-center gap-2">
+                                <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                    <Calendar className="h-5 w-5" />
                                 </div>
-                            ))}
-                        </div>
+                                <h3 className="font-bold text-slate-900 text-lg">Next Cohorts</h3>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                {displayBatches.slice(0, 2).map((b: any, i: number) => (
+                                    <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-300 hover:bg-white hover:shadow-md transition-all duration-300">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">COHORT 0{i + 1}</span>
+                                                <span className="text-lg font-extrabold text-slate-900">{b.date || "Date TBA"}</span>
+                                            </div>
+                                            <span className="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                                {b.status || "Open"}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm text-slate-600">
+                                            <Clock3 className="h-4 w-4 text-indigo-400" />
+                                            <span className="font-semibold">{b.time || "Timings TBA"}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
 
-                        <div className="pt-4 border-t border-slate-100 mt-2">
-                            <Button variant="outline" className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-600 hover:text-white font-bold py-5 rounded-xl transition-all active:scale-95">
-                                Select Schedule & Enroll
+                            <div className="pt-4 border-t border-slate-100 mt-2">
+                                <Button variant="outline" className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-600 hover:text-white font-bold py-5 rounded-xl transition-all active:scale-95">
+                                    Select Schedule & Enroll
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Card: Pricing & Enrollment */}
+                    <div className="bg-gradient-to-br from-[#0f1f45] to-[#1a3270] rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-100/50 flex flex-col justify-center">
+                        <div className="absolute top-0 right-0 p-8 opacity-10">
+                            <Zap className="h-32 w-32 rotate-12" />
+                        </div>
+                        
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2 mb-6">
+                                <span className="px-3 py-1 bg-indigo-500/30 border border-indigo-400/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-indigo-200">
+                                    Best Value
+                                </span>
+                            </div>
+                            
+                            <h3 className="text-2xl font-bold mb-4 font-outfit">Complete Live Program</h3>
+                            <p className="text-indigo-200/80 text-sm mb-8 leading-relaxed max-w-xs">
+                                Full access to live training, real-world projects, and lifetime support.
+                            </p>
+                            
+                            <div className="flex items-baseline gap-3 mb-8">
+                                <span className="text-4xl font-black font-outfit text-white">₹{price}</span>
+                                <span className="text-xl text-indigo-300/40 line-through font-medium">₹{originalPrice}</span>
+                            </div>
+                            
+                            <Button className="w-full bg-white hover:bg-indigo-50 text-indigo-950 font-black text-base py-7 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-wider">
+                                ENROLL NOW
                             </Button>
+                            
+                            <div className="mt-6 flex items-center justify-center gap-4 text-[10px] font-bold text-indigo-300/60 uppercase tracking-widest">
+                                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Live Training</span>
+                                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Certifications</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Right Card: Pricing & Enrollment */}
-                <div className="bg-gradient-to-br from-[#0f1f45] to-[#1a3270] rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-100/50 flex flex-col justify-center">
-                    {/* Decorative Elements */}
-                    <div className="absolute top-0 right-0 p-8 opacity-10">
-                        <Zap className="h-32 w-32 rotate-12" />
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-6">
-                            <span className="px-3 py-1 bg-indigo-500/30 border border-indigo-400/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-indigo-200">
-                                All-Inclusive Package
-                            </span>
-                        </div>
-
-                        <h3 className="text-2xl font-bold mb-4 font-outfit">Join the next cohort</h3>
-                        <p className="text-indigo-200/80 text-sm mb-8 leading-relaxed max-w-xs">
-                            Secure your spot today and get complete access to live training, real-world projects, and lifetime support.
+            {/* 2. Corporate Training */}
+            <div className="bg-slate-900 rounded-3xl p-10 text-white relative overflow-hidden border border-white/10">
+                <div className="absolute top-0 right-0 p-10 opacity-10">
+                    <Users className="h-40 w-40" />
+                </div>
+                <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <h2 className="text-3xl font-bold font-outfit mb-4">Corporate Training</h2>
+                        <p className="text-slate-400 text-lg mb-6 leading-relaxed">
+                            Upskill your team with customized training programs tailored to your company's specific needs and goals.
                         </p>
-
-                        <div className="flex items-baseline gap-3 mb-8">
-                            <span className="text-4xl font-black font-outfit text-white">₹{price}</span>
-                            <span className="text-xl text-indigo-300/40 line-through font-medium">₹{originalPrice}</span>
-                        </div>
-
-                        <Button className="w-full bg-white hover:bg-indigo-50 text-indigo-950 font-black text-base py-7 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-wider">
-                            ENROLL NOW
+                        <ul className="space-y-4 mb-8">
+                            {["Customized Curriculum", "Flexible Scheduling", "Group Discounts", "Post-Training Support"].map((f, i) => (
+                                <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
+                                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                                    {f}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl p-8 border border-white/10">
+                        <MessageSquare className="h-12 w-12 text-indigo-400 mb-4" />
+                        <h4 className="text-xl font-bold mb-2">Need a custom plan?</h4>
+                        <p className="text-slate-400 text-sm text-center mb-8">Our learning experts will help you design the perfect training roadmap for your organization.</p>
+                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-xl">
+                            Request a Quote
                         </Button>
-
-                        <div className="mt-6 flex items-center justify-center gap-4 text-[10px] font-bold text-indigo-300/60 uppercase tracking-widest">
-                            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Live Training</span>
-                            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Certifications</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -636,11 +558,10 @@ export default function CourseContentPanel({ course, sections }: Props) {
                     {/* ─── LEFT: Sticky Sidebar ─── */}
                     <aside className="hidden lg:block w-72 flex-shrink-0">
                         <div className="sticky top-20 py-10">
+                            
                             {/* Nav list */}
-                            <nav className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
-                                <div className="px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800 border-b border-slate-700">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Course Content</p>
-                                </div>
+                            <nav className="rounded-lg  overflow-hidden shadow-sm bg-white">
+
                                 <ul className="divide-y divide-slate-100">
                                     {navItems.map(({ id, label, icon: Icon }) => {
                                         const active = activeId === id;
@@ -702,11 +623,10 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                 )}
                             >
                                 {id === "overview" && <OverviewSection course={course} />}
-                                {id === "objectives" && <ObjectivesSection sections={sections} />}
+                                {/* {id === "objectives" && <ObjectivesSection sections={sections} />} */}
                                 {id === "syllabus" && <SyllabusSection course={course} sections={sections} />}
                                 {id === "projects" && <ProjectsSection course={course} />}
-                                {id === "training-options" && <TrainingSection course={course} sections={sections} />}
-                                {id === "batches" && <BatchesSection course={course} sections={sections} />}
+                                {id === "enrollment" && <EnrollmentSection course={course} sections={sections} />}
                                 {id === "faqs" && <FaqSection course={course} sections={sections} />}
                                 {id === "reviews" && <ReviewsSection course={course} />}
                                 {id === "certification" && <CertificationSection course={course} />}

@@ -46,13 +46,13 @@ export default function LearningPath() {
     <section className="py-24 bg-[#020617]">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-20">
-          <div className="inline-flex px-4 py-1.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-semibold mb-6 border border-purple-500/20">
+          <div className="inline-flex px-6 py-2 rounded-full bg-purple-500/10 text-purple-400 text-sm font-semibold mb-6 border border-purple-500/30 shadow-lg">
             Our Approach
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white font-outfit mb-6 tracking-tight">
-            Your Journey to Success
+          <h2 className="text-3xl md:text-5xl font-bold text-white font-outfit mb-6 tracking-tight">
+            Your <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Journey to Success</span>
           </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
+          <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed font-medium">
             A proven 6-step methodology that has helped thousands transform their careers.
           </p>
         </div>

@@ -13,7 +13,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Learn & Succeed | Modern EdTech Platform",
+  title: "OnlineItGuru",
   description: "Explore detailed syllabus, enroll in career-transforming programs, and track your success with our professional training platform.",
   openGraph: {
     title: "Learn & Succeed | Professional Training Platform",

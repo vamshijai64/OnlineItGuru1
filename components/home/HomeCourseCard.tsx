@@ -19,6 +19,7 @@ interface HomeCourseCardProps {
   delay?: number;
   isTrending?: boolean;
   isNew?: boolean;
+  lightMode?: boolean;
 }
 
 const categoryStyles: Record<string, { gradient: string; icon: LucideIcon }> = {
@@ -49,12 +50,17 @@ export default function HomeCourseCard({
   image,
   delay = 0,
   isTrending = false,
-  isNew = false
+  isNew = false,
+  lightMode = false
 }: HomeCourseCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const style = categoryStyles[category] || categoryStyles['default'];
   const Icon = style.icon;
   const gradient = style.gradient;
+
+  const cardClasses = lightMode 
+    ? "absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-white border border-slate-200 flex flex-col p-6 shadow-xl shadow-slate-200/50"
+    : "absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50";
 
   return (
     <motion.div
@@ -74,7 +80,7 @@ export default function HomeCourseCard({
         {/* Front of card */}
         <Link 
           href={`/courses/${slug}`}
-          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50"
+          className={cardClasses}
           style={{ backfaceVisibility: 'hidden' }}
         >
           {/* Badges */}
@@ -107,7 +113,7 @@ export default function HomeCourseCard({
           </span>
           
           {/* Title */}
-          <h3 className="text-xl font-bold text-white mb-3 line-clamp-2 leading-tight">
+          <h3 className={`text-xl font-bold mb-3 line-clamp-2 leading-tight ${lightMode ? 'text-slate-900' : 'text-white'}`}>
             {title}
           </h3>
           
@@ -117,16 +123,16 @@ export default function HomeCourseCard({
               {[...Array(5)].map((_, i) => (
                 <Star 
                   key={i} 
-                  className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'}`} 
+                  className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : lightMode ? 'text-slate-200' : 'text-gray-700'}`} 
                 />
               ))}
             </div>
-            <span className="text-white text-sm font-bold">{rating}</span>
-            <span className="text-gray-600 text-xs">({reviews.toLocaleString()})</span>
+            <span className={`text-sm font-bold ${lightMode ? 'text-slate-900' : 'text-white'}`}>{rating}</span>
+            <span className={`text-xs ${lightMode ? 'text-slate-500' : 'text-gray-600'}`}>({reviews.toLocaleString()})</span>
           </div>
           
           {/* Stats */}
-          <div className="flex items-center gap-4 text-gray-400 text-xs mt-auto">
+          <div className={`flex items-center gap-4 text-xs mt-auto ${lightMode ? 'text-slate-500' : 'text-gray-400'}`}>
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-purple-500" />
               <span>{duration}</span>
@@ -151,10 +157,10 @@ export default function HomeCourseCard({
         {/* Back of card */}
         <Link 
           href={`/courses/${slug}`}
-          className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden bg-[#0a0a0f] border border-white/10 flex flex-col p-6 shadow-2xl shadow-black/50"
+          className={cardClasses}
           style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
-          <h4 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
+          <h4 className={`text-lg font-bold mb-5 flex items-center gap-2 ${lightMode ? 'text-slate-900' : 'text-white'}`}>
             <Award className="w-5 h-5 text-yellow-400" />
             Key Highlights
           </h4>
@@ -163,7 +169,7 @@ export default function HomeCourseCard({
             {defaultHighlights.map((item, index) => (
               <motion.li 
                 key={index}
-                className="flex items-start gap-3 text-gray-300"
+                className={`flex items-start gap-3 ${lightMode ? 'text-slate-600' : 'text-gray-300'}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: isFlipped ? 1 : 0, x: isFlipped ? 0 : -20 }}
                 transition={{ delay: index * 0.1 + 0.2 }}

@@ -51,7 +51,7 @@ export default function Navbar() {
     const courseMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 20);
+        const handleScroll = () => setIsScrolled(window.scrollY > 50);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
@@ -86,9 +86,11 @@ export default function Navbar() {
     // On ALL other pages the background is light, so keep navbar always solid dark
     // so white text stays readable regardless of scroll position.
     const isHomePage = pathname === "/";
+    
+    // Stable transition classes
     const navBg = isScrolled || !isHomePage
-        ? "bg-gray-950/70 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.3)]"
-        : "bg-transparent backdrop-blur-[2px]";
+        ? "bg-gray-950/80 backdrop-blur-xl border-b border-white/10 shadow-2xl"
+        : "bg-transparent border-b border-transparent";
 
     return (
         <motion.header
@@ -111,10 +113,10 @@ export default function Navbar() {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <nav className="hidden md:flex items-center gap-8">
+                    <nav className="hidden md:flex items-center gap-6">
                         <Link
                             href="/"
-                            className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/") ? "text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`relative text-sm font-bold transition-colors py-2 group ${isActive("/") ? "text-white" : "text-gray-400 hover:text-white"}`}
                         >
                             Home
                             <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 group-hover:w-full ${isActive("/") ? "w-full" : ""}`} />
@@ -124,7 +126,7 @@ export default function Navbar() {
                         <div ref={courseMenuRef} className="relative">
                             <button
                                 onClick={() => setIsCourseMenuOpen((v) => !v)}
-                                className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${isCourseMenuOpen || isActive("/courses") ? "text-white" : "text-gray-400 hover:text-white"
+                                className={`flex items-center gap-1.5 text-sm font-bold transition-colors ${isCourseMenuOpen || isActive("/courses") ? "text-white" : "text-gray-400 hover:text-white"
                                     }`}
                             >
                                 Courses
@@ -140,9 +142,9 @@ export default function Navbar() {
 
                         <Link
                             href="/contact"
-                            className={`relative text-sm font-medium transition-colors py-2 group ${isActive("/contact") ? "text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`relative text-sm font-bold transition-colors py-2 group ${isActive("/contact") ? "text-white" : "text-gray-400 hover:text-white"}`}
                         >
-                            Contact
+                            Contact Us
                             <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300 group-hover:w-full ${isActive("/contact") ? "w-full" : ""}`} />
                         </Link>
                         {user?.roles?.includes("admin") && (
@@ -178,7 +180,7 @@ export default function Navbar() {
                         ) : (
                             <>
                                 <Link href="/login">
-                                    <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10">
+                                    <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10 rounded-full px-6">
                                         Login
                                     </Button>
                                 </Link>

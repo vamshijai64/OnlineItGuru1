@@ -9,14 +9,14 @@ import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-function SectionHeader({ badge, title, subtitle }: { badge: string; title: string; subtitle: string }) {
+function SectionHeader({ badge, title, subtitle }: { badge: string; title: React.ReactNode; subtitle: React.ReactNode }) {
   return (
     <div className="text-center mb-16">
       <motion.span
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="inline-block px-4 py-1.5 mb-4 text-[10px] font-black tracking-[0.2em] text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-full uppercase"
+        className="inline-block px-6 py-2 mb-6 text-sm font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30 rounded-full shadow-lg"
       >
         {badge}
       </motion.span>
@@ -25,17 +25,16 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.1 }}
-        className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight"
+        className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight font-outfit"
       >
-        {title}
-        
+        Explore Our <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Popular Programs</span>
       </motion.h2>
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2 }}
-        className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed"
+        className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed font-medium"
       >
         {subtitle}
       </motion.p>
@@ -101,48 +100,64 @@ export default function CoursesPage() {
     : displayCourses;
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white pt-32 pb-24 px-6 relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[140px] -z-10 animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px] -z-10 animate-pulse" style={{ animationDelay: '2s' }} />
+    <div className="min-h-screen bg-[#030303] text-white">
+      {/* Hero Banner Section */}
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden border-b border-white/5">
+        {/* Background Atmosphere - Intensified Purple & Blue Mix */}
+        <div className="absolute top-[10%] left-[30%] -translate-x-1/2 w-[700px] h-[500px] bg-purple-700/25 rounded-full blur-[140px] animate-pulse mix-blend-screen" />
+        <div className="absolute top-[15%] right-[30%] translate-x-1/2 w-[700px] h-[500px] bg-blue-700/20 rounded-full blur-[140px] animate-pulse mix-blend-screen" style={{ animationDelay: '1s' }} />
+        
+        {/* 4 Corners Dark Mixed Colors */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-[80px]" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-900/10 rounded-full blur-[80px]" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-900/10 rounded-full blur-[80px]" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-[80px]" />
 
-      <div className="container mx-auto max-w-7xl relative z-10">
-        <SectionHeader
-          badge="Course Catalog"
-          title="Explore Our Popular Programs"
-          subtitle="Industry-relevant curriculum designed in collaboration with leading tech companies to accelerate your career."
-        />
+        <div className="container mx-auto max-w-7xl relative z-10">
+          <SectionHeader
+            badge="Course Catalog"
+            title={<>Master <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">In-Demand Skills</span></>}
+            subtitle="Industry-relevant curriculum designed in collaboration with leading tech companies to accelerate your career."
+          />
 
-        {/* Search & Filters */}
-        <div className="max-w-4xl mx-auto mb-20 space-y-8">
-          <motion.div
-            className="relative"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-            <Input
-              placeholder="Search for courses, tools, or categories..."
-              className="w-full h-16 pl-16 pr-8 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:ring-purple-500 focus:border-purple-500 transition-all text-lg"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </motion.div>
+          {/* Search Box in Hero */}
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <Input
+                placeholder="Search for courses, tools, or categories..."
+                className="w-full h-16 pl-16 pr-8 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:ring-purple-500 focus:border-purple-500 transition-all text-lg backdrop-blur-xl shadow-2xl"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
 
+      {/* Course Discovery Section - Light Theme */}
+      <section className="py-20 px-6 relative bg-[#f8fafc]">
+        <div className="container mx-auto max-w-7xl relative z-10">
+          {/* Category Filters */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="mb-16"
           >
             <HomeCategoryFilter
               categories={categories}
               selected={selectedCategory}
               onSelect={handleCategorySelect}
               variant="grid"
+              lightMode={true}
             />
           </motion.div>
-        </div>
 
         <div key={`${selectedCategory}-${loading.categoryCourses}-${page}`} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
           <AnimatePresence mode="popLayout">
@@ -174,6 +189,7 @@ export default function CoursesPage() {
                     delay={index}
                     isTrending={index === 0 && page === 1}
                     isNew={index === 2 && page === 1}
+                    lightMode={true}
                   />
                 </motion.div>
               ))
@@ -186,15 +202,15 @@ export default function CoursesPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-32 bg-white/5 rounded-3xl border border-dashed border-white/10"
+            className="text-center py-32 bg-white rounded-3xl border border-dashed border-slate-200"
           >
-            <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
-              <Search className="w-10 h-10 text-gray-700" />
+            <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-6">
+              <Search className="w-10 h-10 text-slate-300" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">No matching courses</h3>
-            <p className="text-gray-500 text-lg mb-8">We couldn't find any courses matching your search criteria.</p>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">No matching courses</h3>
+            <p className="text-slate-500 text-lg mb-8">We couldn't find any courses matching your search criteria.</p>
             <Button
-              className="rounded-xl px-8 h-12 bg-white text-black hover:bg-gray-200 font-bold"
+              className="rounded-xl px-8 h-12 bg-slate-900 text-white hover:bg-slate-800 font-bold"
               onClick={() => { setSelectedCategory('all'); setSearchQuery(""); }}
             >
               Clear all filters
@@ -209,7 +225,7 @@ export default function CoursesPage() {
               variant="outline"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="h-12 px-6 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 disabled:opacity-30"
+              className="h-12 px-6 rounded-xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50 disabled:opacity-30 shadow-sm"
             >
               <ChevronLeft className="w-5 h-5 mr-2" />
               Previous
@@ -224,7 +240,7 @@ export default function CoursesPage() {
                     onClick={() => setPage(p)}
                     className={`w-12 h-12 rounded-xl text-sm font-bold transition-all ${p === page
                       ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                      : "text-gray-500 hover:bg-white/5 hover:text-white"
+                      : "text-slate-400 hover:bg-white hover:text-slate-900 border border-transparent hover:border-slate-200"
                       }`}
                   >
                     {p}
@@ -237,7 +253,7 @@ export default function CoursesPage() {
               variant="outline"
               onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
               disabled={page === pagination.totalPages}
-              className="h-12 px-6 rounded-xl border-white/10 bg-white/5 text-white hover:bg-white/10 disabled:opacity-30"
+              className="h-12 px-6 rounded-xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50 disabled:opacity-30 shadow-sm"
             >
               Next
               <ChevronRight className="w-5 h-5 ml-2" />
@@ -245,6 +261,7 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
-    </div>
-  );
+    </section>
+  </div>
+);
 }

@@ -37,14 +37,14 @@ const testimonials = [
   }
 ];
 
-function SectionHeader({ badge, title, subtitle }: { badge: string; title: string; subtitle: string }) {
+function SectionHeader({ badge, title, subtitle }: { badge: string; title: React.ReactNode; subtitle: React.ReactNode }) {
   return (
     <div className="text-center mb-16">
       <motion.span 
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-[#e94560] bg-[#e94560]/10 border border-[#e94560]/20 rounded-full uppercase tracking-wider"
+        className="inline-block px-6 py-2 mb-6 text-sm font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/30 rounded-full shadow-lg"
       >
         {badge}
       </motion.span>
@@ -55,14 +55,14 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
         transition={{ delay: 0.1 }}
         className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight font-outfit"
       >
-        {title}
+        Hear From <span className="bg-gradient-to-r from-pink-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Our Graduates</span>
       </motion.h2>
       <motion.p 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2 }}
-        className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed"
+        className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed font-medium"
       >
         {subtitle}
       </motion.p>

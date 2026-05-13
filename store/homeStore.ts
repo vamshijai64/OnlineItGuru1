@@ -599,6 +599,19 @@ export const useHomeStore = create<HomeState>()(
         const { data } = await axiosClient.get(`/public/${type}/${slug}`);
         return data.data;
       } catch (err: any) {
+        if (err.response?.status === 404) {
+          try {
+            // Fallback to searching the list API if the detail route doesn't exist
+            const { data } = await axiosClient.get(`/public/${type}?search=${slug}`);
+            const items = data.data?.items || [];
+            const match = items.find((item: any) => item.slug === slug) || items[0];
+            if (match) {
+              return match;
+            }
+          } catch (fallbackErr) {
+            console.error(`Fallback failed for ${type} by slug`, fallbackErr);
+          }
+        }
         console.error(`Failed to fetch ${type} by slug`, err);
         return null;
       }

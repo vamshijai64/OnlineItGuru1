@@ -25,7 +25,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
       initial={{ opacity: 0, x: 30 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
-      className="p-10 md:p-14 rounded-[2.0rem] bg-gradient-to-br from-slate-900/80 to-slate-900/40 border border-white/10 backdrop-blur-2xl shadow-2xl w-full max-w-2xl mx-auto"
+      className="p-10 md:p-14 rounded-[1.0rem] bg-gradient-to-br from-slate-900/80 to-slate-900/40 border border-white/10 backdrop-blur-2xl shadow-2xl w-full max-w-2xl mx-auto"
     >
       {showTitle && (
         <div className="text-center mb-10">
@@ -47,7 +47,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
               type="text"
               placeholder="Your Name"
               required
-              className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
+              className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
             />
           </div>
           
@@ -57,7 +57,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
               type="email"
               placeholder="Email Address"
               required
-              className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
+              className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
             />
           </div>
 
@@ -67,7 +67,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
               type="tel"
               placeholder="Phone Number"
               required
-              className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
+              className="w-full h-14 pl-12 pr-4 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all"
             />
           </div>
 
@@ -75,7 +75,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
             <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
             <select
               required
-              className="w-full h-14 pl-12 pr-10 bg-white/5 border border-white/10 rounded-2xl text-white appearance-none focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all cursor-pointer"
+              className="w-full h-14 pl-12 pr-10 bg-white/5 border border-white/10 rounded-lg text-white appearance-none focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all cursor-pointer"
             >
               <option value="" disabled selected className="bg-slate-900 text-slate-500">Select Course Interest</option>
               <option value="fullstack" className="bg-slate-900">Full Stack Development</option>
@@ -93,7 +93,7 @@ export default function ContactForm({ showTitle = true }: ContactFormProps) {
         <div className="relative group">
           <textarea
             placeholder="Your Message (Optional)"
-            className="w-full min-h-[160px] p-6 bg-white/5 border border-white/10 rounded-[2rem] text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all resize-none"
+            className="w-full min-h-[160px] p-6 bg-white/5 border border-white/10 rounded-[1rem] text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-white/10 transition-all resize-none"
           />
         </div>
 

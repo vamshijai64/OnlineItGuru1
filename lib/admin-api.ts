@@ -5,21 +5,39 @@ export interface LoginUserData {
   password?: string;
 }
 
-export interface UserResponse {
+export interface UserItem {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
+  phone?: string;
+  status: string;
   roles: string[];
+  role?: string;
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CreateUserData {
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  password?: string;
+  phone?: string;
+  status?: string;
+  role?: string;
+}
+
+export interface UpdateUserData extends Partial<CreateUserData> {}
 
 export interface AuthResponse {
   success: boolean;
   message?: string;
   data?: {
       token: string;
-      user: UserResponse;
+      user: UserItem;
   };
 }
 
@@ -49,6 +67,32 @@ export interface CreateCourseData {
   youtubeDemo: string;
   courseType: string;
 }
+
+export interface ContentItem {
+  id: string;
+  type: string;
+  title: string;
+  slug: string;
+  featureImage?: string;
+  categoryId?: string;
+  keywords?: string;
+  content: string;
+  publishedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateContentData {
+  title: string;
+  slug: string;
+  featureImage?: string;
+  categoryId?: string;
+  keywords?: string;
+  content: string;
+  publishedAt?: string;
+}
+
+export interface UpdateContentData extends Partial<CreateContentData> {}
 
 export interface AdminResponse<T> {
   success: boolean;
@@ -104,5 +148,63 @@ export const fetchAdminReviews = async (page: number = 1, limit: number = 12): P
 
 export const loginAdmin = async (data: LoginUserData): Promise<AuthResponse> => {
     const response = await axiosClient.post<AuthResponse>('/auth/admin/login', data);
+    return response.data;
+};
+
+export const fetchAdminContentList = async (type: string, page: number = 1, limit: number = 10, search?: string): Promise<AdminResponse<any>> => {
+    let url = `/admin/content/${type}?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${search}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminContentById = async (type: string, id: string): Promise<AdminResponse<ContentItem>> => {
+    const response = await axiosClient.get<AdminResponse<ContentItem>>(`/admin/content/${type}/${id}`);
+    return response.data;
+};
+
+export const createAdminContent = async (type: string, data: CreateContentData): Promise<AdminResponse<ContentItem>> => {
+    const response = await axiosClient.post<AdminResponse<ContentItem>>(`/admin/content/${type}`, data);
+    return response.data;
+};
+
+export const updateAdminContent = async (type: string, id: string, data: UpdateContentData): Promise<AdminResponse<ContentItem>> => {
+    const response = await axiosClient.patch<AdminResponse<ContentItem>>(`/admin/content/${type}/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminContent = async (type: string, id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/content/${type}/${id}`);
+    return response.data;
+};
+
+export const fetchAdminUsersList = async (page: number = 1, limit: number = 10, search?: string): Promise<AdminResponse<any>> => {
+    let url = `/admin/users?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${search}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminUserById = async (id: string): Promise<AdminResponse<UserItem>> => {
+    const response = await axiosClient.get<AdminResponse<UserItem>>(`/admin/users/${id}`);
+    return response.data;
+};
+
+export const createAdminUser = async (data: CreateUserData): Promise<AdminResponse<UserItem>> => {
+    const response = await axiosClient.post<AdminResponse<UserItem>>(`/admin/users`, data);
+    return response.data;
+};
+
+export const updateAdminUser = async (id: string, data: UpdateUserData): Promise<AdminResponse<UserItem>> => {
+    const response = await axiosClient.patch<AdminResponse<UserItem>>(`/admin/users/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminUser = async (id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/users/${id}`);
     return response.data;
 };

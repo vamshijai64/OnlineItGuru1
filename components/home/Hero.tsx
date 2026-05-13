@@ -298,10 +298,10 @@ export default function Hero() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center self-start gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 mb-10"
+                className="inline-flex items-center self-start gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 mb-8"
               >
-                <Zap className="w-4 h-4 text-purple-400" />
-                <span className="text-purple-400 text-sm font-medium">{badge}</span>
+                <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="text-purple-400 text-sm font-semibold">{badge}</span>
               </motion.div>
 
               <AnimatedHeadline

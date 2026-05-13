@@ -26,7 +26,7 @@ export default function CorporateTraining() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <div className="relative">
+                        {/* <div className="relative">
                             <div className="absolute -inset-4 bg-gradient-to-br from-[#e94560]/10 to-purple-500/10 rounded-3xl blur-xl" />
                             <div className="relative rounded-2xl shadow-lg border border-slate-100 overflow-hidden aspect-[3/2] bg-slate-100">
                                 <div
@@ -45,16 +45,14 @@ export default function CorporateTraining() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
+                        </div> */}
+                        <motion.div
                         initial={{ opacity: 0, x: 30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <span className="text-[#e94560] text-sm font-semibold uppercase tracking-wider">For Business</span>
+                        <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-purple-600 bg-purple-100 border border-purple-200 rounded-full">For Business</span>
                         <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mt-3 font-outfit">
                             Corporate Training Solutions
                         </h2>
@@ -78,6 +76,28 @@ export default function CorporateTraining() {
                             </Button>
                         </Link>
                     </motion.div>
+                    </motion.div>
+
+                     <div className="relative">
+                            <div className="absolute -inset-4 bg-gradient-to-br from-[#e94560]/10 to-purple-500/10 rounded-3xl blur-xl" />
+                            <div className="relative rounded-2xl shadow-lg border border-slate-100 overflow-hidden aspect-[3/2] bg-slate-100">
+                                <div
+                                    className="w-full h-full bg-cover bg-center"
+                                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80')" }}
+                                />
+                            </div>
+                            <div className="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-xl p-5 border border-slate-100 hidden sm:block">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e94560] to-purple-600 flex items-center justify-center shadow-lg shadow-red-500/10">
+                                        <Building2 className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-[#e94560]">200+</p>
+                                        <p className="text-xs text-slate-500 font-medium">Corporate Partners</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                 </div>
             </div>
         </section>

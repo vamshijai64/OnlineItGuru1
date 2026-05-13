@@ -32,15 +32,15 @@ export default function Home() {
       <WhyChooseUs />
       <FeaturedCourses />
       <LearningPath />
-      <MasterPrograms />     
+      {/* <MasterPrograms />      */}
       <CorporateTraining />
-      <LatestTutorials />
+      {/* <LatestTutorials /> */}
       <ExpertTrainers />
-      <LatestBlogs />     
-      <InterviewQuestions />    
+      {/* <LatestBlogs />      */}
+      {/* <InterviewQuestions />     */}
       <PlacementModule />
       <Testimonials />
-      <HomeFAQ />
+      {/* <HomeFAQ /> */}
       <HomeContact />
       <CTASection />
     </main>

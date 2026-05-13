@@ -1,6 +1,6 @@
 "use client";
 
-import { Star,Award, Clock,Download, Laptop, Users, Share2, Heart, Play, Home, ChevronRight } from "lucide-react";
+import { Star, Award, Clock, Download, Laptop, Users, Share2, Heart, Play, Home, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CourseDetail } from "@/store/homeStore";
@@ -34,10 +34,10 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                 {/* Large Background Orbs */}
                 <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-purple-600/10 rounded-full blur-[140px] animate-pulse" />
                 <div className="absolute bottom-[-20%] right-[-10%] w-[800px] h-[800px] bg-pink-600/10 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '2s' }} />
-                
+
                 {/* Subtle Grid Pattern */}
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]" />
-                
+
                 {/* Dark Vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#020617_80%)]" />
             </div>
@@ -82,21 +82,15 @@ export default function CourseBanner({ course }: CourseBannerProps) {
 
                         {/* Rating & Learners Badges */}
                         <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-br from-[#1a2b4b] to-[#122244] border border-white/10 rounded-lg shadow-lg">
-                                <div className="flex text-yellow-400">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className={`h-3 w-3 ${i < Math.floor(course.rating) ? "fill-current" : "fill-current opacity-30"}`} />
-                                    ))}
-                                </div>
-                                <span className="font-bold text-white text-xs">{course.rating}</span>
-                                <span className="text-[10px] text-slate-400">({course.totalReviews?.toLocaleString() || 0} reviews)</span>
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-full">
+                                <Users className="w-3.5 h-3.5 text-amber-400" />
+                                {course.totalLearners?.toLocaleString() || "7,584"}+ Learners
+                            </div>
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold rounded-full">
+                                <Star className="w-3.5 h-3.5 fill-amber-400" />
+                                {course.rating} ({course.totalReviews?.toLocaleString() || 0} Reviews)
                             </div>
 
-                            <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-br from-[#1a2b4b] to-[#122244] border border-white/10 rounded-lg shadow-lg">
-                                <Users className="h-3.5 w-3.5 text-indigo-400" />
-                                <span className="text-xs font-bold text-white">{course.totalLearners?.toLocaleString() || "7,584"}+</span>
-                                <span className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Learners</span>
-                            </div>
                         </div>
 
                         {/* Stats Row & Watch Demo */}
@@ -108,8 +102,8 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                                             <Icon className="h-4 w-4" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-lg font-black text-white leading-none">{value}</span>
-                                            <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold mt-1">{label}</span>
+                                            <span className="text-lg font-semibold text-white leading-none">{value}</span>
+                                            <span className="text-[10px] text-slate-400  tracking-widest font-bold mt-1">{label}</span>
                                         </div>
                                     </div>
                                 ))}
@@ -196,9 +190,9 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                                 </div>
 
                                 <Button variant="outline" size="sm" className="w-full border-white/20 text-white font-bold py-4 hover:bg-white/10 rounded-xl transition-all text-[13px] bg-transparent">
-                                    Download Syllabus
+                                    Get Free Trail
                                 </Button>
-                                
+
                                 <p className="text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center justify-center gap-2">
                                     <span className="w-1 h-1 rounded-full bg-emerald-500/50" />
                                     14-Day Guarantee

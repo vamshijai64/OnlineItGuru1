@@ -14,7 +14,9 @@ import {
     Search,
     Tag,
     HelpCircle,
-    MessageSquare
+    MessageSquare,
+    FileText,
+    Layout
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AuthForm from "@/components/auth/AuthForm";
@@ -29,6 +31,10 @@ import OfferManagement from "@/components/admin/OfferManagement";
 import InterviewManagement from "@/components/admin/InterviewManagement";
 import ReviewManagement from "@/components/admin/ReviewManagement";
 import CourseSections from "@/components/admin/CourseSections";
+import PostManagement from "@/components/admin/PostManagement";
+import TutorialManagement from "@/components/admin/TutorialManagement";
+import PageManagement from "@/components/admin/PageManagement";
+import UserManagement from "@/components/admin/UserManagement";
 
 export default function AdminDashboard() {
     const { user, logout } = useAuthStore();
@@ -40,8 +46,8 @@ export default function AdminDashboard() {
         adminReviews, fetchReviews
     } = useAdminStore();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections'>('overview');
-    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections'>('courses');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'posts' | 'tutorials' | 'pages' | 'users'>('overview');
+    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'posts' | 'tutorials' | 'pages' | 'users'>('courses');
     
     // State for drill-downs
     const [selectedCategory, setSelectedCategory] = useState<{slug: string, title: string} | null>(null);
@@ -143,7 +149,35 @@ export default function AdminDashboard() {
                         <MessageSquare className="h-4 w-4" />
                         Reviews
                     </Button>
-                    <Button variant="ghost" className="w-full justify-start gap-3 text-slate-600 hover:bg-slate-100">
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => navigateToTab('posts')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'posts' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
+                        <FileText className="h-4 w-4" />
+                        Posts
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => navigateToTab('tutorials')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'tutorials' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
+                        <BookOpen className="h-4 w-4" />
+                        Tutorials
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => navigateToTab('pages')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'pages' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
+                        <Layout className="h-4 w-4" />
+                        Pages
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => navigateToTab('users')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'users' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
                         <Users className="h-4 w-4" />
                         Users
                     </Button>
@@ -209,6 +243,10 @@ export default function AdminDashboard() {
                     {activeTab === 'offers' && <OfferManagement />}
                     {activeTab === 'interviews' && <InterviewManagement />}
                     {activeTab === 'reviews' && <ReviewManagement />}
+                    {activeTab === 'posts' && <PostManagement />}
+                    {activeTab === 'tutorials' && <TutorialManagement />}
+                    {activeTab === 'pages' && <PageManagement />}
+                    {activeTab === 'users' && <UserManagement />}
                     
                     {activeTab === 'category-courses' && selectedCategory && (
                         <CategoryCourses 

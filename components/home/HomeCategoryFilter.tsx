@@ -35,22 +35,28 @@ interface HomeCategoryFilterProps {
   selected: string;
   onSelect: (slug: string) => void;
   variant?: 'scroll' | 'grid';
+  lightMode?: boolean;
 }
 
-export default function HomeCategoryFilter({ categories, selected, onSelect, variant = 'scroll' }: HomeCategoryFilterProps) {
+export default function HomeCategoryFilter({ categories, selected, onSelect, variant = 'scroll', lightMode = false }: HomeCategoryFilterProps) {
   const containerClasses = variant === 'scroll'
     ? "flex flex-nowrap gap-3 justify-start md:justify-center overflow-x-auto pb-4 scrollbar-hide no-scrollbar"
     : "flex flex-wrap gap-3 justify-center";
+
+  const buttonClasses = (isSelected: boolean) => {
+    if (isSelected) return 'text-white';
+    if (lightMode) {
+      return 'text-slate-600 hover:text-purple-600 bg-white hover:bg-slate-50 border border-slate-200 shadow-sm';
+    }
+    return 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10';
+  };
 
   return (
     <div className={containerClasses}>
       {/* "All Courses" Button */}
       <motion.button
         onClick={() => onSelect('all')}
-        className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${selected === 'all'
-            ? 'text-white'
-            : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10'
-          }`}
+        className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${buttonClasses(selected === 'all')}`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -77,10 +83,7 @@ export default function HomeCategoryFilter({ categories, selected, onSelect, var
           <motion.button
             key={category.id}
             onClick={() => onSelect(category.slug)}
-            className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${isSelected
-                ? 'text-white'
-                : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10'
-              }`}
+            className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${buttonClasses(isSelected)}`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
