@@ -58,14 +58,22 @@ export default function CoursesPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
+    // Only fetch globals if they haven't been loaded
     if (courses.length === 0) fetchCourses();
     if (categories.length === 0) fetchCategories();
   }, [courses.length, categories.length, fetchCourses, fetchCategories]);
 
   useEffect(() => {
     const categorySlug = selectedCategory === 'all' ? "" : selectedCategory;
+    
+    // Always fetch the first page or category change, 
+    // but we could theoretically skip if store already has it.
     fetchCoursesByCategory(categorySlug, page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    // Only scroll if it's not the initial mount to avoid jumping on load
+    if (page > 1 || selectedCategory !== 'all') {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }, [selectedCategory, page, fetchCoursesByCategory]);
 
   const handleCategorySelect = (slug: string) => {

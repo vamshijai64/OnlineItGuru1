@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { registerUser, loginUser, loginAdmin, fetchUserProfile, RegisterUserData, LoginUserData, UserResponse } from '../lib/auth-api';
 import axios from 'axios';
 
@@ -30,10 +31,12 @@ const removeAuthToken = () => {
 };
 
 
-export const useAuthStore = create<AuthState>((set) => ({
-    user: null,
-    isLoading: false,
-    error: null,
+export const useAuthStore = create<AuthState>()(
+    persist(
+        (set) => ({
+            user: null,
+            isLoading: false,
+            error: null,
 
     register: async (data: RegisterUserData) => {
         set({ isLoading: true, error: null });
@@ -130,4 +133,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         removeAuthToken();
         set({ user: null, error: null });
     }
-}));
+        }),
+        {
+            name: 'oit_auth_storage',
+            partialize: (state) => ({ user: state.user }),
+        }
+    )
+);

@@ -42,6 +42,31 @@ export interface AuthResponse {
 }
 
 
+export interface ReviewItem {
+  id: string;
+  courseId: string;
+  courseTitle?: string | null;
+  courseSlug?: string | null;
+  userId: string;
+  userName?: string | null;
+  rating: number;
+  review: string;
+  status?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateReviewData {
+  courseId: string;
+  userId: string;
+  userName?: string;
+  rating: number;
+  review: string;
+  status?: string;
+}
+
+export interface UpdateReviewData extends Partial<CreateReviewData> {}
+
 export interface CreateCourseData {
   title: string;
   slug: string;
@@ -141,8 +166,32 @@ export const fetchAdminInterviewQuestions = async (page: number = 1, limit: numb
     return response.data;
 };
 
-export const fetchAdminReviews = async (page: number = 1, limit: number = 12): Promise<AdminResponse<any>> => {
-    const response = await axiosClient.get<AdminResponse<any>>(`/public/reviews?page=${page}&limit=${limit}`);
+export const fetchAdminReviews = async (page: number = 1, limit: number = 12, search?: string): Promise<AdminResponse<any>> => {
+    let url = `/public/reviews?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${search}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminReviewById = async (id: string): Promise<AdminResponse<ReviewItem>> => {
+    const response = await axiosClient.get<AdminResponse<ReviewItem>>(`/admin/reviews/${id}`);
+    return response.data;
+};
+
+export const createAdminReview = async (data: CreateReviewData): Promise<AdminResponse<ReviewItem>> => {
+    const response = await axiosClient.post<AdminResponse<ReviewItem>>('/admin/reviews', data);
+    return response.data;
+};
+
+export const updateAdminReview = async (id: string, data: UpdateReviewData): Promise<AdminResponse<ReviewItem>> => {
+    const response = await axiosClient.patch<AdminResponse<ReviewItem>>(`/admin/reviews/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminReview = async (id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/reviews/${id}`);
     return response.data;
 };
 

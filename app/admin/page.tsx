@@ -46,8 +46,8 @@ export default function AdminDashboard() {
         adminReviews, fetchReviews
     } = useAdminStore();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'posts' | 'tutorials' | 'pages' | 'users'>('overview');
-    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'posts' | 'tutorials' | 'pages' | 'users'>('courses');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users'>('overview');
+    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users'>('courses');
     
     // State for drill-downs
     const [selectedCategory, setSelectedCategory] = useState<{slug: string, title: string} | null>(null);
@@ -151,11 +151,11 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
-                        onClick={() => navigateToTab('posts')}
-                        className={`w-full justify-start gap-3 ${activeTab === 'posts' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                        onClick={() => navigateToTab('blogs')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'blogs' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
                         <FileText className="h-4 w-4" />
-                        Posts
+                        Blogs
                     </Button>
                     <Button 
                         variant="ghost" 
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                     {activeTab === 'offers' && <OfferManagement />}
                     {activeTab === 'interviews' && <InterviewManagement />}
                     {activeTab === 'reviews' && <ReviewManagement />}
-                    {activeTab === 'posts' && <PostManagement />}
+                    {activeTab === 'blogs' && <PostManagement />}
                     {activeTab === 'tutorials' && <TutorialManagement />}
                     {activeTab === 'pages' && <PageManagement />}
                     {activeTab === 'users' && <UserManagement />}

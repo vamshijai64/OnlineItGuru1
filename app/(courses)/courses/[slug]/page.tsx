@@ -64,10 +64,10 @@ export default function CoursesSlugPage() {
   }
 
   if (isCategory) {
-    return <CategoryView slug={slug} />;
+    return <CategoryView key={`cat-${slug}`} slug={slug} />;
   }
 
-  return <CourseDetailView slug={slug} />;
+  return <CourseDetailView key={`course-${slug}`} slug={slug} />;
 }
 
 // ── View 1: Category Course Listing ──────────────────────────────────────────
@@ -245,13 +245,20 @@ function CourseDetailView({ slug }: { slug: string }) {
   const loading = useHomeStore((s) => s.loading.courseDetail);
 
   useEffect(() => {
-    fetchCourseBySlug(slug);
+    // Only fetch if the current stored course doesn't match the slug
+    if (!course || course.slug !== slug) {
+      fetchCourseBySlug(slug);
+    }
+    // We only depend on slug here to avoid size-change errors during HMR
+    // and because fetchCourseBySlug is stable.
   }, [slug]);
 
   useEffect(() => {
-    if (course?.id) {
+    // Only fetch sections if they don't belong to the current course or are empty
+    if (course?.id && (sections.length === 0 || sections[0].courseId !== course.id)) {
       fetchCourseSections(course.id);
     }
+    // Only depend on course?.id to trigger the fetch
   }, [course?.id]);
 
   if (loading) {

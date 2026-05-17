@@ -47,21 +47,50 @@ interface Props {
 }
 
 export default function CourseMegaMenu({ onClose }: Props) {
-   const categories             = useHomeStore((state) => state.categories);
-  const fetchCoursesByCategory = useHomeStore((state) => state.fetchCoursesByCategory);  // ← add this
-  const categoryCoursesPage    = useHomeStore((state) => state.categoryCoursesPage);      // ← add this
-  const loading                = useHomeStore((state) => state.loading.categories);
-  const [activeIndex, setActiveIndex] = useState(0);
+    const categories = useHomeStore((state) => state.categories);
+    const fetchCoursesByCategory = useHomeStore((state) => state.fetchCoursesByCategory);
+    const categoryCoursesPage = useHomeStore((state) => state.categoryCoursesPage);
+    const loadingCategories = useHomeStore((state) => state.loading.categories);
+    const loadingCourses = useHomeStore((state) => state.loading.categoryCourses);
+    const [activeIndex, setActiveIndex] = useState(0);
 
-  const activeCategory = categories?.[activeIndex];
-    
+    const CATEGORY_CONFIG = [
+        { label: "Agentic AI", slug: "artificial-intelligence" },
+        { label: "Data Science & Business Analytics", slug: "data-science" },
+        { label: "Cloud Computing & DevOps", slug: "cloud-computing" },
+        { label: "Cyber Security", slug: "cyber-security" },
+        { label: "Generative AI", slug: "artificial-intelligence" },
+        { label: "Digital Marketing", slug: "digital-marketing" },
+        { label: "AI & Machine Learning", slug: "artificial-intelligence" },
+        { label: "BI & Visualization", slug: "business-intelligence" },
+        { label: "Software Testing Tools", slug: "software-testing-tools" },
+    ];
+
+    const displayCategories = CATEGORY_CONFIG.map(config => {
+        const found = categories?.find(c => 
+            c.slug === config.slug || 
+            c.title.toLowerCase() === config.label.toLowerCase()
+        );
+        return {
+            id: found?.id || config.slug,
+            title: config.label,
+            slug: found?.slug || config.slug,
+            image: found?.image || "fa fa-book",
+        };
+    });
+
+    const activeCategory = displayCategories?.[activeIndex];
+
     // Filter courses that belong to the active category
-     const categoryCourses = categoryCoursesPage?.items?.slice(0, 5) ?? [];
-     useEffect(() => {
-    if (activeCategory?.slug) {
-      fetchCoursesByCategory(activeCategory.slug, 1);
-    }
-  }, [activeCategory?.slug]);
+    const categoryCourses = categoryCoursesPage?.items?.slice(0, 5) ?? [];
+    useEffect(() => {
+        if (activeCategory?.slug) {
+            const timer = setTimeout(() => {
+                fetchCoursesByCategory(activeCategory.slug, 1);
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [activeCategory?.slug, fetchCoursesByCategory]);
     return (
         <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -69,16 +98,15 @@ export default function CourseMegaMenu({ onClose }: Props) {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
             className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[1000px] max-w-[96vw] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
-            onMouseLeave={onClose}
         >
             <div className="flex">
                 {/* ── Col 1: Category tabs ── */}
-                <div className="w-60 flex-shrink-0 bg-slate-50 border-r border-slate-100 py-5 overflow-y-auto max-h-[500px]">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-5 mb-3">
+                <div className="w-72 flex-shrink-0 bg-slate-50 border-r border-slate-100 py-5 overflow-y-auto max-h-[500px]">
+                    <p className="text-[10px] font-bold  tracking-widest text-slate-400 px-5 mb-3">
                         Categories
                     </p>
-                    
-                    {loading && (
+
+                    {loadingCategories && (
                         <div className="space-y-2 px-5">
                             {[...Array(6)].map((_, i) => (
                                 <div key={i} className="h-10 rounded-lg bg-slate-200 animate-pulse" />
@@ -86,23 +114,39 @@ export default function CourseMegaMenu({ onClose }: Props) {
                         </div>
                     )}
 
-                    {!loading && categories?.map((cat, i) => {
+                    {!loadingCategories && displayCategories.map((cat, i) => {
                         const Icon = iconMap[cat.image] ?? DEFAULT_ICON;
                         const active = activeIndex === i;
+                        const isBottomGroup = cat.title.toLowerCase() === "bi & visualization";
+
                         return (
-                            <button
-                                key={cat.id}
-                                onMouseEnter={() => setActiveIndex(i)}
-                                onClick={() => setActiveIndex(i)}
-                                className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold transition-all group ${active ? "bg-white text-indigo-700 border-r-2 border-indigo-600 shadow-sm" : "text-slate-600 hover:text-indigo-600 hover:bg-white/60"
-                                    }`}
-                            >
-                                <Icon className={`h-4 w-4 flex-shrink-0 ${active ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500"}`} />
-                                <span className="truncate">{cat.title}</span>
-                                <ChevronRight className={`ml-auto h-3.5 w-3.5 ${active ? "text-indigo-400" : "text-slate-300"}`} />
-                            </button>
+                            <React.Fragment key={cat.title}>
+                                {isBottomGroup && <div className="my-2 border-t border-slate-200/60 mx-4" />}
+                                <button
+                                    onMouseEnter={() => setActiveIndex(i)}
+                                    onClick={() => setActiveIndex(i)}
+                                    className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold transition-all group ${active ? "bg-white text-indigo-700 border-r-2 border-indigo-600 shadow-sm" : "text-slate-600 hover:text-indigo-600 hover:bg-white/60"
+                                        }`}
+                                >
+                                    <Icon className={`h-4 w-4 flex-shrink-0 ${active ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500"}`} />
+                                    <span className="whitespace-nowrap">{cat.title}</span>
+                                    <ChevronRight className={`ml-auto h-3.5 w-3.5 ${active ? "text-indigo-400" : "text-slate-300"}`} />
+                                </button>
+                            </React.Fragment>
                         );
                     })}
+
+                    {!loadingCategories && (
+                        <Link
+                            href="/courses"
+                            onClick={onClose}
+                            className="w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold transition-all group text-slate-600 hover:text-indigo-600 hover:bg-white/60"
+                        >
+                            <Layout className="h-4 w-4 flex-shrink-0 text-slate-400 group-hover:text-indigo-500" />
+                            <span className="whitespace-nowrap">Others</span>
+                            <ChevronRight className="ml-auto h-3.5 w-3.5 text-slate-300" />
+                        </Link>
+                    )}
 
                     <div className="mx-5 mt-4 pt-4 border-t border-slate-200">
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Explore</p>
@@ -121,8 +165,8 @@ export default function CourseMegaMenu({ onClose }: Props) {
 
                 {/* ── Col 2: Courses for active category ── */}
                 <div className="flex-1 py-5 px-6">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
-                        {activeCategory?.title || "Loading..."} Courses
+                    <p className="text-[10px] font-bold  tracking-widest text-slate-400 mb-3">
+                        {activeCategory?.title || "Loading..."}
                     </p>
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -133,11 +177,17 @@ export default function CourseMegaMenu({ onClose }: Props) {
                             transition={{ duration: 0.15 }}
                             className="space-y-1"
                         >
-                            {categoryCourses.length > 0 ? (
+                            {loadingCourses ? (
+                                <div className="space-y-3">
+                                    {[...Array(3)].map((_, i) => (
+                                        <div key={i} className="h-16 rounded-xl bg-slate-100 animate-pulse" />
+                                    ))}
+                                </div>
+                            ) : categoryCourses.length > 0 ? (
                                 categoryCourses.map((course) => (
                                     <Link
                                         key={course.id}
-                                       href={`/courses/${course.slug}`}
+                                        href={`/courses/${course.slug}`}
                                         onClick={onClose}
                                         className="flex items-center justify-between p-3 rounded-xl hover:bg-indigo-50 group transition-all"
                                     >
@@ -168,28 +218,28 @@ export default function CourseMegaMenu({ onClose }: Props) {
                         </motion.div>
                     </AnimatePresence>
 
-                    {activeCategory && (
-                        <Link
-                            href={`/courses/${activeCategory.slug}`}
-                            onClick={onClose}
-                            className="mt-4 flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors group"
-                        >
-                            View all {activeCategory.title} courses
-                            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                    )}
+
+                    <Link
+                        href={`/courses`}
+                        onClick={onClose}
+                        className="mt-4 flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors group"
+                    >
+                        Browse All Courses
+                        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+
                 </div>
 
                 {/* ── Col 3: Featured promo card ── */}
                 <div className="w-64 flex-shrink-0 border-l border-slate-100 p-5 bg-gradient-to-b from-indigo-50 to-white flex flex-col">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-3">Why OnlineITGuru</p>
+                    <p className="text-[10px] font-bold  tracking-widest text-indigo-400 mb-3">Why OnlineITGuru?</p>
                     <div className="flex-1 space-y-4">
                         <div className="rounded-xl bg-white shadow-sm border border-indigo-100 p-4">
                             <p className="font-bold text-slate-900 text-sm leading-snug mb-1">
                                 Transform your career with industry-expert training
                             </p>
                             <p className="text-xs text-slate-500 leading-5">
-                                Live sessions, real projects, and 100% placement support.
+                                Live sessions, hands-on projects, LMS access and 100% placement support.
                             </p>
                         </div>
                         {/* Stats */}
@@ -208,14 +258,11 @@ export default function CourseMegaMenu({ onClose }: Props) {
                         </div>
                     </div>
                     {/* CTA */}
-                    <Link href="/courses" onClick={onClose}>
+                    <Link href="/contact" onClick={onClose}>
                         <Button className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 text-sm">
-                            Browse All Courses
+                            Get Started
                             <ArrowRight className="h-4 w-4" />
                         </Button>
-                    </Link>
-                    <Link href="/courses" onClick={onClose} className="block text-center text-xs text-indigo-500 hover:underline mt-2">
-                        Free demo available →
                     </Link>
                 </div>
             </div>
@@ -235,7 +282,7 @@ export default function CourseMegaMenu({ onClose }: Props) {
                     ))}
                 </div>
 
-                <div className="flex items-center gap-6">
+                {/* <div className="flex items-center gap-6">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Resources:</span>
                     <div className="flex gap-5">
                         {[
@@ -253,7 +300,7 @@ export default function CourseMegaMenu({ onClose }: Props) {
                             </Link>
                         ))}
                     </div>
-                </div>
+                </div> */}
             </div>
         </motion.div>
     );

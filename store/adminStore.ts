@@ -5,7 +5,8 @@ import {
     fetchAdminCoursesByCategory, fetchAdminCourseSections, updateSectionPositions,
     fetchAdminContentList, fetchAdminContentById, createAdminContent, 
     updateAdminContent, deleteAdminContent, CreateContentData, UpdateContentData, ContentItem,
-    fetchAdminUsersList, fetchAdminUserById, createAdminUser, updateAdminUser, deleteAdminUser, CreateUserData, UpdateUserData, UserItem
+    fetchAdminUsersList, fetchAdminUserById, createAdminUser, updateAdminUser, deleteAdminUser, CreateUserData, UpdateUserData, UserItem,
+    fetchAdminReviewById, createAdminReview, updateAdminReview, deleteAdminReview, CreateReviewData, UpdateReviewData, ReviewItem
 } from '@/lib/admin-api';
 import axios from 'axios';
 
@@ -47,6 +48,7 @@ interface AdminState {
         totalPages: number;
     } | null;
     currentContentItem: ContentItem | null;
+    currentReviewItem: ReviewItem | null;
 
     adminUsers: UserItem[];
     usersPagination: {
@@ -61,7 +63,11 @@ interface AdminState {
     fetchAllCourses: (page?: number) => Promise<void>;
     fetchOffers: () => Promise<void>;
     fetchInterviewQuestions: (page?: number) => Promise<void>;
-    fetchReviews: (page?: number) => Promise<void>;
+    fetchReviews: (page?: number, limit?: number, search?: string) => Promise<void>;
+    fetchReviewById: (id: string) => Promise<void>;
+    createReviewItem: (data: CreateReviewData) => Promise<{ success: boolean; message?: string }>;
+    updateReviewItem: (id: string, data: UpdateReviewData) => Promise<{ success: boolean; message?: string }>;
+    deleteReviewItem: (id: string) => Promise<{ success: boolean; message?: string }>;
     fetchCoursesByCategory: (categorySlug: string, page?: number) => Promise<void>;
     fetchCourseSections: (courseId: string) => Promise<void>;
     updateCourseSectionPositions: (courseId: string, positions: {id: string, position: number}[]) => Promise<boolean>;
@@ -97,6 +103,7 @@ export const useAdminStore = create<AdminState>((set) => ({
     adminContent: [],
     contentPagination: null,
     currentContentItem: null,
+    currentReviewItem: null,
     adminUsers: [],
     usersPagination: null,
 
@@ -133,20 +140,36 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    fetchAllCourses: async (page = 1) => {
+    fetchAllCourses: async () => {
         set({ isLoading: true, error: null });
         try {
-            const response = await fetchAdminCourses(page);
+            // First fetch page 1 with standard safe limit 50
+            const response = await fetchAdminCourses(1, 50);
             if (response.success) {
-                // Handle the data structure with items and pagination
-                const items = response.data?.items || [];
+                let allItems = response.data?.items || [];
                 const pagination = response.data?.pagination || null;
+                
+                // If there are more pages, fetch them concurrently to ensure the dropdown list is complete
+                if (pagination && pagination.totalPages > 1) {
+                    const promises = [];
+                    for (let p = 2; p <= pagination.totalPages; p++) {
+                        promises.push(fetchAdminCourses(p, 50));
+                    }
+                    const results = await Promise.all(promises);
+                    results.forEach(res => {
+                        if (res.success && res.data?.items) {
+                            allItems = [...allItems, ...res.data.items];
+                        }
+                    });
+                }
                     
                 set({ 
-                    adminCourses: items, 
+                    adminCourses: allItems, 
                     coursePagination: pagination,
                     isLoading: false 
                 });
+            } else {
+                set({ isLoading: false });
             }
         } catch (error: any) {
             set({ isLoading: false });
@@ -189,10 +212,10 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    fetchReviews: async (page = 1) => {
+    fetchReviews: async (page = 1, limit = 12, search?: string) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await fetchAdminReviews(page);
+            const response = await fetchAdminReviews(page, limit, search);
             if (response.success) {
                 const items = response.data?.items || [];
                 const pagination = response.data?.pagination || null;
@@ -204,6 +227,81 @@ export const useAdminStore = create<AdminState>((set) => ({
             }
         } catch (error: any) {
             set({ isLoading: false });
+        }
+    },
+
+    fetchReviewById: async (id: string) => {
+        set({ isLoading: true, error: null, currentReviewItem: null });
+        try {
+            const response = await fetchAdminReviewById(id);
+            if (response.success) {
+                set({ currentReviewItem: response.data || null, isLoading: false });
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
+        }
+    },
+
+    createReviewItem: async (data: CreateReviewData) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminReview(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Review created successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to create review');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    updateReviewItem: async (id: string, data: UpdateReviewData) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminReview(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Review updated successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to update review');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    deleteReviewItem: async (id: string) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminReview(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Review deleted successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to delete review');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
         }
     },
 

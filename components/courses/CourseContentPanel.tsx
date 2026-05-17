@@ -7,7 +7,7 @@ import {
     CheckCircle2, Users, MapPin, Clock3,
     BarChart2, TrendingUp, Zap, MessageSquare,
     BadgeCheck, Phone, Download,
-    Monitor, Layout, Target, ListChecks
+    Monitor, Layout, Target, ListChecks, Briefcase
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,19 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
+// ── Section Components ──────────────────────────────────────────────────────
+import OverviewSection from "./sections/OverviewSection";
+import SyllabusSection from "./sections/SyllabusSection";
+import ProjectsSection from "./sections/ProjectsSection";
+import EnrollmentSection from "./sections/EnrollmentSection";
+import FaqSection from "./sections/FaqSection";
+import ReviewsSection from "./sections/ReviewsSection";
+import CertificationSection from "./sections/CertificationSection";
+import SkillsAndTools from "./sections/SkillsAndTools";
+import HiringSprints from "./sections/HiringSprints";
+import JobOutlook from "./sections/JobOutlook";
+import ObjectivesSection from "./sections/ObjectivesSection";
+
 interface Props {
     course: CourseDetail;
     sections: CourseSection[];
@@ -27,492 +40,22 @@ interface Props {
 
 const FIXED_NAV_ITEMS = [
     { id: "overview", label: "Course Overview", icon: Layout },
+   
     // { id: "objectives", label: "Course Objectives", icon: Target },
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
     { id: "projects", label: "Projects", icon: Layers },
     { id: "enrollment", label: "Enrollment Options", icon: Calendar },
     { id: "faqs", label: "FAQ's", icon: HelpCircle },
     { id: "reviews", label: "Reviews", icon: Star },
+     { id: "skills", label: "Skills & Tools", icon: ListChecks },
+    { id: "outlook", label: "Job Outlook", icon: TrendingUp },
+    { id: "hiring", label: "Hiring Sprints", icon: Briefcase },
     { id: "certification", label: "Certification", icon: Award },
 ];
 
-// Helper to parse JSON content safely
-function parseContent(contentStr: string) {
-    try {
-        return JSON.parse(contentStr);
-    } catch (e) {
-        return [];
-    }
-}
-
-/* ─────────────── Section: Overview ─────────────── */
-function OverviewSection({ course }: { course: CourseDetail }) {
-    const [isExpanded, setIsExpanded] = useState(false);
-
-    return (
-        <div className="space-y-5">
-            <div className="mb-2">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Course Overview</h2>
-            </div>
-            <div className="relative">
-                <div
-                    className={cn(
-                        "text-slate-600 leading-relaxed prose prose-slate max-w-none transition-all duration-500",
-                        !isExpanded && "line-clamp-6"
-                    )}
-                    dangerouslySetInnerHTML={{ __html: course.description }}
-                />
-                {!isExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
-                )}
-            </div>
-            <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-sky-500 font-bold text-sm hover:text-sky-600 transition-colors flex items-center gap-1 group"
-            >
-                {isExpanded ? "Read Less" : "Read More"}
-                <ChevronRight className={cn("w-4 h-4 transition-transform", isExpanded ? "rotate-90" : "")} />
-            </button>
-        </div>
-    );
-}
-
-/* ─────────────── Section: Objectives ─────────────── */
-function ObjectivesSection({ sections }: { sections: CourseSection[] }) {
-    const section = sections.find(s => s.title.toLowerCase().includes('objectives'));
-    const items = section ? parseContent(section.content) : [];
-
-    if (items.length === 0) return null;
-
-    return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-900 font-outfit">{section?.title || "Course Objectives"}</h2>
-            <Accordion type="single" collapsible className="space-y-3">
-                {items.map((item: any, i: number) => (
-                    <AccordionItem key={i} value={`obj-${i}`}
-                        className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
-                        <AccordionTrigger className="hover:no-underline py-4 text-left font-semibold text-slate-800">
-                            {item.itemTitle}
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-4 text-slate-600 leading-7">
-                            <div dangerouslySetInnerHTML={{ __html: item.itemDescription }} />
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </div>
-    );
-}
-
-/* ─────────────── Section: Syllabus (Dynamic from API) ─────────────── */
-function SyllabusSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
-    // Find the specific syllabus section from API
-    const syllabusApiSection = sections.find(s =>
-        s.view === 'title-rich-description' ||
-        s.title.toLowerCase().includes('syllabus')
-    );
-
-    const dynamicModules = syllabusApiSection ? parseContent(syllabusApiSection.content) : [];
-
-    // If no dynamic sections, use mock data
-    const displayModules = dynamicModules.length > 0 ? dynamicModules : [
-        { itemTitle: "Module 1: Fundamentals & Core Concepts", itemDescription: "<ul><li>Introduction & Environment Setup</li><li>Core Architecture & Patterns</li><li>Advanced Concepts Deep Dive</li></ul>" },
-        { itemTitle: "Module 2: Hands-On Implementation", itemDescription: "<ul><li>Real Project Setup</li><li>Building Key Features</li><li>Testing & Debugging</li></ul>" },
-    ];
-
-    return (
-        <div className="space-y-5">
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900 font-outfit">Course Syllabus</h2>
-                    <p className="text-sm text-slate-500 mt-1">
-                        {displayModules.length} modules · {course.duration || "40+ Hours"}
-                    </p>
-                </div>
-
-            </div>
-            <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3">
-                {displayModules.map((mod: any, i: number) => (
-                    <AccordionItem key={i} value={`item-${i}`}
-                        className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
-                        <AccordionTrigger className="hover:no-underline py-4 gap-3">
-                            <div className="flex items-center gap-3 text-left">
-                                <span className="h-7 w-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                    {String(i + 1).padStart(2, "0")}
-                                </span>
-                                <span className="font-semibold text-slate-800">{mod.itemTitle}</span>
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-4 pl-10">
-                            {(() => {
-                                // Extract list items from HTML string
-                                const lessons = mod.itemDescription?.match(/<li>(.*?)<\/li>/g)?.map((l: string) => l.replace(/<\/?li>/g, '')) || [];
-
-                                if (lessons.length > 0) {
-                                    return (
-                                        <ul className="space-y-3">
-                                            {lessons.map((lesson: string, idx: number) => (
-                                                <li key={idx} className="flex items-start gap-3 text-sm text-slate-600 group">
-                                                    <PlayCircle className="h-4 w-4 text-indigo-400 group-hover:text-indigo-600 transition-colors flex-shrink-0 mt-0.5" />
-                                                    <span dangerouslySetInnerHTML={{ __html: lesson }} />
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    );
-                                }
-
-                                // Fallback for non-list HTML
-                                return (
-                                    <div
-                                        className="prose prose-sm max-w-none text-slate-600"
-                                        dangerouslySetInnerHTML={{ __html: mod.itemDescription }}
-                                    />
-                                );
-                            })()}
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </div>
-    );
-}
-
-/* ─────────────── Section: Projects ─────────────── */
-function ProjectsSection({ course }: { course: CourseDetail }) {
-    const projects = [
-        { title: "Real-Time Data Pipeline", desc: "Build an end-to-end ETL pipeline processing live data streams and visualizing insights.", tags: ["Backend", "Cloud"], icon: BarChart2, bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100" },
-        { title: "E-Commerce Analytics Dashboard", desc: "Design and deploy a full-featured sales analytics dashboard with real-time KPI tracking.", tags: ["Frontend", "API"], icon: TrendingUp, bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-100" },
-        { title: "AI Recommendation Engine", desc: "Train and deploy a collaborative filtering ML model for personalised product recommendations.", tags: ["ML", "Python"], icon: Zap, bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100" },
-        { title: "Cloud-Native Microservices", desc: "Architect, containerise and deploy microservices on Kubernetes with automated CI/CD pipelines.", tags: ["DevOps", "Docker"], icon: Layers, bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100" },
-    ];
-
-    return (
-        <div className="space-y-5">
-            <div className="mb-2">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Industry-Grade Projects</h2>
-                <p className="text-sm text-slate-500 mt-1">Build {course.liveProjects || "4+"} real-world projects to power your portfolio</p>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-                {projects.map((p, i) => {
-                    const Icon = p.icon;
-                    return (
-                        <div key={i} className={`rounded-2xl border p-6 hover:shadow-lg transition-all group cursor-pointer ${p.border} bg-white`}>
-                            <div className={`h-11 w-11 rounded-xl flex items-center justify-center mb-4 ${p.bg} ${p.text} group-hover:scale-110 transition-transform`}>
-                                <Icon className="h-5 w-5" />
-                            </div>
-                            <h4 className="font-bold text-slate-900 mb-2">{p.title}</h4>
-                            <p className="text-sm text-slate-500 leading-6 mb-4">{p.desc}</p>
-                            <div className="flex gap-2 flex-wrap">
-                                {p.tags.map((t) => (
-                                    <span key={t} className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${p.bg} ${p.text} border ${p.border}`}>{t}</span>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
-
-/* ─────────────── Section: Enrollment & Batches (Merged) ─────────────── */
-function EnrollmentSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
-    const batchSection = sections.find(s => s.view === 'schedule-card-list' || s.title.toLowerCase().includes('batch'));
-    const dynamicBatches = batchSection ? parseContent(batchSection.content) : [];
-
-    const mockBatches = [
-        { date: "May 15, 2026", type: "Weekday", time: "7:00 AM – 9:00 AM IST", seats: 5, mode: "Online", status: "Filling Fast" },
-        { date: "May 22, 2026", type: "Weekend", time: "10:00 AM – 1:00 PM IST", seats: 12, mode: "Hybrid", status: "Open" },
-    ];
-
-    const displayBatches = dynamicBatches.length > 0 ? dynamicBatches : mockBatches;
-    const price = Number(course.price).toLocaleString("en-IN");
-    const originalPrice = Number(course.livePrice).toLocaleString("en-IN");
-
-    return (
-        <div className="space-y-10">
-            {/* 1. Individual Training & Cohorts */}
-            <div>
-                <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-slate-900 font-outfit">Individual Training</h2>
-                    <p className="text-sm text-slate-500 mt-1">Join a live cohort and learn with experts</p>
-                </div>
-                
-                <div className="grid lg:grid-cols-2 gap-8">
-                    {/* Left Card: Cohort Schedules */}
-                    <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-100/50 transition-colors" />
-                        
-                        <div className="relative z-10 space-y-6">
-                            <div className="flex items-center gap-2">
-                                <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                    <Calendar className="h-5 w-5" />
-                                </div>
-                                <h3 className="font-bold text-slate-900 text-lg">Next Cohorts</h3>
-                            </div>
-                            
-                            <div className="space-y-4">
-                                {displayBatches.slice(0, 2).map((b: any, i: number) => (
-                                    <div key={i} className="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-300 hover:bg-white hover:shadow-md transition-all duration-300">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">COHORT 0{i + 1}</span>
-                                                <span className="text-lg font-extrabold text-slate-900">{b.date || "Date TBA"}</span>
-                                            </div>
-                                            <span className="px-3 py-1 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-                                                {b.status || "Open"}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-sm text-slate-600">
-                                            <Clock3 className="h-4 w-4 text-indigo-400" />
-                                            <span className="font-semibold">{b.time || "Timings TBA"}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="pt-4 border-t border-slate-100 mt-2">
-                                <Button variant="outline" className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-600 hover:text-white font-bold py-5 rounded-xl transition-all active:scale-95">
-                                    Select Schedule & Enroll
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Card: Pricing & Enrollment */}
-                    <div className="bg-gradient-to-br from-[#0f1f45] to-[#1a3270] rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-100/50 flex flex-col justify-center">
-                        <div className="absolute top-0 right-0 p-8 opacity-10">
-                            <Zap className="h-32 w-32 rotate-12" />
-                        </div>
-                        
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-6">
-                                <span className="px-3 py-1 bg-indigo-500/30 border border-indigo-400/30 rounded-full text-[10px] font-bold uppercase tracking-widest text-indigo-200">
-                                    Best Value
-                                </span>
-                            </div>
-                            
-                            <h3 className="text-2xl font-bold mb-4 font-outfit">Complete Live Program</h3>
-                            <p className="text-indigo-200/80 text-sm mb-8 leading-relaxed max-w-xs">
-                                Full access to live training, real-world projects, and lifetime support.
-                            </p>
-                            
-                            <div className="flex items-baseline gap-3 mb-8">
-                                <span className="text-4xl font-black font-outfit text-white">₹{price}</span>
-                                <span className="text-xl text-indigo-300/40 line-through font-medium">₹{originalPrice}</span>
-                            </div>
-                            
-                            <Button className="w-full bg-white hover:bg-indigo-50 text-indigo-950 font-black text-base py-7 rounded-2xl shadow-xl transition-all active:scale-95 uppercase tracking-wider">
-                                ENROLL NOW
-                            </Button>
-                            
-                            <div className="mt-6 flex items-center justify-center gap-4 text-[10px] font-bold text-indigo-300/60 uppercase tracking-widest">
-                                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Live Training</span>
-                                <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-emerald-400" /> Certifications</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* 2. Corporate Training */}
-            <div className="bg-slate-900 rounded-3xl p-10 text-white relative overflow-hidden border border-white/10">
-                <div className="absolute top-0 right-0 p-10 opacity-10">
-                    <Users className="h-40 w-40" />
-                </div>
-                <div className="relative z-10 grid md:grid-cols-2 gap-10 items-center">
-                    <div>
-                        <h2 className="text-3xl font-bold font-outfit mb-4">Corporate Training</h2>
-                        <p className="text-slate-400 text-lg mb-6 leading-relaxed">
-                            Upskill your team with customized training programs tailored to your company's specific needs and goals.
-                        </p>
-                        <ul className="space-y-4 mb-8">
-                            {["Customized Curriculum", "Flexible Scheduling", "Group Discounts", "Post-Training Support"].map((f, i) => (
-                                <li key={i} className="flex items-center gap-3 text-slate-300 font-medium">
-                                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                                    {f}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className="flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl p-8 border border-white/10">
-                        <MessageSquare className="h-12 w-12 text-indigo-400 mb-4" />
-                        <h4 className="text-xl font-bold mb-2">Need a custom plan?</h4>
-                        <p className="text-slate-400 text-sm text-center mb-8">Our learning experts will help you design the perfect training roadmap for your organization.</p>
-                        <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-6 rounded-xl">
-                            Request a Quote
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-/* ─────────────── Section: FAQs ─────────────── */
-function FaqSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
-    const faqSection = sections.find(s => s.title.toLowerCase().includes('faq'));
-    const dynamicFaqs = faqSection ? parseContent(faqSection.content) : [];
-
-    const faqs = dynamicFaqs.length > 0 ? dynamicFaqs.map((f: any) => ({ q: f.itemTitle, a: f.itemDescription })) : [
-        { q: "Who is this course for?", a: "Anyone looking to start or advance their career. We go from complete basics to advanced real-world applications." },
-        { q: "Do you offer placement assistance?", a: "Yes — 100% placement support including resume building, mock interviews, and direct recruiter referrals." },
-        { q: "How long is the course access?", a: "You get lifetime access to all videos, resources, and future updates — even after course completion." },
-        { q: "Is there a money-back guarantee?", a: "Absolutely. We offer a 14-day, no-questions-asked refund if you're not satisfied." },
-    ];
-
-    return (
-        <div>
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Frequently Asked Questions</h2>
-                <p className="text-sm text-slate-500 mt-1">Quick answers to common questions</p>
-            </div>
-            <Accordion type="single" collapsible className="space-y-3">
-                {faqs.map((faq: any, i: number) => (
-                    <AccordionItem key={i} value={`faq-${i}`}
-                        className="border border-slate-200 rounded-2xl px-5 bg-white shadow-sm hover:border-indigo-200 transition-colors overflow-hidden">
-                        <AccordionTrigger className="hover:no-underline py-4 text-left font-semibold text-slate-800 gap-3">
-                            <span className="flex items-center gap-2">
-                                <HelpCircle className="h-4 w-4 text-indigo-400 flex-shrink-0" />
-                                {faq.q}
-                            </span>
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-4 pl-9 text-slate-600 leading-7">
-                            <div dangerouslySetInnerHTML={{ __html: faq.a }} />
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </div>
-    );
-}
-
-/* ─────────────── Section: Reviews ─────────────── */
-function ReviewsSection({ course }: { course: CourseDetail }) {
-    const reviews = course.reviews && course.reviews.length > 0 ? course.reviews : [
-        { user_name: "Priya Menon", role: "Software Engineer", created_at: "2026-02-10", rating: 5, review: "Top-notch course! Responsive mentors, practical projects. Got placed in 3 weeks after completion." },
-        { user_name: "Arjun Reddy", role: "Data Analyst", created_at: "2026-01-15", rating: 5, review: "Curriculum is perfectly up-to-date. Live sessions were engaging and doubt resolution is lightning fast." },
-    ];
-
-    const GRAD = ["from-indigo-500 to-violet-600", "from-pink-500 to-rose-600", "from-amber-500 to-orange-600", "from-teal-500 to-emerald-600"];
-
-    return (
-        <div>
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Student Reviews</h2>
-                {/* Rating summary */}
-                <div className="flex items-center gap-6 mt-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                    <div className="text-center flex-shrink-0">
-                        <p className="text-5xl font-extrabold text-slate-900">{course.rating}</p>
-                        <div className="flex text-yellow-400 mt-1 justify-center">
-                            {[...Array(5)].map((_, i) => <Star key={i} className={`h-4 w-4 ${i < Math.floor(course.rating) ? "fill-current" : "fill-current opacity-25"}`} />)}
-                        </div>
-                        <p className="text-xs text-slate-400 mt-1">Course Rating</p>
-                    </div>
-                    <div className="flex-1 space-y-1.5">
-                        {[5, 4, 3, 2, 1].map((star) => {
-                            const pct = star === 5 ? 72 : star === 4 ? 20 : star === 3 ? 5 : star === 2 ? 2 : 1;
-                            return (
-                                <div key={star} className="flex items-center gap-2 text-xs text-slate-500">
-                                    <span className="w-3 text-right">{star}</span>
-                                    <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                                    <div className="flex-1 bg-slate-100 rounded-full h-2">
-                                        <div className="bg-yellow-400 h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                    </div>
-                                    <span className="w-6">{pct}%</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-            <div className="space-y-4">
-                {reviews.map((r, i) => (
-                    <div key={i} className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 transition-colors">
-                        <div className="flex items-start justify-between mb-3 gap-3">
-                            <div className="flex items-center gap-3">
-                                <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${GRAD[i % GRAD.length]} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
-                                    {r.user_name?.charAt(0) || "U"}
-                                </div>
-                                <div>
-                                    <p className="font-bold text-slate-900 text-sm">{r.user_name || "Anonymous"}</p>
-                                    <p className="text-xs text-slate-500">{r.role || "Verified Student"}</p>
-                                </div>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                                <div className="flex text-yellow-400 justify-end">
-                                    {[...Array(r.rating || 5)].map((_, j) => <Star key={j} className="h-3.5 w-3.5 fill-current" />)}
-                                </div>
-                                <p className="text-xs text-slate-400 mt-0.5">{r.created_at ? new Date(r.created_at).toLocaleDateString() : "Recently"}</p>
-                            </div>
-                        </div>
-                        <p className="text-sm text-slate-600 leading-6 flex items-start gap-2">
-                            <MessageSquare className="h-4 w-4 text-indigo-300 flex-shrink-0 mt-0.5" />
-                            {r.review}
-                        </p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-/* ─────────────── Section: Certification ─────────────── */
-function CertificationSection({ course }: { course: CourseDetail }) {
-    const highlights = [
-        "Globally recognised & industry-validated",
-        "Digital certificate with unique verification ID",
-        "Share directly to LinkedIn with one click",
-        "Recognised by 500+ hiring partners",
-        "Lifetime validity — never expires",
-    ];
-
-    return (
-        <div>
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 font-outfit">Course Certification</h2>
-                <p className="text-sm text-slate-500 mt-1">Earn a credential that gets you noticed</p>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-6">
-                {/* Mockup */}
-                <div className="relative rounded-2xl overflow-hidden border-2 border-dashed border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-violet-50 aspect-[4/3] flex flex-col items-center justify-center p-8 shadow-inner">
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-transparent to-transparent opacity-60" />
-                    <Award className="h-16 w-16 text-indigo-500 mb-4 drop-shadow-lg z-10" />
-                    <div className="text-center z-10">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Certificate of Completion</p>
-                        <p className="text-lg font-extrabold text-slate-800 font-outfit leading-tight">{course.title}</p>
-                        <div className="mt-3 h-px w-28 bg-indigo-300 mx-auto" />
-                        <p className="text-xs text-slate-500 mt-2">Issued by <span className="font-bold text-indigo-600">OnlineITGuru</span></p>
-                        <div className="flex gap-1 mt-3 justify-center">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="h-3.5 w-3.5 text-yellow-400 fill-current" />)}
-                        </div>
-                    </div>
-                </div>
-                {/* Details */}
-                <div className="space-y-5">
-                    <ul className="space-y-3">
-                        {highlights.map((h, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm text-slate-700">
-                                <BadgeCheck className="h-5 w-5 text-indigo-500 flex-shrink-0 mt-0.5" />
-                                {h}
-                            </li>
-                        ))}
-                    </ul>
-                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                        <p className="text-sm font-bold text-amber-800">🏢 Recognised by 500+ Companies</p>
-                        <p className="text-xs text-amber-700 mt-1">TCS, Wipro, Infosys, Cognizant, Accenture & more.</p>
-                    </div>
-                    <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 py-5">
-                        <Award className="h-4 w-4" /> Get Certified — Enroll Now
-                    </Button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 /* ═══════════════════════════════════════════════
    MAIN PANEL — scroll-spy + smooth scroll
+   Refactored to use individual section components
 ═══════════════════════════════════════════════ */
 export default function CourseContentPanel({ course, sections }: Props) {
     const [activeId, setActiveId] = useState("overview");
@@ -623,7 +166,10 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                 )}
                             >
                                 {id === "overview" && <OverviewSection course={course} />}
-                                {/* {id === "objectives" && <ObjectivesSection sections={sections} />} */}
+                                {id === "skills" && <SkillsAndTools />}
+                                {id === "outlook" && <JobOutlook />}
+                                {id === "hiring" && <HiringSprints course={course} />}
+                                {id === "objectives" && <ObjectivesSection sections={sections} />}
                                 {id === "syllabus" && <SyllabusSection course={course} sections={sections} />}
                                 {id === "projects" && <ProjectsSection course={course} />}
                                 {id === "enrollment" && <EnrollmentSection course={course} sections={sections} />}
