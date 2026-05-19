@@ -40,8 +40,7 @@ interface Props {
 
 const FIXED_NAV_ITEMS = [
     { id: "overview", label: "Course Overview", icon: Layout },
-   
-    // { id: "objectives", label: "Course Objectives", icon: Target },
+    { id: "objectives", label: "Course Objectives", icon: Target },
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
     { id: "projects", label: "Projects", icon: Layers },
     { id: "enrollment", label: "Enrollment Options", icon: Calendar },

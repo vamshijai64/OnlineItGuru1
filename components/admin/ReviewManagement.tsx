@@ -35,6 +35,7 @@ export default function ReviewManagement() {
     } = useAdminStore();
 
     const [viewState, setViewState] = useState<'list' | 'create' | 'edit'>('list');
+    const [isFormOpen, setIsFormOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -72,6 +73,7 @@ export default function ReviewManagement() {
             status: "approved"
         });
         setViewState('create');
+        setIsFormOpen(true);
     };
 
     const handleOpenEdit = (review: any) => {
@@ -85,11 +87,17 @@ export default function ReviewManagement() {
             status: review.status || "approved"
         });
         setViewState('edit');
+        setIsFormOpen(true);
     };
 
     const handleOpenDelete = (review: any) => {
         setSelectedReview(review);
         setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseForm = () => {
+        setIsFormOpen(false);
+        setViewState('list');
     };
 
     const handleCreate = async () => {
@@ -105,7 +113,7 @@ export default function ReviewManagement() {
         });
         setIsSaving(false);
         if (res.success) {
-            setViewState('list');
+            handleCloseForm();
             fetchReviews(1, 12);
         } else {
             alert(res.message);
@@ -126,7 +134,7 @@ export default function ReviewManagement() {
         });
         setIsSaving(false);
         if (res.success) {
-            setViewState('list');
+            handleCloseForm();
             fetchReviews(1, 12);
         } else {
             alert(res.message);
@@ -156,138 +164,7 @@ export default function ReviewManagement() {
         fetchReviews(reviewPagination?.page || 1, 12);
     };
 
-    if (viewState === 'create' || viewState === 'edit') {
-        return (
-            <div className="space-y-6 overflow-y-auto">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => setViewState('list')}>
-                        <ArrowLeft className="h-5 w-5 text-slate-600" />
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">
-                            {viewState === 'create' ? 'Add Student Review' : 'Edit Review'}
-                        </h1>
-                        <p className="text-slate-500">
-                            {viewState === 'create' ? 'Manually insert feedback from a student.' : 'Modify rating, written feedback, or status.'}
-                        </p>
-                    </div>
-                </div>
 
-                <Card className="border-none shadow-sm w-full">
-                    <CardContent className="p-8 space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {/* Course Selection */}
-                            <div className="grid gap-2 col-span-2">
-                                <Label className="font-semibold text-slate-700">Course</Label>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button 
-                                            variant="outline" 
-                                            className="w-full h-11 justify-between font-normal text-left px-3 border-input bg-background hover:bg-slate-50"
-                                        >
-                                            <span className="truncate">
-                                                {formData.courseId 
-                                                    ? (adminCourses.find((c: any) => c.id === formData.courseId)?.title || selectedReview?.courseTitle || `Selected ID: ${formData.courseId}`)
-                                                    : "-- Select a Course --"}
-                                            </span>
-                                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-60 overflow-y-auto">
-                                        {adminCourses.map((c: any) => (
-                                            <DropdownMenuItem 
-                                                key={c.id} 
-                                                onClick={() => setFormData({ ...formData, courseId: c.id })}
-                                                className="cursor-pointer py-2"
-                                            >
-                                                <span className="truncate">{c.title} {c.slug ? `(${c.slug})` : ''}</span>
-                                            </DropdownMenuItem>
-                                        ))}
-                                        {formData.courseId && !adminCourses?.some((c: any) => c.id === formData.courseId) && (
-                                            <DropdownMenuItem 
-                                                onClick={() => {}}
-                                                className="cursor-pointer py-2 font-bold text-indigo-600"
-                                            >
-                                                <span className="truncate">
-                                                    {selectedReview?.courseTitle || selectedReview?.courseSlug || `Selected Course ID: ${formData.courseId}`}
-                                                </span>
-                                            </DropdownMenuItem>
-                                        )}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-
-                            {/* Student / Reviewer Username */}
-                            <div className="grid gap-2 col-span-2 md:col-span-1">
-                                <Label htmlFor="userName" className="font-semibold text-slate-700">Student Username / Name</Label>
-                                <Input 
-                                    id="userName" 
-                                    className="h-11" 
-                                    value={formData.userName} 
-                                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })} 
-                                    placeholder="e.g. Rahul" 
-                                />
-                            </div>
-
-                            {/* Rating */}
-                            <div className="grid gap-2 col-span-2 md:col-span-1 w-full">
-                                <Label className="font-semibold text-slate-700">Rating Stars</Label>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button 
-                                            variant="outline" 
-                                            className="w-full h-11 justify-between font-normal text-left px-3 border-input bg-background hover:bg-slate-50"
-                                        >
-                                            <span>
-                                                {"⭐".repeat(formData.rating || 5)} ({(formData.rating || 5)} {(formData.rating || 5) === 1 ? "Star" : "Stars"})
-                                            </span>
-                                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
-                                        {[5, 4, 3, 2, 1].map((stars) => (
-                                            <DropdownMenuItem 
-                                                key={stars} 
-                                                onClick={() => setFormData({ ...formData, rating: stars })}
-                                                className="cursor-pointer py-2"
-                                            >
-                                                {"⭐".repeat(stars)} ({stars} {stars === 1 ? "Star" : "Stars"})
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-
-                            {/* Review Content */}
-                            <div className="grid gap-2 col-span-2">
-                                <Label htmlFor="review" className="font-semibold text-slate-700">Review Message</Label>
-                                <Textarea 
-                                    id="review" 
-                                    className="min-h-[120px] p-4 bg-slate-50 leading-relaxed text-sm" 
-                                    value={formData.review} 
-                                    onChange={(e) => setFormData({ ...formData, review: e.target.value })} 
-                                    placeholder="Write review commentary here..." 
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
-                            <Button variant="outline" size="lg" onClick={() => setViewState('list')}>Cancel</Button>
-                            <Button 
-                                size="lg" 
-                                onClick={viewState === 'create' ? handleCreate : handleEdit} 
-                                disabled={isSaving} 
-                                className="bg-indigo-600 hover:bg-indigo-700 min-w-[140px]"
-                            >
-                                {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                {viewState === 'create' ? 'Save Review' : 'Update Review'}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-8">
@@ -421,6 +298,130 @@ export default function ReviewManagement() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Create/Edit Modal Dialog */}
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if(!open) handleCloseForm(); }}>
+                <DialogContent className="!max-w-none w-3/4 h-[92vh] max-h-[92vh] overflow-hidden flex flex-col rounded-2xl">
+                    <DialogHeader className="flex-shrink-0">
+                        <DialogTitle className="text-xl font-bold text-slate-900">
+                            {viewState === 'create' ? 'Add Student Review' : 'Edit Review'}
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-500 text-xs">
+                            {viewState === 'create' ? 'Manually insert feedback from a student.' : 'Modify rating, written feedback, or status.'}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-auto py-4 space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Course Selection */}
+                            <div className="grid gap-2 col-span-2">
+                                <Label className="font-semibold text-slate-700">Course</Label>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full h-11 justify-between font-normal text-left px-3 border-input bg-background hover:bg-slate-50"
+                                        >
+                                            <span className="truncate">
+                                                {formData.courseId 
+                                                    ? (adminCourses.find((c: any) => c.id === formData.courseId)?.title || selectedReview?.courseTitle || `Selected ID: ${formData.courseId}`)
+                                                    : "-- Select a Course --"}
+                                            </span>
+                                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-60 overflow-y-auto">
+                                        {adminCourses.map((c: any) => (
+                                            <DropdownMenuItem 
+                                                key={c.id} 
+                                                onClick={() => setFormData({ ...formData, courseId: c.id })}
+                                                className="cursor-pointer py-2"
+                                            >
+                                                <span className="truncate">{c.title} {c.slug ? `(${c.slug})` : ''}</span>
+                                            </DropdownMenuItem>
+                                        ))}
+                                        {formData.courseId && !adminCourses?.some((c: any) => c.id === formData.courseId) && (
+                                            <DropdownMenuItem 
+                                                onClick={() => {}}
+                                                className="cursor-pointer py-2 font-bold text-indigo-600"
+                                            >
+                                                <span className="truncate">
+                                                    {selectedReview?.courseTitle || selectedReview?.courseSlug || `Selected Course ID: ${formData.courseId}`}
+                                                </span>
+                                            </DropdownMenuItem>
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+
+                            {/* Student / Reviewer Username */}
+                            <div className="grid gap-2 col-span-2 md:col-span-1">
+                                <Label htmlFor="userName" className="font-semibold text-slate-700">Student Username / Name</Label>
+                                <Input 
+                                    id="userName" 
+                                    className="h-11" 
+                                    value={formData.userName} 
+                                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })} 
+                                    placeholder="e.g. Rahul" 
+                                />
+                            </div>
+
+                            {/* Rating */}
+                            <div className="grid gap-2 col-span-2 md:col-span-1 w-full">
+                                <Label className="font-semibold text-slate-700">Rating Stars</Label>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full h-11 justify-between font-normal text-left px-3 border-input bg-background hover:bg-slate-50"
+                                        >
+                                            <span>
+                                                {"⭐".repeat(formData.rating || 5)} ({(formData.rating || 5)} {(formData.rating || 5) === 1 ? "Star" : "Stars"})
+                                            </span>
+                                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]">
+                                        {[5, 4, 3, 2, 1].map((stars) => (
+                                            <DropdownMenuItem 
+                                                key={stars} 
+                                                onClick={() => setFormData({ ...formData, rating: stars })}
+                                                className="cursor-pointer py-2"
+                                            >
+                                                {"⭐".repeat(stars)} ({stars} {stars === 1 ? "Star" : "Stars"})
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+
+                            {/* Review Content */}
+                            <div className="grid gap-2 col-span-2">
+                                <Label htmlFor="review" className="font-semibold text-slate-700">Review Message</Label>
+                                <Textarea 
+                                    id="review" 
+                                    className="min-h-[120px] p-4 bg-slate-50 leading-relaxed text-sm" 
+                                    value={formData.review} 
+                                    onChange={(e) => setFormData({ ...formData, review: e.target.value })} 
+                                    placeholder="Write review commentary here..." 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-shrink-0 pt-4 border-t border-slate-100 flex justify-end gap-3">
+                        <Button variant="outline" onClick={handleCloseForm}>Cancel</Button>
+                        <Button 
+                            onClick={viewState === 'create' ? handleCreate : handleEdit} 
+                            disabled={isSaving} 
+                            className="bg-indigo-600 hover:bg-indigo-700 min-w-[140px]"
+                        >
+                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                            {viewState === 'create' ? 'Save Review' : 'Update Review'}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                 <DialogContent>

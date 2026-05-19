@@ -41,7 +41,7 @@ const iconMap: Record<string, React.ElementType> = {
 export default function CoursesSlugPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  
+
   const fetchCategories = useHomeStore((s) => s.fetchCategories);
   const categories = useHomeStore((s) => s.categories);
   const loadingCategories = useHomeStore((s) => s.loading.categories);
@@ -255,7 +255,7 @@ function CourseDetailView({ slug }: { slug: string }) {
 
   useEffect(() => {
     // Only fetch sections if they don't belong to the current course or are empty
-    if (course?.id && (sections.length === 0 || sections[0].courseId !== course.id)) {
+    if (course?.id && (sections.length === 0 || (sections[0].courseId || (sections[0] as any).course_id) !== course.id)) {
       fetchCourseSections(course.id);
     }
     // Only depend on course?.id to trigger the fetch

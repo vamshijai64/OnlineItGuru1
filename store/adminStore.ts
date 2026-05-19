@@ -1,12 +1,16 @@
 import { create } from 'zustand';
 import { 
-    createCourse, CreateCourseData, fetchAdminCategories, fetchAdminCourses, 
+    createCourse, CreateCourseData, CourseRequestData, AdminCourse, fetchAdminCourseById, 
+    updateAdminCourse, deleteAdminCourse, fetchAdminCategories, fetchAdminCourses, 
     fetchAdminInterviewQuestions, fetchAdminOffers, fetchAdminReviews, 
     fetchAdminCoursesByCategory, fetchAdminCourseSections, updateSectionPositions,
     fetchAdminContentList, fetchAdminContentById, createAdminContent, 
     updateAdminContent, deleteAdminContent, CreateContentData, UpdateContentData, ContentItem,
     fetchAdminUsersList, fetchAdminUserById, createAdminUser, updateAdminUser, deleteAdminUser, CreateUserData, UpdateUserData, UserItem,
-    fetchAdminReviewById, createAdminReview, updateAdminReview, deleteAdminReview, CreateReviewData, UpdateReviewData, ReviewItem
+    fetchAdminReviewById, createAdminReview, updateAdminReview, deleteAdminReview, CreateReviewData, UpdateReviewData, ReviewItem,
+    CourseTemplateItem, fetchAdminCourseTemplates, fetchAdminCourseTemplateById, updateAdminCourseTemplate,
+    SectionItem, CreateSectionData, fetchAdminSections, fetchAdminSectionById, createAdminSection, updateAdminSection, deleteAdminSection,
+    createAdminCourseSection, updateAdminCourseSection, deleteAdminCourseSection
 } from '@/lib/admin-api';
 import axios from 'axios';
 
@@ -57,10 +61,23 @@ interface AdminState {
         total: number;
         totalPages: number;
     } | null;
+
+    adminCourseTemplates: CourseTemplateItem[];
+
+    adminSections: SectionItem[];
+    sectionsPagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    } | null;
     
-    createCourse: (data: CreateCourseData) => Promise<{ success: boolean; message?: string }>;
+    createCourse: (data: CourseRequestData) => Promise<{ success: boolean; message?: string }>;
     fetchCategories: () => Promise<void>;
-    fetchAllCourses: (page?: number) => Promise<void>;
+    fetchAllCourses: (page?: number, limit?: number, search?: string, category?: string) => Promise<void>;
+    fetchCourseById: (id: string) => Promise<AdminCourse | null>;
+    updateCourse: (id: string, data: CourseRequestData) => Promise<{ success: boolean; message?: string }>;
+    deleteCourse: (id: string) => Promise<{ success: boolean; message?: string }>;
     fetchOffers: () => Promise<void>;
     fetchInterviewQuestions: (page?: number) => Promise<void>;
     fetchReviews: (page?: number, limit?: number, search?: string) => Promise<void>;
@@ -71,6 +88,9 @@ interface AdminState {
     fetchCoursesByCategory: (categorySlug: string, page?: number) => Promise<void>;
     fetchCourseSections: (courseId: string) => Promise<void>;
     updateCourseSectionPositions: (courseId: string, positions: {id: string, position: number}[]) => Promise<boolean>;
+    createCourseSectionItem: (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => Promise<{ success: boolean; message?: string }>;
+    updateCourseSectionItem: (id: string, data: { title?: string; view?: string; content?: string; position?: number }) => Promise<{ success: boolean; message?: string }>;
+    deleteCourseSectionItem: (id: string) => Promise<{ success: boolean; message?: string }>;
     
     fetchContentList: (type: string, page?: number, limit?: number, search?: string) => Promise<void>;
     fetchContentById: (type: string, id: string) => Promise<void>;
@@ -82,6 +102,16 @@ interface AdminState {
     createUserItem: (data: CreateUserData) => Promise<{ success: boolean; message?: string }>;
     updateUserItem: (id: string, data: UpdateUserData) => Promise<{ success: boolean; message?: string }>;
     deleteUserItem: (id: string) => Promise<{ success: boolean; message?: string }>;
+
+    fetchCourseTemplates: () => Promise<void>;
+    fetchCourseTemplateById: (id: string) => Promise<CourseTemplateItem | null>;
+    updateCourseTemplate: (id: string, data: any) => Promise<{ success: boolean; message?: string }>;
+
+    fetchSections: (page?: number, limit?: number, search?: string) => Promise<void>;
+    fetchSectionById: (id: string) => Promise<SectionItem | null>;
+    createSectionItem: (data: CreateSectionData) => Promise<{ success: boolean; message?: string }>;
+    updateSectionItem: (id: string, data: Partial<CreateSectionData>) => Promise<{ success: boolean; message?: string }>;
+    deleteSectionItem: (id: string) => Promise<{ success: boolean; message?: string }>;
     
     clearMessages: () => void;
 }
@@ -106,8 +136,11 @@ export const useAdminStore = create<AdminState>((set) => ({
     currentReviewItem: null,
     adminUsers: [],
     usersPagination: null,
+    adminCourseTemplates: [],
+    adminSections: [],
+    sectionsPagination: null,
 
-    createCourse: async (data: CreateCourseData) => {
+    createCourse: async (data: CourseRequestData) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {
             const response = await createCourse(data);
@@ -140,39 +173,115 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    fetchAllCourses: async () => {
+    fetchAllCourses: async (page?: number, limit?: number, search?: string, category?: string) => {
         set({ isLoading: true, error: null });
         try {
-            // First fetch page 1 with standard safe limit 50
-            const response = await fetchAdminCourses(1, 50);
-            if (response.success) {
-                let allItems = response.data?.items || [];
-                const pagination = response.data?.pagination || null;
-                
-                // If there are more pages, fetch them concurrently to ensure the dropdown list is complete
-                if (pagination && pagination.totalPages > 1) {
-                    const promises = [];
-                    for (let p = 2; p <= pagination.totalPages; p++) {
-                        promises.push(fetchAdminCourses(p, 50));
-                    }
-                    const results = await Promise.all(promises);
-                    results.forEach(res => {
-                        if (res.success && res.data?.items) {
-                            allItems = [...allItems, ...res.data.items];
-                        }
+            if (page !== undefined) {
+                const response = await fetchAdminCourses(page, limit || 10, search, category);
+                if (response.success) {
+                    set({ 
+                        adminCourses: response.data?.items || response.data?.courses || [], 
+                        coursePagination: response.data?.pagination || null,
+                        isLoading: false 
                     });
+                } else {
+                    set({ isLoading: false });
                 }
-                    
-                set({ 
-                    adminCourses: allItems, 
-                    coursePagination: pagination,
-                    isLoading: false 
-                });
             } else {
-                set({ isLoading: false });
+                // Fetch page 1 with larger limit to get all for dropdowns
+                const response = await fetchAdminCourses(1, 100, search, category);
+                if (response.success) {
+                    let allItems = response.data?.items || response.data?.courses || [];
+                    const pagination = response.data?.pagination || null;
+                    
+                    if (pagination && pagination.totalPages > 1) {
+                        const promises = [];
+                        for (let p = 2; p <= pagination.totalPages; p++) {
+                            promises.push(fetchAdminCourses(p, 100, search, category));
+                        }
+                        const results = await Promise.all(promises);
+                        results.forEach(res => {
+                            if (res.success) {
+                                const items = res.data?.items || res.data?.courses || [];
+                                allItems = [...allItems, ...items];
+                            }
+                        });
+                    }
+                    
+                    set({ 
+                        adminCourses: allItems, 
+                        coursePagination: pagination,
+                        isLoading: false 
+                    });
+                } else {
+                    set({ isLoading: false });
+                }
             }
         } catch (error: any) {
             set({ isLoading: false });
+        }
+    },
+
+    fetchCourseById: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminCourseById(id);
+            if (response.success && response.data) {
+                set({ isLoading: false });
+                return response.data;
+            }
+            throw new Error(response.message || 'Failed to fetch course');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return null;
+        }
+    },
+
+    updateCourse: async (id: string, data: CourseRequestData) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminCourse(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course updated successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to update course');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    deleteCourse: async (id: string) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminCourse(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course deleted successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to delete course');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
         }
     },
 
@@ -543,6 +652,239 @@ export const useAdminStore = create<AdminState>((set) => ({
                 return { success: true, message: response.message };
             }
             throw new Error(response.message || 'Failed to delete user');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    fetchCourseTemplates: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminCourseTemplates();
+            if (response.success) {
+                set({ adminCourseTemplates: response.data || [], isLoading: false });
+            } else {
+                set({ isLoading: false });
+            }
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+        }
+    },
+
+    fetchCourseTemplateById: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminCourseTemplateById(id);
+            if (response.success && response.data) {
+                set({ isLoading: false });
+                return response.data;
+            }
+            throw new Error(response.message || 'Failed to fetch course template');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return null;
+        }
+    },
+
+    updateCourseTemplate: async (id: string, data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminCourseTemplate(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course template updated successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to update course template');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    fetchSections: async (page = 1, limit = 10, search?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSections(page, limit, search);
+            if (response.success) {
+                set({ 
+                    adminSections: response.data?.items || response.data?.sections || (Array.isArray(response.data) ? response.data : []), 
+                    sectionsPagination: response.data?.pagination || null, 
+                    isLoading: false 
+                });
+            } else {
+                set({ isLoading: false });
+            }
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+        }
+    },
+
+    fetchSectionById: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSectionById(id);
+            if (response.success && response.data) {
+                set({ isLoading: false });
+                return response.data;
+            }
+            throw new Error(response.message || 'Failed to fetch section');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return null;
+        }
+    },
+
+    createSectionItem: async (data: CreateSectionData) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminSection(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Section created successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to create section');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    updateSectionItem: async (id: string, data: Partial<CreateSectionData>) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminSection(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Section updated successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to update section');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    deleteSectionItem: async (id: string) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminSection(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Section deleted successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to delete section');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    createCourseSectionItem: async (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminCourseSection(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course section created successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to create course section');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    updateCourseSectionItem: async (id: string, data: { title?: string; view?: string; content?: string; position?: number }) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminCourseSection(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course section updated successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to update course section');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    deleteCourseSectionItem: async (id: string) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminCourseSection(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course section deleted successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to delete course section');
         } catch (error: any) {
             let message = 'An unexpected error occurred';
             if (axios.isAxiosError(error) && error.response) {

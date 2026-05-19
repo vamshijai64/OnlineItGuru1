@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, BookOpen, BarChart3, Bell, Settings } from "lucide-react";
+import { Users, BookOpen, BarChart3, Bell, Settings, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,31 +12,88 @@ import {
     TableHeader, 
     TableRow 
 } from "@/components/ui/table";
+import { useAdminStore } from "@/store/adminStore";
+import { useEffect } from "react";
 
 interface DashboardOverviewProps {
     userName: string;
 }
 
 export default function DashboardOverview({ userName }: DashboardOverviewProps) {
+    const { 
+        adminUsers, 
+        usersPagination, 
+        fetchUsersList, 
+        adminCourses, 
+        coursePagination, 
+        fetchAllCourses, 
+        adminReviews, 
+        reviewPagination, 
+        fetchReviews,
+        adminCategories,
+        fetchCategories,
+        isLoading
+    } = useAdminStore();
+
+    useEffect(() => {
+        fetchUsersList(1, 10);
+        fetchAllCourses(1, 10);
+        fetchReviews(1, 10);
+        fetchCategories();
+    }, [fetchUsersList, fetchAllCourses, fetchReviews, fetchCategories]);
+
     const stats = [
-        { title: "Total Users", value: "1,284", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-        { title: "Active Courses", value: "42", icon: BookOpen, color: "text-indigo-600", bg: "bg-indigo-50" },
-        { title: "Revenue", value: "$12,450", icon: BarChart3, color: "text-emerald-600", bg: "bg-emerald-50" },
-        { title: "Pending Reviews", value: "12", icon: Bell, color: "text-amber-600", bg: "bg-amber-50" },
+        { 
+            title: "Total Users", 
+            value: usersPagination?.total !== undefined ? String(usersPagination.total) : String(adminUsers.length), 
+            icon: Users, 
+            color: "text-blue-600", 
+            bg: "bg-blue-50" 
+        },
+        { 
+            title: "Active Courses", 
+            value: coursePagination?.total !== undefined ? String(coursePagination.total) : String(adminCourses.length), 
+            icon: BookOpen, 
+            color: "text-indigo-600", 
+            bg: "bg-indigo-50" 
+        },
+        { 
+            title: "Categories", 
+            value: String(adminCategories.length), 
+            icon: BarChart3, 
+            color: "text-emerald-600", 
+            bg: "bg-emerald-50" 
+        },
+        { 
+            title: "Total Reviews", 
+            value: reviewPagination?.total !== undefined ? String(reviewPagination.total) : String(adminReviews.length), 
+            icon: Bell, 
+            color: "text-amber-600", 
+            bg: "bg-amber-50" 
+        },
     ];
 
-    const recentActivity = [
-        { id: 1, user: "John Doe", action: "Purchased Next.js Mastery", time: "2 hours ago", status: "Completed" },
-        { id: 2, user: "Sarah Smith", action: "Started React Basics", time: "4 hours ago", status: "In Progress" },
-        { id: 3, user: "Mike Johnson", action: "Left a review", time: "5 hours ago", status: "Pending" },
-        { id: 4, user: "Emily Brown", action: "Joined platform", time: "1 day ago", status: "New" },
-    ];
+    const recentActivity = adminUsers.slice(0, 5).map((user) => ({
+        id: user.id,
+        user: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+        action: `Joined as ${user.role || (user.roles && user.roles.length > 0 ? user.roles[0] : 'user')}`,
+        time: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+        status: user.status === 'active' ? 'Active' : user.status === 'suspended' ? 'Suspended' : 'Inactive'
+    }));
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900">Welcome Back, {userName}</h1>
-                <p className="text-slate-500">Here's what's happening with your platform today.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">Welcome Back, {userName}</h1>
+                    <p className="text-slate-500">Here's what's happening with your platform today.</p>
+                </div>
+                {isLoading && (
+                    <div className="flex items-center gap-2 text-indigo-600 text-sm font-semibold bg-indigo-50 px-4 py-2 rounded-xl">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Refreshing stats...
+                    </div>
+                )}
             </div>
 
             {/* Stats Grid */}
@@ -67,10 +124,9 @@ export default function DashboardOverview({ userName }: DashboardOverviewProps) 
                 <Card className="lg:col-span-2 border-none shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                            <CardTitle>Recent Activity</CardTitle>
-                            <CardDescription>Latest transactions and user actions</CardDescription>
+                            <CardTitle>Recent Registered Users</CardTitle>
+                            <CardDescription>Latest registered accounts on the platform</CardDescription>
                         </div>
-                        <Button variant="outline" size="sm">View All</Button>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -78,7 +134,7 @@ export default function DashboardOverview({ userName }: DashboardOverviewProps) 
                                 <TableRow>
                                     <TableHead>User</TableHead>
                                     <TableHead>Action</TableHead>
-                                    <TableHead>Time</TableHead>
+                                    <TableHead>Date</TableHead>
                                     <TableHead className="text-right">Status</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -90,15 +146,21 @@ export default function DashboardOverview({ userName }: DashboardOverviewProps) 
                                         <TableCell className="text-slate-500">{activity.time}</TableCell>
                                         <TableCell className="text-right">
                                             <Badge variant={
-                                                activity.status === "Completed" ? "default" : 
-                                                activity.status === "Pending" ? "outline" : 
-                                                activity.status === "New" ? "secondary" : "outline"
+                                                activity.status === "Active" ? "default" : 
+                                                activity.status === "Suspended" ? "destructive" : "secondary"
                                             }>
                                                 {activity.status}
                                             </Badge>
                                         </TableCell>
                                     </TableRow>
                                 ))}
+                                {recentActivity.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                            No user activity found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>

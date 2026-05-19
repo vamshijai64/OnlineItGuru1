@@ -9,13 +9,21 @@ import {
 } from "@/components/ui/accordion";
 import { CourseDetail, CourseSection } from "@/store/homeStore";
 
-// Helper to parse JSON content safely
-function parseContent(contentStr: string) {
+// Helper to parse JSON content safely with global section fallback
+function parseSectionContent(sec: any) {
+    if (!sec) return [];
+    let content = [];
     try {
-        return JSON.parse(contentStr);
-    } catch (e) {
-        return [];
+        if (sec.content && sec.content.trim() !== "" && sec.content !== "[]") {
+            content = JSON.parse(sec.content);
+        }
+    } catch {}
+    if ((!Array.isArray(content) || content.length === 0) && sec.section?.content) {
+        try {
+            content = JSON.parse(sec.section.content);
+        } catch {}
     }
+    return Array.isArray(content) ? content : [];
 }
 
 export default function SyllabusSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
@@ -25,7 +33,14 @@ export default function SyllabusSection({ course, sections }: { course: CourseDe
         s.title.toLowerCase().includes('syllabus')
     );
 
-    const dynamicModules = syllabusApiSection ? parseContent(syllabusApiSection.content) : [];
+    const rawModules = parseSectionContent(syllabusApiSection);
+    // Filter out uninitialized or placeholder modules
+    const dynamicModules = rawModules.filter((mod: any) => {
+        if (!mod) return false;
+        const title = mod.itemTitle || mod.title;
+        const desc = mod.itemDescription || mod.description;
+        return (title && String(title).trim() !== "") || (desc && String(desc).trim() !== "");
+    });
 
     // If no dynamic sections, use mock data
     const displayModules = dynamicModules.length > 0 ? dynamicModules : [

@@ -16,7 +16,8 @@ import {
     HelpCircle,
     MessageSquare,
     FileText,
-    Layout
+    Layout,
+    Grid
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AuthForm from "@/components/auth/AuthForm";
@@ -35,6 +36,8 @@ import PostManagement from "@/components/admin/PostManagement";
 import TutorialManagement from "@/components/admin/TutorialManagement";
 import PageManagement from "@/components/admin/PageManagement";
 import UserManagement from "@/components/admin/UserManagement";
+import TemplateManagement from "@/components/admin/TemplateManagement";
+import SectionManagement from "@/components/admin/SectionManagement";
 
 export default function AdminDashboard() {
     const { user, logout } = useAuthStore();
@@ -43,11 +46,13 @@ export default function AdminDashboard() {
         adminCategories, fetchCategories, 
         adminOffers, fetchOffers,
         adminInterviewQuestions, fetchInterviewQuestions,
-        adminReviews, fetchReviews
+        adminReviews, fetchReviews,
+        adminCourseTemplates, fetchCourseTemplates,
+        adminSections, fetchSections
     } = useAdminStore();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users'>('overview');
-    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users'>('courses');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users' | 'course-templates' | 'sections'>('overview');
+    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users' | 'course-templates' | 'sections'>('courses');
     
     // State for drill-downs
     const [selectedCategory, setSelectedCategory] = useState<{slug: string, title: string} | null>(null);
@@ -74,7 +79,13 @@ export default function AdminDashboard() {
         if (activeTab === 'reviews' && adminReviews.length === 0) {
             fetchReviews();
         }
-    }, [activeTab, adminCourses.length, adminCategories.length, adminOffers.length, adminInterviewQuestions.length, adminReviews.length, fetchAllCourses, fetchCategories, fetchOffers, fetchInterviewQuestions, fetchReviews]);
+        if (activeTab === 'course-templates' && adminCourseTemplates.length === 0) {
+            fetchCourseTemplates();
+        }
+        if (activeTab === 'sections' && adminSections.length === 0) {
+            fetchSections();
+        }
+    }, [activeTab, adminCourses.length, adminCategories.length, adminOffers.length, adminInterviewQuestions.length, adminReviews.length, adminCourseTemplates.length, adminSections.length, fetchAllCourses, fetchCategories, fetchOffers, fetchInterviewQuestions, fetchReviews, fetchCourseTemplates, fetchSections]);
 
     const handleLogout = () => {
         logout();
@@ -116,6 +127,22 @@ export default function AdminDashboard() {
                     >
                         <BookOpen className="h-4 w-4" />
                         Courses
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => navigateToTab('course-templates')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'course-templates' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
+                        <Layout className="h-4 w-4" />
+                        Course Templates
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => navigateToTab('sections')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'sections' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
+                        <Grid className="h-4 w-4" />
+                        Section Definitions
                     </Button>
                     <Button 
                         variant="ghost" 
@@ -247,6 +274,8 @@ export default function AdminDashboard() {
                     {activeTab === 'tutorials' && <TutorialManagement />}
                     {activeTab === 'pages' && <PageManagement />}
                     {activeTab === 'users' && <UserManagement />}
+                    {activeTab === 'course-templates' && <TemplateManagement />}
+                    {activeTab === 'sections' && <SectionManagement />}
                     
                     {activeTab === 'category-courses' && selectedCategory && (
                         <CategoryCourses 

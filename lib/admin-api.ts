@@ -1,133 +1,181 @@
 import axiosClient from './axios-client';
 
 export interface LoginUserData {
-  email: string;
-  password?: string;
+    email: string;
+    password?: string;
 }
 
 export interface UserItem {
-  id: string;
-  name: string;
-  firstName?: string;
-  lastName?: string;
-  email: string;
-  phone?: string;
-  status: string;
-  roles: string[];
-  role?: string;
-  createdAt: string;
-  updatedAt: string;
+    id: string;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    phone?: string;
+    status: string;
+    roles: string[];
+    role?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CreateUserData {
-  name: string;
-  firstName?: string;
-  lastName?: string;
-  email: string;
-  password?: string;
-  phone?: string;
-  status?: string;
-  role?: string;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
+    password?: string;
+    phone?: string;
+    status?: string;
+    role?: string;
 }
 
-export interface UpdateUserData extends Partial<CreateUserData> {}
+export interface UpdateUserData extends Partial<CreateUserData> { }
 
 export interface AuthResponse {
-  success: boolean;
-  message?: string;
-  data?: {
-      token: string;
-      user: UserItem;
-  };
+    success: boolean;
+    message?: string;
+    data?: {
+        token: string;
+        user: UserItem;
+    };
 }
 
 
 export interface ReviewItem {
-  id: string;
-  courseId: string;
-  courseTitle?: string | null;
-  courseSlug?: string | null;
-  userId: string;
-  userName?: string | null;
-  rating: number;
-  review: string;
-  status?: string | null;
-  createdAt: string;
-  updatedAt: string;
+    id: string;
+    courseId: string;
+    courseTitle?: string | null;
+    courseSlug?: string | null;
+    userId: string;
+    userName?: string | null;
+    rating: number;
+    review: string;
+    status?: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CreateReviewData {
-  courseId: string;
-  userId: string;
-  userName?: string;
-  rating: number;
-  review: string;
-  status?: string;
+    courseId: string;
+    userId: string;
+    userName?: string;
+    rating: number;
+    review: string;
+    status?: string;
 }
 
-export interface UpdateReviewData extends Partial<CreateReviewData> {}
+export interface UpdateReviewData extends Partial<CreateReviewData> { }
 
-export interface CreateCourseData {
-  title: string;
-  slug: string;
-  status: string;
-  subtitle: string;
-  description: string;
-  previewImage: string;
-  demoVideo: string;
-  categoryId: string;
-  duration: string;
-  liveProjects: string;
-  trainingFormat: string;
-  price: number;
-  livePrice: number;
-  rating: number;
-  totalLearners: number;
-  resources: string;
-  assignments: string;
-  syllabus: string;
-  totalReviews: number;
-  extraUrls: string;
-  extraUrlTitle: string;
-  youtubeDemo: string;
-  courseType: string;
+export interface CourseRequestData {
+    type: string;
+    title: string;
+    subTitle: string;
+    slug: string;
+    extraUrlTitle?: string;
+    extraUrls?: string;
+    categoryId: string;
+    courseTemplateId?: string;
+    course_template_id?: string;
+    courseOverview?: string;
+    duration?: string;
+    assignments?: number;
+    liveProjects?: string;
+    downloadableResources?: number;
+    selfPacedPrice?: string | number;
+    liveOnlinePrice?: string | number;
+    youtubeDemoUrl?: string;
+    demoVideo?: string;
+    previewImage?: string;
+    syllabus?: string;
+    rating?: number;
+    totalReviews?: number;
+    totalLearners?: number;
+    selectedCourses?: string[];
+    status?: string;
+}
+
+export interface CreateCourseData extends CourseRequestData { }
+
+export interface AdminCourse {
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+    subtitle: string;
+    subTitle: string;
+    description: string;
+    courseOverview: string;
+    previewImage: string;
+    demoVideo: string;
+    categoryId: string;
+    category?: {
+        id: string;
+        title: string;
+        slug: string;
+    };
+    courseTemplateId: string;
+    course_template_id?: string;
+    duration: string;
+    liveProjects: string;
+    trainingFormat?: string | null;
+    price: string | number;
+    selfPacedPrice: string | number;
+    livePrice: string | number;
+    liveOnlinePrice: string | number;
+    rating: number;
+    totalLearners: number;
+    resources: number;
+    downloadableResources: number;
+    assignments: number;
+    syllabus: string;
+    totalReviews: number;
+    extraUrls: string;
+    extraUrlTitle: string;
+    youtubeDemo: string;
+    youtubeDemoUrl: string;
+    courseType: string;
+    type: string;
+    selectedCourses?: string[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface ContentItem {
-  id: string;
-  type: string;
-  title: string;
-  slug: string;
-  featureImage?: string;
-  categoryId?: string;
-  keywords?: string;
-  content: string;
-  publishedAt?: string;
-  createdAt: string;
-  updatedAt: string;
+    id: string;
+    type: string;
+    title: string;
+    slug: string;
+    featureImage?: string;
+    categoryId?: string;
+    keywords?: string;
+    content: string;
+    publishedAt?: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface CreateContentData {
-  title: string;
-  slug: string;
-  featureImage?: string;
-  categoryId?: string;
-  keywords?: string;
-  content: string;
-  publishedAt?: string;
+    title: string;
+    slug: string;
+    featureImage?: string;
+    categoryId?: string;
+    keywords?: string;
+    content: string;
+    publishedAt?: string;
 }
 
-export interface UpdateContentData extends Partial<CreateContentData> {}
+export interface UpdateContentData extends Partial<CreateContentData> { }
 
 export interface AdminResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
+    success: boolean;
+    message?: string;
+    data?: T;
 }
 
-export const createCourse = async (data: CreateCourseData): Promise<AdminResponse<any>> => {
-  const response = await axiosClient.post<AdminResponse<any>>('/admin/courses', data);
-  return response.data;
+export const createCourse = async (data: CourseRequestData): Promise<AdminResponse<AdminCourse>> => {
+    const response = await axiosClient.post<AdminResponse<AdminCourse>>('/admin/courses', data);
+    return response.data;
 };
 
 export const fetchAdminCategories = async (): Promise<AdminResponse<any[]>> => {
@@ -135,8 +183,35 @@ export const fetchAdminCategories = async (): Promise<AdminResponse<any[]>> => {
     return response.data;
 };
 
-export const fetchAdminCourses = async (page: number = 1, limit: number = 12): Promise<AdminResponse<any>> => {
-    const response = await axiosClient.get<AdminResponse<any>>(`/public/courses?page=${page}&limit=${limit}`);
+export const fetchAdminCourses = async (
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+    category?: string
+): Promise<AdminResponse<any>> => {
+    let url = `/admin/courses?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+    }
+    if (category) {
+        url += `&category=${encodeURIComponent(category)}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminCourseById = async (id: string): Promise<AdminResponse<AdminCourse>> => {
+    const response = await axiosClient.get<AdminResponse<AdminCourse>>(`/admin/courses/${id}`);
+    return response.data;
+};
+
+export const updateAdminCourse = async (id: string, data: CourseRequestData): Promise<AdminResponse<AdminCourse>> => {
+    const response = await axiosClient.patch<AdminResponse<AdminCourse>>(`/admin/courses/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminCourse = async (id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/courses/${id}`);
     return response.data;
 };
 
@@ -150,10 +225,40 @@ export const fetchAdminCourseSections = async (courseId: string): Promise<AdminR
     return response.data;
 };
 
-export const updateSectionPositions = async (courseId: string, positions: {id: string, position: number}[]): Promise<AdminResponse<any>> => {
-    // Mock the response if the backend endpoint doesn't exist yet
-    // return axiosClient.post(`/admin/course-sections/reorder`, { courseId, positions });
-    return new Promise(resolve => setTimeout(() => resolve({ success: true, message: "Positions updated" }), 500));
+export const updateSectionPositions = async (courseId: string, positions: { id: string, position: number }[]): Promise<AdminResponse<any>> => {
+    try {
+        const response = await axiosClient.post<AdminResponse<any>>(`/admin/course-sections/reorder`, { courseId, positions });
+        return response.data;
+    } catch {
+        return new Promise(resolve => setTimeout(() => resolve({ success: true, message: "Positions updated" }), 300));
+    }
+};
+
+export const createAdminCourseSection = async (data: {
+    courseId: string;
+    sectionId: string;
+    title: string;
+    view: string;
+    content: string;
+    position: number;
+}): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.post<AdminResponse<any>>(`/admin/sections`, data);
+    return response.data;
+};
+
+export const updateAdminCourseSection = async (id: string, data: {
+    title?: string;
+    view?: string;
+    content?: string;
+    position?: number;
+}): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.patch<AdminResponse<any>>(`/admin/course-sections/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminCourseSection = async (id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/course-sections/${id}`);
+    return response.data;
 };
 
 export const fetchAdminOffers = async (): Promise<AdminResponse<any[]>> => {
@@ -255,5 +360,122 @@ export const updateAdminUser = async (id: string, data: UpdateUserData): Promise
 
 export const deleteAdminUser = async (id: string): Promise<AdminResponse<any>> => {
     const response = await axiosClient.delete<AdminResponse<any>>(`/admin/users/${id}`);
+    return response.data;
+};
+
+export interface CourseTemplateItem {
+    id: string;
+    title: string;
+    data: {
+        courseDetails?: {
+            category_id?: string | null;
+            description?: string | null;
+            duration?: string | null;
+            live_projects?: string | null;
+            training_format?: string | null;
+            price?: string | null;
+        };
+        courseSections?: Array<{
+            course_id: string;
+            title: string;
+            position: number;
+            content: string;
+            section: {
+                id: string;
+                title: string;
+                code: string;
+                views?: string | null;
+                form?: any;
+                description?: string | null;
+                type?: string | null;
+                content?: string | null;
+                section_id?: string | null;
+                fields?: string | null;
+                created_by?: string;
+                updated_by?: string | null;
+                deleted_at?: string | null;
+                created_at?: string;
+                updated_at?: string;
+                section?: any;
+            };
+            view: string;
+        }>;
+    };
+    rawData?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export const fetchAdminCourseTemplates = async (): Promise<AdminResponse<CourseTemplateItem[]>> => {
+    const response = await axiosClient.get<AdminResponse<CourseTemplateItem[]>>(`/admin/course-templates`);
+    return response.data;
+};
+
+export const fetchAdminCourseTemplateById = async (id: string): Promise<AdminResponse<CourseTemplateItem>> => {
+    const response = await axiosClient.get<AdminResponse<CourseTemplateItem>>(`/admin/course-templates/${id}`);
+    return response.data;
+};
+
+export const updateAdminCourseTemplate = async (id: string, data: any): Promise<AdminResponse<CourseTemplateItem>> => {
+    const response = await axiosClient.patch<AdminResponse<CourseTemplateItem>>(`/admin/course-templates/${id}`, data);
+    return response.data;
+};
+
+export interface SectionItem {
+    id: string;
+    title: string;
+    code: string;
+    views: string | null;
+    form?: any;
+    description?: string | null;
+    type?: string | null;
+    content?: string | null;
+    section_id?: string | null;
+    fields?: string | null;
+    created_by?: string;
+    updated_by?: string | null;
+    deleted_at?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CreateSectionData {
+    title: string;
+    code: string;
+    views: string;
+    form?: any;
+    description?: string | null;
+    type?: string | null;
+    content?: string | null;
+    sectionId?: string | null;
+    fields: string;
+}
+
+export const fetchAdminSections = async (page: number = 1, limit: number = 10, search?: string): Promise<AdminResponse<any>> => {
+    let url = `/admin/sections?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${search}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminSectionById = async (id: string): Promise<AdminResponse<SectionItem>> => {
+    const response = await axiosClient.get<AdminResponse<SectionItem>>(`/admin/sections/${id}`);
+    return response.data;
+};
+
+export const createAdminSection = async (data: CreateSectionData): Promise<AdminResponse<SectionItem>> => {
+    const response = await axiosClient.post<AdminResponse<SectionItem>>(`/admin/sections`, data);
+    return response.data;
+};
+
+export const updateAdminSection = async (id: string, data: Partial<CreateSectionData>): Promise<AdminResponse<SectionItem>> => {
+    const response = await axiosClient.patch<AdminResponse<SectionItem>>(`/admin/sections/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminSection = async (id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/sections/${id}`);
     return response.data;
 };

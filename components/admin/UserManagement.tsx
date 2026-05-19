@@ -22,6 +22,7 @@ export default function UserManagement() {
     const { adminUsers, usersPagination, fetchUsersList, createUserItem, updateUserItem, deleteUserItem, isLoading } = useAdminStore();
     
     const [viewState, setViewState] = useState<'list' | 'create' | 'edit'>('list');
+    const [isFormOpen, setIsFormOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -50,6 +51,7 @@ export default function UserManagement() {
             name: "", firstName: "", lastName: "", email: "", password: "", phone: "", status: "active", role: "user" 
         });
         setViewState('create');
+        setIsFormOpen(true);
     };
 
     const handleOpenEdit = (user: any) => {
@@ -65,6 +67,7 @@ export default function UserManagement() {
             role: user.role || (user.roles && user.roles.length > 0 ? user.roles[0] : "user")
         });
         setViewState('edit');
+        setIsFormOpen(true);
     };
 
     const handleOpenDelete = (user: any) => {
@@ -72,12 +75,17 @@ export default function UserManagement() {
         setIsDeleteModalOpen(true);
     };
 
+    const handleCloseForm = () => {
+        setIsFormOpen(false);
+        setViewState('list');
+    };
+
     const handleCreate = async () => {
         setIsSaving(true);
         const res = await createUserItem(formData);
         setIsSaving(false);
         if (res.success) {
-            setViewState('list');
+            handleCloseForm();
             fetchUsersList(1, 10);
         } else {
             alert(res.message);
@@ -95,7 +103,7 @@ export default function UserManagement() {
         const res = await updateUserItem(selectedUser.id, updateData);
         setIsSaving(false);
         if (res.success) {
-            setViewState('list');
+            handleCloseForm();
             fetchUsersList(1, 10);
         } else {
             alert(res.message);
@@ -115,86 +123,7 @@ export default function UserManagement() {
         }
     };
 
-    if (viewState === 'create' || viewState === 'edit') {
-        return (
-            <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => setViewState('list')}>
-                        <ArrowLeft className="h-5 w-5 text-slate-600" />
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">{viewState === 'create' ? 'Create New User' : 'Edit User'}</h1>
-                        <p className="text-slate-500">{viewState === 'create' ? 'Add a new member to the platform.' : 'Modify existing user details.'}</p>
-                    </div>
-                </div>
 
-                <Card className="border-none shadow-sm max-w-4xl">
-                    <CardContent className="p-8 space-y-2">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="grid gap-2 col-span-2">
-                                <Label htmlFor="name" className="font-semibold text-slate-700">Display Name</Label>
-                                <Input id="name" className="h-11" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Rahul Kumar" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="firstName" className="font-semibold text-slate-700">First Name</Label>
-                                <Input id="firstName" className="h-11" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} placeholder="e.g. Rahul" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="lastName" className="font-semibold text-slate-700">Last Name</Label>
-                                <Input id="lastName" className="h-11" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} placeholder="e.g. Kumar" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email" className="font-semibold text-slate-700">Email Address</Label>
-                                <Input id="email" type="email" className="h-11" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="rahul@example.com" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="phone" className="font-semibold text-slate-700">Phone Number</Label>
-                                <Input id="phone" className="h-11" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="9876543210" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="password" className="font-semibold text-slate-700">Password</Label>
-                                <Input id="password" type="password" className="h-11" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder={viewState === 'edit' ? "Leave empty to keep unchanged" : "••••••••"} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="role" className="font-semibold text-slate-700">Role</Label>
-                                <select 
-                                    id="role" 
-                                    className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={formData.role} 
-                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                >
-                                    <option value="user">User</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="instructor">Instructor</option>
-                                </select>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="status" className="font-semibold text-slate-700">Status</Label>
-                                <select 
-                                    id="status" 
-                                    className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    value={formData.status} 
-                                    onChange={(e) => setFormData({...formData, status: e.target.value})}
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="suspended">Suspended</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
-                            <Button variant="outline" size="lg" onClick={() => setViewState('list')}>Cancel</Button>
-                            <Button size="lg" onClick={viewState === 'create' ? handleCreate : handleEdit} disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700 min-w-[140px]">
-                                {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                {viewState === 'create' ? 'Create User' : 'Save Changes'}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-8 w-full min-w-0">
@@ -310,6 +239,83 @@ export default function UserManagement() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Create/Edit Modal Dialog */}
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if(!open) handleCloseForm(); }}>
+                <DialogContent className="!max-w-none w-3/4 h-[92vh] max-h-[92vh] overflow-hidden flex flex-col rounded-2xl">
+                    <DialogHeader className="flex-shrink-0">
+                        <DialogTitle className="text-xl font-bold text-slate-900">
+                            {viewState === 'create' ? 'Create New User' : 'Edit User'}
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-500 text-xs">
+                            {viewState === 'create' ? 'Add a new member to the platform.' : 'Modify existing user details.'}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-auto py-4 space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="grid gap-2 col-span-2">
+                                <Label htmlFor="name" className="font-semibold text-slate-700">Display Name</Label>
+                                <Input id="name" className="h-11" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Rahul Kumar" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="firstName" className="font-semibold text-slate-700">First Name</Label>
+                                <Input id="firstName" className="h-11" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} placeholder="e.g. Rahul" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="lastName" className="font-semibold text-slate-700">Last Name</Label>
+                                <Input id="lastName" className="h-11" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} placeholder="e.g. Kumar" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email" className="font-semibold text-slate-700">Email Address</Label>
+                                <Input id="email" type="email" className="h-11" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="rahul@example.com" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="phone" className="font-semibold text-slate-700">Phone Number</Label>
+                                <Input id="phone" className="h-11" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} placeholder="9876543210" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="password" className="font-semibold text-slate-700">Password</Label>
+                                <Input id="password" type="password" className="h-11" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder={viewState === 'edit' ? "Leave empty to keep unchanged" : "••••••••"} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="role" className="font-semibold text-slate-700">Role</Label>
+                                <select 
+                                    id="role" 
+                                    className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={formData.role} 
+                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
+                                >
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="instructor">Instructor</option>
+                                </select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="status" className="font-semibold text-slate-700">Status</Label>
+                                <select 
+                                    id="status" 
+                                    className="h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={formData.status} 
+                                    onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-shrink-0 pt-4 border-t border-slate-100 flex justify-end gap-3">
+                        <Button variant="outline" size="lg" onClick={handleCloseForm}>Cancel</Button>
+                        <Button size="lg" onClick={viewState === 'create' ? handleCreate : handleEdit} disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700 min-w-[140px]">
+                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                            {viewState === 'create' ? 'Create User' : 'Save Changes'}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                 <DialogContent>

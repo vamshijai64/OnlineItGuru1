@@ -9,19 +9,35 @@ import {
 } from "@/components/ui/accordion";
 import { CourseDetail, CourseSection } from "@/store/homeStore";
 
-function parseContent(contentStr: string) {
+// Helper to parse JSON content safely with global section fallback
+function parseSectionContent(sec: any) {
+    if (!sec) return [];
+    let content = [];
     try {
-        return JSON.parse(contentStr);
-    } catch (e) {
-        return [];
+        if (sec.content && sec.content.trim() !== "" && sec.content !== "[]") {
+            content = JSON.parse(sec.content);
+        }
+    } catch {}
+    if ((!Array.isArray(content) || content.length === 0) && sec.section?.content) {
+        try {
+            content = JSON.parse(sec.section.content);
+        } catch {}
     }
+    return Array.isArray(content) ? content : [];
 }
 
 export default function FaqSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
     const faqSection = sections.find(s => s.title.toLowerCase().includes('faq'));
-    const dynamicFaqs = faqSection ? parseContent(faqSection.content) : [];
+    const rawFaqs = parseSectionContent(faqSection);
+    // Filter out uninitialized or empty FAQs
+    const dynamicFaqs = rawFaqs.filter((f: any) => {
+        if (!f) return false;
+        const q = f.itemTitle || f.title;
+        const a = f.itemDescription || f.description;
+        return (q && String(q).trim() !== "") || (a && String(a).trim() !== "");
+    });
 
-    const faqs = dynamicFaqs.length > 0 ? dynamicFaqs.map((f: any) => ({ q: f.itemTitle, a: f.itemDescription })) : [
+    const faqs = dynamicFaqs.length > 0 ? dynamicFaqs.map((f: any) => ({ q: f.itemTitle || f.title, a: f.itemDescription || f.description })) : [
         { q: "Who is this course for?", a: "Anyone looking to start or advance their career. We go from complete basics to advanced real-world applications." },
         { q: "Do you offer placement assistance?", a: "Yes — 100% placement support including resume building, mock interviews, and direct recruiter referrals." },
         { q: "How long is the course access?", a: "You get lifetime access to all videos, resources, and future updates — even after course completion." },

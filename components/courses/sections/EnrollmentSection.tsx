@@ -4,17 +4,31 @@ import { Calendar, Clock3, Zap, CheckCircle2, Users, MessageSquare } from "lucid
 import { Button } from "@/components/ui/button";
 import { CourseDetail, CourseSection } from "@/store/homeStore";
 
-function parseContent(contentStr: string) {
+// Helper to parse JSON content safely with global section fallback
+function parseSectionContent(sec: any) {
+    if (!sec) return [];
+    let content = [];
     try {
-        return JSON.parse(contentStr);
-    } catch (e) {
-        return [];
+        if (sec.content && sec.content.trim() !== "" && sec.content !== "[]") {
+            content = JSON.parse(sec.content);
+        }
+    } catch {}
+    if ((!Array.isArray(content) || content.length === 0) && sec.section?.content) {
+        try {
+            content = JSON.parse(sec.section.content);
+        } catch {}
     }
+    return Array.isArray(content) ? content : [];
 }
 
 export default function EnrollmentSection({ course, sections }: { course: CourseDetail; sections: CourseSection[] }) {
     const batchSection = sections.find(s => s.view === 'schedule-card-list' || s.title.toLowerCase().includes('batch'));
-    const dynamicBatches = batchSection ? parseContent(batchSection.content) : [];
+    const rawBatches = parseSectionContent(batchSection);
+    // Filter out uninitialized or placeholder batches
+    const dynamicBatches = rawBatches.filter((b: any) => {
+        if (!b) return false;
+        return (b.date && String(b.date).trim() !== "") || (b.time && String(b.time).trim() !== "");
+    });
 
     const mockBatches = [
         { date: "May 15, 2026", type: "Weekday", time: "7:00 AM – 9:00 AM IST", seats: 5, mode: "Online", status: "Filling Fast" },

@@ -22,6 +22,7 @@ export default function InterviewManagement() {
     const { adminContent, contentPagination, fetchContentList, createContentItem, updateContentItem, deleteContentItem, isLoading } = useAdminStore();
     
     const [viewState, setViewState] = useState<'list' | 'create' | 'edit'>('list');
+    const [isFormOpen, setIsFormOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -45,6 +46,7 @@ export default function InterviewManagement() {
     const handleOpenCreate = () => {
         setFormData({ title: "", slug: "", content: "", featureImage: "", keywords: "" });
         setViewState('create');
+        setIsFormOpen(true);
     };
 
     const handleOpenEdit = (item: any) => {
@@ -57,6 +59,7 @@ export default function InterviewManagement() {
             keywords: item.keywords || ""
         });
         setViewState('edit');
+        setIsFormOpen(true);
     };
 
     const handleOpenDelete = (item: any) => {
@@ -64,12 +67,17 @@ export default function InterviewManagement() {
         setIsDeleteModalOpen(true);
     };
 
+    const handleCloseForm = () => {
+        setIsFormOpen(false);
+        setViewState('list');
+    };
+
     const handleCreate = async () => {
         setIsSaving(true);
         const res = await createContentItem('interview-questions', formData);
         setIsSaving(false);
         if (res.success) {
-            setViewState('list');
+            handleCloseForm();
             fetchContentList('interview-questions', 1, 10);
         } else {
             alert(res.message);
@@ -82,7 +90,7 @@ export default function InterviewManagement() {
         const res = await updateContentItem('interview-questions', selectedItem.id, formData);
         setIsSaving(false);
         if (res.success) {
-            setViewState('list');
+            handleCloseForm();
             fetchContentList('interview-questions', 1, 10);
         } else {
             alert(res.message);
@@ -101,57 +109,6 @@ export default function InterviewManagement() {
             alert(res.message);
         }
     };
-
-    if (viewState === 'create' || viewState === 'edit') {
-        return (
-            <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => setViewState('list')}>
-                        <ArrowLeft className="h-5 w-5 text-slate-600" />
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">{viewState === 'create' ? 'Create Interview Question' : 'Edit Interview Question'}</h1>
-                        <p className="text-slate-500">{viewState === 'create' ? 'Add a new interview question to the platform.' : 'Modify existing question details.'}</p>
-                    </div>
-                </div>
-
-                <Card className="border-none shadow-sm max-w-4xl">
-                    <CardContent className="p-8 space-y-6">
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="title" className="font-semibold text-slate-700">Title</Label>
-                                <Input id="title" className="h-11" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} placeholder="e.g. Explain React Lifecycle" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="slug" className="font-semibold text-slate-700">Slug</Label>
-                                <Input id="slug" className="h-11 font-mono text-sm" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} placeholder="e.g. explain-react-lifecycle" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="featureImage" className="font-semibold text-slate-700">Feature Image URL</Label>
-                                <Input id="featureImage" className="h-11" value={formData.featureImage} onChange={(e) => setFormData({...formData, featureImage: e.target.value})} placeholder="https://example.com/image.jpg" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="keywords" className="font-semibold text-slate-700">Keywords (Comma separated)</Label>
-                                <Input id="keywords" className="h-11" value={formData.keywords} onChange={(e) => setFormData({...formData, keywords: e.target.value})} placeholder="react, interview, concepts" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="content" className="font-semibold text-slate-700">HTML Content</Label>
-                                <Textarea id="content" className="min-h-[400px] font-mono text-sm leading-relaxed p-4 bg-slate-50" value={formData.content} onChange={(e) => setFormData({...formData, content: e.target.value})} placeholder="<p>Write your question and answer content here...</p>" />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-end gap-3 pt-8 border-t border-slate-100">
-                            <Button variant="outline" size="lg" onClick={() => setViewState('list')}>Cancel</Button>
-                            <Button size="lg" onClick={viewState === 'create' ? handleCreate : handleEdit} disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700 min-w-[140px]">
-                                {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                {viewState === 'create' ? 'Publish Question' : 'Save Changes'}
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
 
     return (
         <div className="space-y-8">
@@ -254,6 +211,53 @@ export default function InterviewManagement() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Create/Edit Modal Dialog */}
+            <Dialog open={isFormOpen} onOpenChange={(open) => { if(!open) handleCloseForm(); }}>
+                <DialogContent className="!max-w-none w-3/4 h-[92vh] max-h-[92vh] overflow-hidden flex flex-col rounded-2xl">
+                    <DialogHeader className="flex-shrink-0">
+                        <DialogTitle className="text-xl font-bold text-slate-900">
+                            {viewState === 'create' ? 'Create Interview Question' : 'Edit Interview Question'}
+                        </DialogTitle>
+                        <DialogDescription className="text-slate-500 text-xs">
+                            {viewState === 'create' ? 'Add a new interview question to the platform.' : 'Modify existing question details.'}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-auto py-4 space-y-6">
+                        <div className="grid gap-6">
+                            <div className="grid gap-2">
+                                <Label htmlFor="title" className="font-semibold text-slate-700">Title</Label>
+                                <Input id="title" className="h-11" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} placeholder="e.g. Explain React Lifecycle" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="slug" className="font-semibold text-slate-700">Slug</Label>
+                                <Input id="slug" className="h-11 font-mono text-sm" value={formData.slug} onChange={(e) => setFormData({...formData, slug: e.target.value})} placeholder="e.g. explain-react-lifecycle" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="featureImage" className="font-semibold text-slate-700">Feature Image URL</Label>
+                                <Input id="featureImage" className="h-11" value={formData.featureImage} onChange={(e) => setFormData({...formData, featureImage: e.target.value})} placeholder="https://example.com/image.jpg" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="keywords" className="font-semibold text-slate-700">Keywords (Comma separated)</Label>
+                                <Input id="keywords" className="h-11" value={formData.keywords} onChange={(e) => setFormData({...formData, keywords: e.target.value})} placeholder="react, interview, concepts" />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="content" className="font-semibold text-slate-700">HTML Content</Label>
+                                <Textarea id="content" className="min-h-[300px] font-mono text-sm leading-relaxed p-4 bg-slate-50 flex-1" value={formData.content} onChange={(e) => setFormData({...formData, content: e.target.value})} placeholder="<p>Write your question and answer content here...</p>" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-shrink-0 pt-4 border-t border-slate-100 flex justify-end gap-3">
+                        <Button variant="outline" onClick={handleCloseForm}>Cancel</Button>
+                        <Button onClick={viewState === 'create' ? handleCreate : handleEdit} disabled={isSaving} className="bg-indigo-600 hover:bg-indigo-700 min-w-[140px]">
+                            {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                            {viewState === 'create' ? 'Publish Question' : 'Save Changes'}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                 <DialogContent>
