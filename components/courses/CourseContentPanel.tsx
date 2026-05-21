@@ -46,7 +46,7 @@ const FIXED_NAV_ITEMS = [
     { id: "enrollment", label: "Enrollment Options", icon: Calendar },
     { id: "faqs", label: "FAQ's", icon: HelpCircle },
     { id: "reviews", label: "Reviews", icon: Star },
-     { id: "skills", label: "Skills & Tools", icon: ListChecks },
+    { id: "skills", label: "Skills & Tools", icon: ListChecks },
     { id: "outlook", label: "Job Outlook", icon: TrendingUp },
     { id: "hiring", label: "Hiring Sprints", icon: Briefcase },
     { id: "certification", label: "Certification", icon: Award },
@@ -100,7 +100,7 @@ export default function CourseContentPanel({ course, sections }: Props) {
                     {/* ─── LEFT: Sticky Sidebar ─── */}
                     <aside className="hidden lg:block w-72 flex-shrink-0">
                         <div className="sticky top-20 py-10">
-                            
+
                             {/* Nav list */}
                             <nav className="rounded-lg  overflow-hidden shadow-sm bg-white">
 
@@ -164,15 +164,32 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                     idx < navItems.length - 1 ? "border-b border-slate-100 mb-10" : ""
                                 )}
                             >
-                                {id === "overview" && <OverviewSection course={course} />}
+                                {/* {id === "overview" && <OverviewSection course={course} />}
                                 {id === "skills" && <SkillsAndTools />}
                                 {id === "outlook" && <JobOutlook />}
                                 {id === "hiring" && <HiringSprints course={course} />}
                                 {id === "objectives" && <ObjectivesSection sections={sections} />}
-                                {id === "syllabus" && <SyllabusSection course={course} sections={sections} />}
-                                {id === "projects" && <ProjectsSection course={course} />}
+                                {id === "syllabus" && <SyllabusSection course={course} sections={sections || course?.sections || []} />} 
+                                {id === "projects" && <ProjectsSection course={course} sections={sections || course?.sections || []}/>}
                                 {id === "enrollment" && <EnrollmentSection course={course} sections={sections} />}
                                 {id === "faqs" && <FaqSection course={course} sections={sections} />}
+                                {id === "reviews" && <ReviewsSection course={course} />}
+                                {id === "certification" && <CertificationSection course={course} />} */}
+
+                                {/* ─── Change your section rendering blocks in CourseContentPanel.tsx to match this ─── */}
+
+                                {id === "overview" && <OverviewSection course={course} />}
+                                {id === "skills" && <SkillsAndTools />}
+                                {id === "outlook" && <JobOutlook />}
+                                {id === "hiring" && <HiringSprints course={course} />}
+
+                                {/* FIXED PROP PASS-THROUGHS */}
+                                {id === "objectives" && <ObjectivesSection sections={sections || course?.sections || []} />}
+                                {id === "syllabus" && <SyllabusSection course={course} sections={sections || course?.sections || []} />}
+                                {id === "projects" && <ProjectsSection course={course} sections={sections || course?.sections || []} />}
+                                {id === "enrollment" && <EnrollmentSection course={course} sections={sections || course?.sections || []} />}
+                                {id === "faqs" && <FaqSection course={course} sections={sections || course?.sections || []} />}
+
                                 {id === "reviews" && <ReviewsSection course={course} />}
                                 {id === "certification" && <CertificationSection course={course} />}
                             </section>

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CourseDetail } from "@/store/homeStore";
+import { CourseDetail, CourseSection } from "@/store/homeStore";
 
-export default function OverviewSection({ course }: { course: CourseDetail }) {
+export default function OverviewSection({ course,section=[] }: { course: CourseDetail;section?:CourseSection[] }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (

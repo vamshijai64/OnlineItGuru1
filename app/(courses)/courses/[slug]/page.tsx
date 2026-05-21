@@ -281,7 +281,7 @@ function CourseDetailView({ slug }: { slug: string }) {
   return (
     <div className="min-h-screen bg-slate-50">
       <CourseBanner course={course} />
-      <CourseContentPanel course={course} sections={sections} />
+      <CourseContentPanel course={course} sections={sections.length > 0 ? sections : (course.sections || [])} />
       <PlacementModule />
     </div>
   );

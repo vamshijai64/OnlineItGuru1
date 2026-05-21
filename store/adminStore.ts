@@ -1,14 +1,15 @@
 import { create } from 'zustand';
-import { 
-    createCourse, CreateCourseData, CourseRequestData, AdminCourse, fetchAdminCourseById, 
-    updateAdminCourse, deleteAdminCourse, fetchAdminCategories, fetchAdminCourses, 
-    fetchAdminInterviewQuestions, fetchAdminOffers, fetchAdminReviews, 
+import {
+    createCourse, CreateCourseData, CourseRequestData, AdminCourse, fetchAdminCourseById,
+    updateAdminCourse, deleteAdminCourse, fetchAdminCategories, fetchAdminCourses,
+    fetchAdminInterviewQuestions, fetchAdminOffers, fetchAdminReviews,
     fetchAdminCoursesByCategory, fetchAdminCourseSections, updateSectionPositions,
-    fetchAdminContentList, fetchAdminContentById, createAdminContent, 
+    fetchAdminContentList, fetchAdminContentById, createAdminContent,
     updateAdminContent, deleteAdminContent, CreateContentData, UpdateContentData, ContentItem,
     fetchAdminUsersList, fetchAdminUserById, createAdminUser, updateAdminUser, deleteAdminUser, CreateUserData, UpdateUserData, UserItem,
     fetchAdminReviewById, createAdminReview, updateAdminReview, deleteAdminReview, CreateReviewData, UpdateReviewData, ReviewItem,
     CourseTemplateItem, fetchAdminCourseTemplates, fetchAdminCourseTemplateById, updateAdminCourseTemplate,
+    createAdminCourseTemplate, deleteAdminCourseTemplate,
     SectionItem, CreateSectionData, fetchAdminSections, fetchAdminSectionById, createAdminSection, updateAdminSection, deleteAdminSection,
     createAdminCourseSection, updateAdminCourseSection, deleteAdminCourseSection
 } from '@/lib/admin-api';
@@ -70,8 +71,9 @@ interface AdminState {
         limit: number;
         total: number;
         totalPages: number;
+        view: string;
     } | null;
-    
+
     createCourse: (data: CourseRequestData) => Promise<{ success: boolean; message?: string }>;
     fetchCategories: () => Promise<void>;
     fetchAllCourses: (page?: number, limit?: number, search?: string, category?: string) => Promise<void>;
@@ -87,17 +89,16 @@ interface AdminState {
     deleteReviewItem: (id: string) => Promise<{ success: boolean; message?: string }>;
     fetchCoursesByCategory: (categorySlug: string, page?: number) => Promise<void>;
     fetchCourseSections: (courseId: string) => Promise<void>;
-    updateCourseSectionPositions: (courseId: string, positions: {id: string, position: number}[]) => Promise<boolean>;
+    updateCourseSectionPositions: (courseId: string, positions: { id: string, position: number }[]) => Promise<boolean>;
     createCourseSectionItem: (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => Promise<{ success: boolean; message?: string }>;
     updateCourseSectionItem: (id: string, data: { title?: string; view?: string; content?: string; position?: number }) => Promise<{ success: boolean; message?: string }>;
     deleteCourseSectionItem: (id: string) => Promise<{ success: boolean; message?: string }>;
-    
     fetchContentList: (type: string, page?: number, limit?: number, search?: string) => Promise<void>;
     fetchContentById: (type: string, id: string) => Promise<void>;
     createContentItem: (type: string, data: CreateContentData) => Promise<{ success: boolean; message?: string }>;
     updateContentItem: (type: string, id: string, data: UpdateContentData) => Promise<{ success: boolean; message?: string }>;
     deleteContentItem: (type: string, id: string) => Promise<{ success: boolean; message?: string }>;
-    
+
     fetchUsersList: (page?: number, limit?: number, search?: string) => Promise<void>;
     createUserItem: (data: CreateUserData) => Promise<{ success: boolean; message?: string }>;
     updateUserItem: (id: string, data: UpdateUserData) => Promise<{ success: boolean; message?: string }>;
@@ -106,13 +107,15 @@ interface AdminState {
     fetchCourseTemplates: () => Promise<void>;
     fetchCourseTemplateById: (id: string) => Promise<CourseTemplateItem | null>;
     updateCourseTemplate: (id: string, data: any) => Promise<{ success: boolean; message?: string }>;
+    createCourseTemplate: (data: any) => Promise<{ success: boolean; message?: string }>;
+    deleteCourseTemplate: (id: string) => Promise<{ success: boolean; message?: string }>;
 
     fetchSections: (page?: number, limit?: number, search?: string) => Promise<void>;
     fetchSectionById: (id: string) => Promise<SectionItem | null>;
     createSectionItem: (data: CreateSectionData) => Promise<{ success: boolean; message?: string }>;
     updateSectionItem: (id: string, data: Partial<CreateSectionData>) => Promise<{ success: boolean; message?: string }>;
     deleteSectionItem: (id: string) => Promise<{ success: boolean; message?: string }>;
-    
+
     clearMessages: () => void;
 }
 
@@ -179,10 +182,10 @@ export const useAdminStore = create<AdminState>((set) => ({
             if (page !== undefined) {
                 const response = await fetchAdminCourses(page, limit || 10, search, category);
                 if (response.success) {
-                    set({ 
-                        adminCourses: response.data?.items || response.data?.courses || [], 
+                    set({
+                        adminCourses: response.data?.items || response.data?.courses || [],
                         coursePagination: response.data?.pagination || null,
-                        isLoading: false 
+                        isLoading: false
                     });
                 } else {
                     set({ isLoading: false });
@@ -193,7 +196,7 @@ export const useAdminStore = create<AdminState>((set) => ({
                 if (response.success) {
                     let allItems = response.data?.items || response.data?.courses || [];
                     const pagination = response.data?.pagination || null;
-                    
+
                     if (pagination && pagination.totalPages > 1) {
                         const promises = [];
                         for (let p = 2; p <= pagination.totalPages; p++) {
@@ -207,11 +210,11 @@ export const useAdminStore = create<AdminState>((set) => ({
                             }
                         });
                     }
-                    
-                    set({ 
-                        adminCourses: allItems, 
+
+                    set({
+                        adminCourses: allItems,
                         coursePagination: pagination,
-                        isLoading: false 
+                        isLoading: false
                     });
                 } else {
                     set({ isLoading: false });
@@ -310,10 +313,10 @@ export const useAdminStore = create<AdminState>((set) => ({
             if (response.success) {
                 const items = response.data?.items || [];
                 const pagination = response.data?.pagination || null;
-                set({ 
-                    adminInterviewQuestions: items, 
+                set({
+                    adminInterviewQuestions: items,
                     interviewPagination: pagination,
-                    isLoading: false 
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -328,10 +331,10 @@ export const useAdminStore = create<AdminState>((set) => ({
             if (response.success) {
                 const items = response.data?.items || [];
                 const pagination = response.data?.pagination || null;
-                set({ 
-                    adminReviews: items, 
+                set({
+                    adminReviews: items,
                     reviewPagination: pagination,
-                    isLoading: false 
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -421,10 +424,10 @@ export const useAdminStore = create<AdminState>((set) => ({
             if (response.success) {
                 const items = response.data?.items || [];
                 const pagination = response.data?.pagination || null;
-                set({ 
-                    categoryCourses: items, 
+                set({
+                    categoryCourses: items,
                     coursePagination: pagination,
-                    isLoading: false 
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -437,9 +440,9 @@ export const useAdminStore = create<AdminState>((set) => ({
         try {
             const response = await fetchAdminCourseSections(courseId);
             if (response.success) {
-                set({ 
-                    courseSections: response.data || [], 
-                    isLoading: false 
+                set({
+                    courseSections: response.data || [],
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -447,15 +450,15 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    updateCourseSectionPositions: async (courseId: string, positions: {id: string, position: number}[]) => {
+    updateCourseSectionPositions: async (courseId: string, positions: { id: string, position: number }[]) => {
         set({ isLoading: true, error: null });
         try {
             const response = await updateSectionPositions(courseId, positions);
             if (response.success) {
                 // Fetch the updated sections
                 const updatedResponse = await fetchAdminCourseSections(courseId);
-                set({ 
-                    courseSections: updatedResponse.data || [], 
+                set({
+                    courseSections: updatedResponse.data || [],
                     isLoading: false,
                     successMessage: 'Section positions updated successfully'
                 });
@@ -475,10 +478,10 @@ export const useAdminStore = create<AdminState>((set) => ({
             if (response.success) {
                 const items = response.data?.items || [];
                 const pagination = response.data?.pagination || null;
-                set({ 
-                    adminContent: items, 
+                set({
+                    adminContent: items,
                     contentPagination: pagination,
-                    isLoading: false 
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -491,9 +494,9 @@ export const useAdminStore = create<AdminState>((set) => ({
         try {
             const response = await fetchAdminContentById(type, id);
             if (response.success) {
-                set({ 
-                    currentContentItem: response.data || null, 
-                    isLoading: false 
+                set({
+                    currentContentItem: response.data || null,
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -571,7 +574,7 @@ export const useAdminStore = create<AdminState>((set) => ({
             if (response.success) {
                 let items = [];
                 let pagination = null;
-                
+
                 if (Array.isArray(response.data)) {
                     items = response.data;
                 } else if (response.data && response.data.items) {
@@ -581,11 +584,11 @@ export const useAdminStore = create<AdminState>((set) => ({
                     items = response.data.users;
                     pagination = response.data.pagination || null;
                 }
-                
-                set({ 
-                    adminUsers: items, 
+
+                set({
+                    adminUsers: items,
                     usersPagination: pagination,
-                    isLoading: false 
+                    isLoading: false
                 });
             }
         } catch (error: any) {
@@ -669,7 +672,68 @@ export const useAdminStore = create<AdminState>((set) => ({
         try {
             const response = await fetchAdminCourseTemplates();
             if (response.success) {
-                set({ adminCourseTemplates: response.data || [], isLoading: false });
+                const templates = response.data || [];
+                set({ adminCourseTemplates: templates, isLoading: false });
+
+                // Proactive self-healing migration for legacy templates lacking top-level section_id
+                for (const template of templates) {
+                    let needsMigration = false;
+                    let courseDetails = {};
+                    let courseSections: any[] = [];
+
+                    if (template && template.data) {
+                        let parsedData = template.data;
+                        if (typeof parsedData === 'string') {
+                            try {
+                                parsedData = JSON.parse(parsedData);
+                            } catch {}
+                        }
+                        if (typeof parsedData === 'object' && parsedData !== null) {
+                            courseDetails = parsedData.courseDetails || {};
+                            courseSections = parsedData.courseSections || [];
+                        }
+                    }
+
+                    if (Array.isArray(courseSections) && courseSections.length > 0) {
+                        const migratedSections = courseSections.map((sec: any) => {
+                            const sId = sec.section_id || sec.sectionId || sec.section?.id || sec.section?.section_id;
+                            if (sId && (!sec.section_id || !sec.sectionId)) {
+                                needsMigration = true;
+                            }
+                            return {
+                                ...sec,
+                                section_id: sId,
+                                sectionId: sId,
+                                section: sec.section ? {
+                                    ...sec.section,
+                                    id: sId,
+                                    section_id: sId
+                                } : null
+                            };
+                        });
+
+                        if (needsMigration) {
+                            console.log(`[Migration] Migrating course template "${template.title}" (${template.id}) to include top-level section_id properties.`);
+                            const payload = {
+                                title: template.title,
+                                courseDetails,
+                                courseSections: migratedSections
+                            };
+                            updateAdminCourseTemplate(template.id, payload).then((res) => {
+                                if (res.success) {
+                                    console.log(`[Migration] Successfully updated course template "${template.title}"`);
+                                    fetchAdminCourseTemplates().then((refreshRes) => {
+                                        if (refreshRes.success) {
+                                            set({ adminCourseTemplates: refreshRes.data || [] });
+                                        }
+                                    });
+                                }
+                            }).catch(err => {
+                                console.error(`[Migration] Failed to migrate template "${template.title}":`, err);
+                            });
+                        }
+                    }
+                }
             } else {
                 set({ isLoading: false });
             }
@@ -726,19 +790,15 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    fetchSections: async (page = 1, limit = 10, search?: string) => {
-        set({ isLoading: true, error: null });
+    createCourseTemplate: async (data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
         try {
-            const response = await fetchAdminSections(page, limit, search);
+            const response = await createAdminCourseTemplate(data);
             if (response.success) {
-                set({ 
-                    adminSections: response.data?.items || response.data?.sections || (Array.isArray(response.data) ? response.data : []), 
-                    sectionsPagination: response.data?.pagination || null, 
-                    isLoading: false 
-                });
-            } else {
-                set({ isLoading: false });
+                set({ isLoading: false, successMessage: response.message || 'Course template created successfully' });
+                return { success: true, message: response.message };
             }
+            throw new Error(response.message || 'Failed to create course template');
         } catch (error: any) {
             let message = 'An unexpected error occurred';
             if (axios.isAxiosError(error) && error.response) {
@@ -747,9 +807,71 @@ export const useAdminStore = create<AdminState>((set) => ({
                 message = error.message;
             }
             set({ error: message, isLoading: false });
+            return { success: false, message };
         }
     },
 
+    deleteCourseTemplate: async (id: string) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminCourseTemplate(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: response.message || 'Course template deleted successfully' });
+                return { success: true, message: response.message };
+            }
+            throw new Error(response.message || 'Failed to delete course template');
+        } catch (error: any) {
+            let message = 'An unexpected error occurred';
+            if (axios.isAxiosError(error) && error.response) {
+                message = error.response.data?.message || message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    // fetchSections: async (page = 1, limit = 10, search?: string) => {
+    //     set({ isLoading: true, error: null });
+    //     try {
+    //         const response = await fetchAdminSections(page, limit, search);
+    //         if (response.success) {
+    //             set({ 
+    //                 adminSections: response.data?.items || response.data?.sections || (Array.isArray(response.data) ? response.data : []), 
+    //                 sectionsPagination: response.data?.pagination || null, 
+    //                 isLoading: false 
+    //             });
+    //         } else {
+    //             set({ isLoading: false });
+    //         }
+    //     } catch (error: any) {
+    //         let message = 'An unexpected error occurred';
+    //         if (axios.isAxiosError(error) && error.response) {
+    //             message = error.response.data?.message || message;
+    //         } else if (error instanceof Error) {
+    //             message = error.message;
+    //         }
+    //         set({ error: message, isLoading: false });
+    //     }
+    // },
+    fetchSections: async (page = 1, limit = 10, search?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSections(page, limit, search);
+            if (response.success) {
+                set({
+                    adminSections: response.data?.items || response.data?.sections || (Array.isArray(response.data) ? response.data : []),
+                    sectionsPagination: response.data?.pagination || null,
+                    isLoading: false
+                });
+            } else {
+                set({ isLoading: false });
+            }
+        } catch (error: any) {
+            set({ isLoading: false, error: error?.message });
+        }
+    },
     fetchSectionById: async (id: string) => {
         set({ isLoading: true, error: null });
         try {
@@ -792,27 +914,41 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
+    // updateSectionItem: async (id: string, data: Partial<CreateSectionData>) => {
+    //     set({ isLoading: true, error: null, successMessage: null });
+    //     try {
+    //         const response = await updateAdminSection(id, data);
+    //         if (response.success) {
+    //             set({ isLoading: false, successMessage: response.message || 'Section updated successfully' });
+    //             return { success: true, message: response.message };
+    //         }
+    //         throw new Error(response.message || 'Failed to update section');
+    //     } catch (error: any) {
+    //         let message = 'An unexpected error occurred';
+    //         if (axios.isAxiosError(error) && error.response) {
+    //             message = error.response.data?.message || message;
+    //         } else if (error instanceof Error) {
+    //             message = error.message;
+    //         }
+    //         set({ error: message, isLoading: false });
+    //         return { success: false, message };
+    //     }
+    // },
     updateSectionItem: async (id: string, data: Partial<CreateSectionData>) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {
+            // Hits PATCH /api/v1/admin/sections/:id directly
             const response = await updateAdminSection(id, data);
             if (response.success) {
-                set({ isLoading: false, successMessage: response.message || 'Section updated successfully' });
+                set({ isLoading: false, successMessage: response.message || 'Section definition adjusted' });
                 return { success: true, message: response.message };
             }
-            throw new Error(response.message || 'Failed to update section');
+            throw new Error(response.message || 'Failed to update section definition');
         } catch (error: any) {
-            let message = 'An unexpected error occurred';
-            if (axios.isAxiosError(error) && error.response) {
-                message = error.response.data?.message || message;
-            } else if (error instanceof Error) {
-                message = error.message;
-            }
-            set({ error: message, isLoading: false });
-            return { success: false, message };
+            set({ error: error.message, isLoading: false });
+            return { success: false, message: error.message };
         }
     },
-
     deleteSectionItem: async (id: string) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Headphones,GraduationCap,Calendar,Video,Code,Cloud,Star,BookOpen,Award, LucideIcon } from 'lucide-react';
+import { Headphones, GraduationCap, Calendar, Video, Code, Cloud, Star, BookOpen, Award, LucideIcon } from 'lucide-react';
 import axiosClient from '@/lib/axios-client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -106,7 +106,7 @@ export interface ResourcePage<T> {
     totalPages: number;
   };
 }
-export interface CoursesPage extends ResourcePage<Course> {}
+export interface CoursesPage extends ResourcePage<Course> { }
 export interface CourseSection {
   id: string;
   title: string;
@@ -143,6 +143,8 @@ export interface CourseDetail {
   youtubeDemo: string | null;
   category: { id: string; title: string; slug: string };
   reviews?: any[];
+  sections?: CourseSection[];
+  offers?: any[];
 }
 
 export interface PublicPage {
@@ -286,16 +288,16 @@ export const useHomeStore = create<HomeState>()(
       subtext: 'Industry-aligned courses with guaranteed placement support. Learn from top experts, build real-world projects, and land your dream job in tech.',
       primaryCTA: { label: 'Explore Courses', href: '/courses' },
       secondaryCTA: { label: 'Request Free Demo' },
-     
+
     },
 
     features: [
       { icon: Headphones, title: '24x7 Support', description: 'Round-the-clock assistance from our dedicated support team to help you succeed.', gradient: 'from-blue-500 to-cyan-500' },
-  { icon: GraduationCap, title: 'Expert Trainers', description: 'Learn from industry veterans with 15+ years of real-world experience.', gradient: 'from-purple-500 to-pink-500' },
-  { icon: Calendar, title: 'Flexible Scheduling', description: 'Choose your own pace with batch timings that fit your lifestyle.', gradient: 'from-orange-500 to-amber-500' },
-  { icon: Video, title: 'Live Interactive Classes', description: 'Engage in real-time with instructors and peers through live sessions.', gradient: 'from-green-500 to-emerald-500' },
-  { icon: Code, title: 'Hands-on Projects', description: 'Build real-world applications with guided project-based learning.', gradient: 'from-red-500 to-rose-500' },
-  { icon: Cloud, title: 'Lifetime LMS Access', description: 'Access course materials, recordings, and resources forever.', gradient: 'from-indigo-500 to-violet-500' },
+      { icon: GraduationCap, title: 'Expert Trainers', description: 'Learn from industry veterans with 15+ years of real-world experience.', gradient: 'from-purple-500 to-pink-500' },
+      { icon: Calendar, title: 'Flexible Scheduling', description: 'Choose your own pace with batch timings that fit your lifestyle.', gradient: 'from-orange-500 to-amber-500' },
+      { icon: Video, title: 'Live Interactive Classes', description: 'Engage in real-time with instructors and peers through live sessions.', gradient: 'from-green-500 to-emerald-500' },
+      { icon: Code, title: 'Hands-on Projects', description: 'Build real-world applications with guided project-based learning.', gradient: 'from-red-500 to-rose-500' },
+      { icon: Cloud, title: 'Lifetime LMS Access', description: 'Access course materials, recordings, and resources forever.', gradient: 'from-indigo-500 to-violet-500' },
     ],
 
 
@@ -431,29 +433,114 @@ export const useHomeStore = create<HomeState>()(
         }));
       }
     },
-    fetchCourseBySlug: async (slug) => {
+    // fetchCourseBySlug: async (slug) => {
+    //   set((s) => ({ loading: { ...s.loading, courseDetail: true }, error: null }));
+    //   try {
+    //     const { data } = await axiosClient.get(`/public/courses/${slug}`);
+    //     const rawCourse = data.data;
+    //     if (rawCourse && rawCourse.sections) {
+    //       rawCourse.sections = rawCourse.sections.map((sec: any) => ({
+    //         ...sec,
+    //         sectionId: sec.sectionId || sec.section_id || "",
+    //         courseId: sec.courseId || sec.course_id || "",
+    //         createdAt: sec.createdAt || sec.created_at || "",
+    //         updatedAt: sec.updatedAt || sec.updated_at || "",
+    //       }));
+    //     }
+    //     set((s) => ({
+    //       courseDetail: data.data,
+    //       loading: { ...s.loading, courseDetail: false },
+    //     }));
+    //   } catch (err: any) {
+    //     set((s) => ({
+    //       error: err?.response?.data?.message || 'Failed to load course',
+    //       loading: { ...s.loading, courseDetail: false },
+    //     }));
+    //   }
+    // },
+
+
+    // Look for fetchCourseBySlug inside homeStore.ts and replace it with this version:
+
+ fetchCourseBySlug: async (slug) => {
       set((s) => ({ loading: { ...s.loading, courseDetail: true }, error: null }));
       try {
         const { data } = await axiosClient.get(`/public/courses/${slug}`);
+        const rawCourse = data.data;
+
+        if (rawCourse) {
+          // Unifies sections array placement whether it comes as 'sections' or 'courseSections'
+          const rawSections = rawCourse.sections || rawCourse.courseSections || [];
+          
+          rawCourse.sections = rawSections.map((sec: any) => {
+            // ─── UNIFIED CONTENT FALLBACK SYSTEM ───
+            // If root content is blank or empty '[]', immediately pull from nested section template data content node
+            let consolidatedContentStr = "[]";
+            if (sec.content && sec.content !== "[]" && sec.content.trim() !== "") {
+              consolidatedContentStr = sec.content;
+            } else if (sec.section?.content && sec.section.content !== "[]" && sec.section.content.trim() !== "") {
+              consolidatedContentStr = sec.section.content;
+            }
+
+            return {
+              ...sec,
+              id: sec.id,
+              title: sec.title,
+              content: consolidatedContentStr, // Holds verified valid string row data array mapping
+              view: sec.view || sec.views || "title-description",
+              position: Number(sec.position || 0),
+              sectionId: sec.sectionId || sec.section_id || sec.linked_section_id || "",
+              courseId: sec.courseId || sec.course_id || "",
+              section: sec.section || {
+                id: sec.section_id || sec.sectionId || "",
+                title: sec.title || ""
+              }
+            };
+          }).sort((a: any, b: any) => a.position - b.position);
+        }
+
         set((s) => ({
-          courseDetail: data.data,
+          courseDetail: rawCourse,
           loading: { ...s.loading, courseDetail: false },
         }));
       } catch (err: any) {
         set((s) => ({
-          error: err?.response?.data?.message || 'Failed to load course',
+          error: err?.response?.data?.message || 'Failed to load course details',
           loading: { ...s.loading, courseDetail: false },
         }));
       }
     },
+
+
     fetchCourseSections: async (courseId) => {
       set((s) => ({ loading: { ...s.loading, courseSections: true }, error: null }));
       try {
         const { data } = await axiosClient.get(`/public/course-sections?courseId=${courseId}`);
-        const sortedSections = (data.data || []).map((sec: any) => ({
-          ...sec,
-          courseId: sec.courseId || sec.course_id || ""
-        })).sort((a: any, b: any) => a.position - b.position);
+        const rawSections = data.data || [];
+        const sortedSections = rawSections.map((sec: any) => {
+          let consolidatedContentStr = "[]";
+          if (sec.content && sec.content !== "[]" && sec.content.trim() !== "") {
+            consolidatedContentStr = sec.content;
+          } else if (sec.section?.content && sec.section.content !== "[]" && sec.section.content.trim() !== "") {
+            consolidatedContentStr = sec.section.content;
+          }
+
+          return {
+            ...sec,
+            id: sec.id,
+            title: sec.title,
+            content: consolidatedContentStr,
+            view: sec.view || sec.views || "title-description",
+            position: Number(sec.position || 0),
+            sectionId: sec.sectionId || sec.section_id || sec.linked_section_id || "",
+            courseId: sec.courseId || sec.course_id || "",
+            section: sec.section || {
+              id: sec.section_id || sec.sectionId || "",
+              title: sec.title || ""
+            }
+          };
+        }).sort((a: any, b: any) => a.position - b.position);
+
         set((s) => ({
           courseSections: sortedSections,
           loading: { ...s.loading, courseSections: false },

@@ -8,34 +8,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { AdminCourse } from "@/lib/admin-api";
-import { 
-    Select, 
-    SelectContent, 
-    SelectItem, 
-    SelectTrigger, 
-    SelectValue 
+import { AdminCourse, CourseTemplateItem } from "@/lib/admin-api";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from "@/components/ui/select";
 
 interface CreateCourseFormProps {
     courseToEdit?: AdminCourse | null;
+    prefillFromTemplate?: CourseTemplateItem | null;
     onSuccess?: () => void;
 }
 
-export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCourseFormProps) {
-    const { 
-        createCourse, 
-        updateCourse, 
-        adminCourses, 
-        fetchAllCourses, 
-        isLoading, 
-        error, 
-        successMessage, 
+export default function CreateCourseForm({ courseToEdit, prefillFromTemplate, onSuccess }: CreateCourseFormProps) {
+    const {
+        createCourse,
+        updateCourse,
+        adminCourses,
+        fetchAllCourses,
+        isLoading,
+        error,
+        successMessage,
         clearMessages,
         adminCourseTemplates,
         fetchCourseTemplates
     } = useAdminStore();
-    
+
     const { categories, fetchCategories } = useHomeStore();
 
     const [formData, setFormData] = useState({
@@ -114,6 +115,45 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
         }
     }, [courseToEdit]);
 
+    // Bind template details if pre-filling
+    useEffect(() => {
+        if (prefillFromTemplate) {
+            setFormData(prev => ({
+                ...prev,
+                title: prefillFromTemplate.title || "",
+                categoryId: prefillFromTemplate.data?.courseDetails?.category_id || "",
+                courseTemplateId: prefillFromTemplate.id,
+                courseOverview: prefillFromTemplate.data?.courseDetails?.description || "",
+                duration: prefillFromTemplate.data?.courseDetails?.duration || "",
+                liveProjects: prefillFromTemplate.data?.courseDetails?.live_projects || "0",
+                selfPacedPrice: prefillFromTemplate.data?.courseDetails?.price || "",
+                liveOnlinePrice: prefillFromTemplate.data?.courseDetails?.price || "",
+                slug: (prefillFromTemplate.title || "")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)+/g, '')
+            }));
+        }
+    }, [prefillFromTemplate]);
+
+    // Prefill details when template is selected in the dropdown
+    useEffect(() => {
+        if (formData.courseTemplateId && adminCourseTemplates.length > 0) {
+            const template = adminCourseTemplates.find(t => t.id === formData.courseTemplateId);
+            if (template) {
+                setFormData(prev => ({
+                    ...prev,
+                    categoryId: prev.categoryId || template.data?.courseDetails?.category_id || "",
+                    courseOverview: prev.courseOverview || template.data?.courseDetails?.description || "",
+                    duration: prev.duration || template.data?.courseDetails?.duration || "",
+                    liveProjects: prev.liveProjects === "0" || !prev.liveProjects ? (template.data?.courseDetails?.live_projects || "0") : prev.liveProjects,
+                    selfPacedPrice: prev.selfPacedPrice || template.data?.courseDetails?.price || "",
+                    liveOnlinePrice: prev.liveOnlinePrice || template.data?.courseDetails?.price || "",
+                }));
+            }
+        }
+    }, [formData.courseTemplateId, adminCourseTemplates]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         setFormData(prev => ({
@@ -139,7 +179,7 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Coerce types to align with backend expectancies
         const payload = {
             ...formData,
@@ -175,7 +215,7 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                     <span className="whitespace-pre-line">{error}</span>
                 </div>
             )}
-            
+
             {successMessage && (
                 <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
@@ -187,10 +227,10 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Type Selection */}
                 <div className="space-y-2">
                     <Label htmlFor="type" className="font-semibold text-slate-700">Course Type</Label>
-                    <select 
-                        id="type" 
-                        name="type" 
-                        value={formData.type} 
+                    <select
+                        id="type"
+                        name="type"
+                        value={formData.type}
                         onChange={handleChange}
                         className="w-full h-11 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-medium"
                     >
@@ -204,10 +244,10 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Status Selection */}
                 <div className="space-y-2">
                     <Label htmlFor="status" className="font-semibold text-slate-700">Publishing Status</Label>
-                    <select 
-                        id="status" 
-                        name="status" 
-                        value={formData.status} 
+                    <select
+                        id="status"
+                        name="status"
+                        value={formData.status}
                         onChange={handleChange}
                         className="w-full h-11 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-medium"
                     >
@@ -219,51 +259,51 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Basic Info */}
                 <div className="space-y-2">
                     <Label htmlFor="title" className="font-semibold text-slate-700">Course Title</Label>
-                    <Input 
-                        id="title" 
-                        name="title" 
-                        value={formData.title} 
-                        onChange={handleTitleChange} 
-                        placeholder="e.g. Data Science Masters Program" 
+                    <Input
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleTitleChange}
+                        placeholder="e.g. Data Science Masters Program"
                         className="h-11 border-slate-200"
-                        required 
+                        required
                     />
                 </div>
-                
+
                 <div className="space-y-2">
                     <Label htmlFor="slug" className="font-semibold text-slate-700">Slug URL path</Label>
-                    <Input 
-                        id="slug" 
-                        name="slug" 
-                        value={formData.slug} 
-                        onChange={handleChange} 
-                        placeholder="e.g. data-science-masters-program" 
+                    <Input
+                        id="slug"
+                        name="slug"
+                        value={formData.slug}
+                        onChange={handleChange}
+                        placeholder="e.g. data-science-masters-program"
                         className="h-11 border-slate-200 font-mono text-xs"
-                        required 
+                        required
                     />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="subTitle" className="font-semibold text-slate-700">Subtitle / Tagline</Label>
-                    <Input 
-                        id="subTitle" 
-                        name="subTitle" 
-                        value={formData.subTitle} 
-                        onChange={handleChange} 
-                        placeholder="e.g. Job-ready program with placement support" 
+                    <Input
+                        id="subTitle"
+                        name="subTitle"
+                        value={formData.subTitle}
+                        onChange={handleChange}
+                        placeholder="e.g. Job-ready program with placement support"
                         className="h-11 border-slate-200"
                     />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="courseOverview" className="font-semibold text-slate-700">Course Description & Overview</Label>
-                    <Textarea 
-                        id="courseOverview" 
-                        name="courseOverview" 
-                        value={formData.courseOverview} 
-                        onChange={handleChange} 
-                        placeholder="Detailed syllabus introduction and overview text..." 
-                        rows={4} 
+                    <Textarea
+                        id="courseOverview"
+                        name="courseOverview"
+                        value={formData.courseOverview}
+                        onChange={handleChange}
+                        placeholder="Detailed syllabus introduction and overview text..."
+                        rows={4}
                         className="border-slate-200 bg-slate-50 focus:bg-white transition-all text-sm leading-relaxed p-4"
                     />
                 </div>
@@ -271,8 +311,8 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Categorization & Layout */}
                 <div className="space-y-2">
                     <Label htmlFor="categoryId" className="font-semibold text-slate-700">Course Category</Label>
-                    <Select 
-                        value={formData.categoryId} 
+                    <Select
+                        value={formData.categoryId}
                         onValueChange={(val) => setFormData(prev => ({ ...prev, categoryId: val }))}
                     >
                         <SelectTrigger id="categoryId" className="w-full h-11 bg-white border-slate-200 text-sm">
@@ -286,44 +326,46 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                     </Select>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="courseTemplateId" className="font-semibold text-slate-700">Course Template (Optional)</Label>
-                    <Select 
-                        value={formData.courseTemplateId || "none"} 
-                        onValueChange={(val) => setFormData(prev => ({ ...prev, courseTemplateId: val === "none" ? "" : val }))}
-                    >
-                        <SelectTrigger id="courseTemplateId" className="w-full h-11 bg-white border-slate-200 font-medium text-slate-700 text-sm">
-                            <SelectValue placeholder="No Template (Default)" />
-                        </SelectTrigger>
-                        <SelectContent position="popper">
-                            <SelectItem value="none">-- No Template (Default) --</SelectItem>
-                            {adminCourseTemplates.map(tmpl => (
-                                <SelectItem key={tmpl.id} value={tmpl.id}>{tmpl.title}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+                {!prefillFromTemplate && (
+                    <div className="space-y-2">
+                        <Label htmlFor="courseTemplateId" className="font-semibold text-slate-700">Course Template (Optional)</Label>
+                        <Select
+                            value={formData.courseTemplateId || "none"}
+                            onValueChange={(val) => setFormData(prev => ({ ...prev, courseTemplateId: val === "none" ? "" : val }))}
+                        >
+                            <SelectTrigger id="courseTemplateId" className="w-full h-11 bg-white border-slate-200 font-medium text-slate-700 text-sm">
+                                <SelectValue placeholder="No Template (Default)" />
+                            </SelectTrigger>
+                            <SelectContent position="popper">
+                                <SelectItem value="none">-- No Template (Default) --</SelectItem>
+                                {adminCourseTemplates.map(tmpl => (
+                                    <SelectItem key={tmpl.id} value={tmpl.id}>{tmpl.title}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
 
                 {/* Pricing Structure */}
                 <div className="space-y-2">
                     <Label htmlFor="selfPacedPrice" className="font-semibold text-slate-700">Self-Paced Price (₹)</Label>
-                    <Input 
-                        id="selfPacedPrice" 
-                        name="selfPacedPrice" 
-                        value={formData.selfPacedPrice} 
-                        onChange={handleChange} 
-                        placeholder="e.g. 25000" 
+                    <Input
+                        id="selfPacedPrice"
+                        name="selfPacedPrice"
+                        value={formData.selfPacedPrice}
+                        onChange={handleChange}
+                        placeholder="e.g. 25000"
                         className="h-11 border-slate-200"
                     />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="liveOnlinePrice" className="font-semibold text-slate-700">Live Online Price (₹)</Label>
-                    <Input 
-                        id="liveOnlinePrice" 
-                        name="liveOnlinePrice" 
-                        value={formData.liveOnlinePrice} 
-                        onChange={handleChange} 
-                        placeholder="e.g. 40000" 
+                    <Input
+                        id="liveOnlinePrice"
+                        name="liveOnlinePrice"
+                        value={formData.liveOnlinePrice}
+                        onChange={handleChange}
+                        placeholder="e.g. 40000"
                         className="h-11 border-slate-200"
                     />
                 </div>
@@ -331,48 +373,48 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Key Training Metrics */}
                 <div className="space-y-2">
                     <Label htmlFor="duration" className="font-semibold text-slate-700">Program Duration</Label>
-                    <Input 
-                        id="duration" 
-                        name="duration" 
-                        value={formData.duration} 
-                        onChange={handleChange} 
-                        placeholder="e.g. 6 Months or 40 Hours" 
+                    <Input
+                        id="duration"
+                        name="duration"
+                        value={formData.duration}
+                        onChange={handleChange}
+                        placeholder="e.g. 6 Months or 40 Hours"
                         className="h-11 border-slate-200"
                     />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="liveProjects" className="font-semibold text-slate-700">Live Projects Count</Label>
-                    <Input 
-                        id="liveProjects" 
-                        name="liveProjects" 
-                        value={formData.liveProjects} 
-                        onChange={handleChange} 
-                        placeholder="e.g. 5" 
+                    <Input
+                        id="liveProjects"
+                        name="liveProjects"
+                        value={formData.liveProjects}
+                        onChange={handleChange}
+                        placeholder="e.g. 5"
                         className="h-11 border-slate-200"
                     />
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="assignments" className="font-semibold text-slate-700">Assignments Count</Label>
-                    <Input 
-                        id="assignments" 
-                        name="assignments" 
-                        type="number" 
-                        value={formData.assignments} 
-                        onChange={handleChange} 
-                        placeholder="e.g. 20" 
+                    <Input
+                        id="assignments"
+                        name="assignments"
+                        type="number"
+                        value={formData.assignments}
+                        onChange={handleChange}
+                        placeholder="e.g. 20"
                         className="h-11 border-slate-200"
                     />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="downloadableResources" className="font-semibold text-slate-700">Downloadable Resources Count</Label>
-                    <Input 
-                        id="downloadableResources" 
-                        name="downloadableResources" 
-                        type="number" 
-                        value={formData.downloadableResources} 
-                        onChange={handleChange} 
-                        placeholder="e.g. 30" 
+                    <Input
+                        id="downloadableResources"
+                        name="downloadableResources"
+                        type="number"
+                        value={formData.downloadableResources}
+                        onChange={handleChange}
+                        placeholder="e.g. 30"
                         className="h-11 border-slate-200"
                     />
                 </div>
@@ -380,46 +422,46 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Media assets */}
                 <div className="space-y-2">
                     <Label htmlFor="previewImage" className="font-semibold text-slate-700">Preview Image URL</Label>
-                    <Input 
-                        id="previewImage" 
-                        name="previewImage" 
-                        value={formData.previewImage} 
-                        onChange={handleChange} 
-                        placeholder="https://cdn.com/preview.jpg" 
+                    <Input
+                        id="previewImage"
+                        name="previewImage"
+                        value={formData.previewImage}
+                        onChange={handleChange}
+                        placeholder="https://cdn.com/preview.jpg"
                         className="h-11 border-slate-200 text-xs"
                     />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="demoVideo" className="font-semibold text-slate-700">Demo MP4 Video URL</Label>
-                    <Input 
-                        id="demoVideo" 
-                        name="demoVideo" 
-                        value={formData.demoVideo} 
-                        onChange={handleChange} 
-                        placeholder="https://cdn.com/demo.mp4" 
+                    <Input
+                        id="demoVideo"
+                        name="demoVideo"
+                        value={formData.demoVideo}
+                        onChange={handleChange}
+                        placeholder="https://cdn.com/demo.mp4"
                         className="h-11 border-slate-200 text-xs"
                     />
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="youtubeDemoUrl" className="font-semibold text-slate-700">YouTube Demo URL</Label>
-                    <Input 
-                        id="youtubeDemoUrl" 
-                        name="youtubeDemoUrl" 
-                        value={formData.youtubeDemoUrl} 
-                        onChange={handleChange} 
-                        placeholder="https://youtube.com/watch?v=..." 
+                    <Input
+                        id="youtubeDemoUrl"
+                        name="youtubeDemoUrl"
+                        value={formData.youtubeDemoUrl}
+                        onChange={handleChange}
+                        placeholder="https://youtube.com/watch?v=..."
                         className="h-11 border-slate-200 text-xs"
                     />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="syllabus" className="font-semibold text-slate-700">Syllabus PDF URL</Label>
-                    <Input 
-                        id="syllabus" 
-                        name="syllabus" 
-                        value={formData.syllabus} 
-                        onChange={handleChange} 
-                        placeholder="https://cdn.com/syllabus.pdf" 
+                    <Input
+                        id="syllabus"
+                        name="syllabus"
+                        value={formData.syllabus}
+                        onChange={handleChange}
+                        placeholder="https://cdn.com/syllabus.pdf"
                         className="h-11 border-slate-200 text-xs"
                     />
                 </div>
@@ -427,38 +469,38 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Reviews & Social Stats */}
                 <div className="space-y-2">
                     <Label htmlFor="rating" className="font-semibold text-slate-700">Assigned Rating (1-5)</Label>
-                    <Input 
-                        id="rating" 
-                        name="rating" 
-                        type="number" 
-                        step="0.1" 
-                        min="1" 
-                        max="5" 
-                        value={formData.rating} 
-                        onChange={handleChange} 
+                    <Input
+                        id="rating"
+                        name="rating"
+                        type="number"
+                        step="0.1"
+                        min="1"
+                        max="5"
+                        value={formData.rating}
+                        onChange={handleChange}
                         className="h-11 border-slate-200"
                     />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="totalReviews" className="font-semibold text-slate-700">Total Reviews Count</Label>
-                    <Input 
-                        id="totalReviews" 
-                        name="totalReviews" 
-                        type="number" 
-                        value={formData.totalReviews} 
-                        onChange={handleChange} 
+                    <Input
+                        id="totalReviews"
+                        name="totalReviews"
+                        type="number"
+                        value={formData.totalReviews}
+                        onChange={handleChange}
                         className="h-11 border-slate-200"
                     />
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="totalLearners" className="font-semibold text-slate-700">Enrolled Learners Count</Label>
-                    <Input 
-                        id="totalLearners" 
-                        name="totalLearners" 
-                        type="number" 
-                        value={formData.totalLearners} 
-                        onChange={handleChange} 
+                    <Input
+                        id="totalLearners"
+                        name="totalLearners"
+                        type="number"
+                        value={formData.totalLearners}
+                        onChange={handleChange}
                         className="h-11 border-slate-200"
                     />
                 </div>
@@ -466,24 +508,24 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                 {/* Extra Resource Link */}
                 <div className="space-y-2">
                     <Label htmlFor="extraUrlTitle" className="font-semibold text-slate-700">Extra Resource Link Title</Label>
-                    <Input 
-                        id="extraUrlTitle" 
-                        name="extraUrlTitle" 
-                        value={formData.extraUrlTitle} 
-                        onChange={handleChange} 
-                        placeholder="e.g. Resource Links" 
+                    <Input
+                        id="extraUrlTitle"
+                        name="extraUrlTitle"
+                        value={formData.extraUrlTitle}
+                        onChange={handleChange}
+                        placeholder="e.g. Resource Links"
                         className="h-11 border-slate-200"
                     />
                 </div>
-                
+
                 <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="extraUrls" className="font-semibold text-slate-700">Extra URLs (Separated by |)</Label>
-                    <Input 
-                        id="extraUrls" 
-                        name="extraUrls" 
-                        value={formData.extraUrls} 
-                        onChange={handleChange} 
-                        placeholder="e.g. https://domain.com/docs|https://domain.com/git" 
+                    <Input
+                        id="extraUrls"
+                        name="extraUrls"
+                        value={formData.extraUrls}
+                        onChange={handleChange}
+                        placeholder="e.g. https://domain.com/docs|https://domain.com/git"
                         className="h-11 border-slate-200 font-mono text-xs"
                     />
                 </div>
@@ -499,12 +541,12 @@ export default function CreateCourseForm({ courseToEdit, onSuccess }: CreateCour
                                 .map(course => {
                                     const isSelected = formData.selectedCourses.includes(course.id);
                                     return (
-                                        <label 
-                                            key={course.id} 
+                                        <label
+                                            key={course.id}
                                             className={`flex items-center gap-2.5 p-2 rounded-lg bg-white border cursor-pointer transition-all select-none ${isSelected ? 'border-indigo-600 bg-indigo-50/30' : 'border-slate-200 hover:border-slate-300'}`}
                                         >
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={isSelected}
                                                 onChange={() => {
                                                     setFormData(prev => {

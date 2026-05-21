@@ -227,7 +227,7 @@ export const fetchAdminCourseSections = async (courseId: string): Promise<AdminR
 
 export const updateSectionPositions = async (courseId: string, positions: { id: string, position: number }[]): Promise<AdminResponse<any>> => {
     try {
-        const response = await axiosClient.post<AdminResponse<any>>(`/admin/course-sections/reorder`, { courseId, positions });
+        const response = await axiosClient.post<AdminResponse<any>>(`/admin/sections/reorder`, { courseId, positions });
         return response.data;
     } catch {
         return new Promise(resolve => setTimeout(() => resolve({ success: true, message: "Positions updated" }), 300));
@@ -252,12 +252,12 @@ export const updateAdminCourseSection = async (id: string, data: {
     content?: string;
     position?: number;
 }): Promise<AdminResponse<any>> => {
-    const response = await axiosClient.patch<AdminResponse<any>>(`/admin/course-sections/${id}`, data);
+    const response = await axiosClient.patch<AdminResponse<any>>(`/admin/sections/${id}`, data);
     return response.data;
 };
 
 export const deleteAdminCourseSection = async (id: string): Promise<AdminResponse<any>> => {
-    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/course-sections/${id}`);
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/sections/${id}`);
     return response.data;
 };
 
@@ -418,6 +418,16 @@ export const fetchAdminCourseTemplateById = async (id: string): Promise<AdminRes
 
 export const updateAdminCourseTemplate = async (id: string, data: any): Promise<AdminResponse<CourseTemplateItem>> => {
     const response = await axiosClient.patch<AdminResponse<CourseTemplateItem>>(`/admin/course-templates/${id}`, data);
+    return response.data;
+};
+
+export const createAdminCourseTemplate = async (data: any): Promise<AdminResponse<CourseTemplateItem>> => {
+    const response = await axiosClient.post<AdminResponse<CourseTemplateItem>>(`/admin/course-templates`, data);
+    return response.data;
+};
+
+export const deleteAdminCourseTemplate = async (id: string): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/course-templates/${id}`);
     return response.data;
 };
 
