@@ -44,7 +44,7 @@ const FIXED_NAV_ITEMS = [
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
     { id: "projects", label: "Projects", icon: Layers },
     { id: "enrollment", label: "Enrollment Options", icon: Calendar },
-    { id: "faqs", label: "FAQ's", icon: HelpCircle },
+  
     { id: "reviews", label: "Reviews", icon: Star },
     { id: "skills", label: "Skills & Tools", icon: ListChecks },
     { id: "outlook", label: "Job Outlook", icon: TrendingUp },
@@ -52,10 +52,7 @@ const FIXED_NAV_ITEMS = [
     { id: "certification", label: "Certification", icon: Award },
 ];
 
-/* ═══════════════════════════════════════════════
-   MAIN PANEL — scroll-spy + smooth scroll
-   Refactored to use individual section components
-═══════════════════════════════════════════════ */
+
 export default function CourseContentPanel({ course, sections }: Props) {
     const [activeId, setActiveId] = useState("overview");
     const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -188,7 +185,7 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                 {id === "syllabus" && <SyllabusSection course={course} sections={sections || course?.sections || []} />}
                                 {id === "projects" && <ProjectsSection course={course} sections={sections || course?.sections || []} />}
                                 {id === "enrollment" && <EnrollmentSection course={course} sections={sections || course?.sections || []} />}
-                                {id === "faqs" && <FaqSection course={course} sections={sections || course?.sections || []} />}
+                                {/* {id === "faqs" && <FaqSection course={course} sections={sections || course?.sections || []} />} */}
 
                                 {id === "reviews" && <ReviewsSection course={course} />}
                                 {id === "certification" && <CertificationSection course={course} />}

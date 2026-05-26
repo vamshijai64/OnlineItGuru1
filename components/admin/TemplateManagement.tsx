@@ -215,15 +215,29 @@ export default function TemplateManagement() {
 
             const mappedSections = sections.map((sec: any) => {
                 const sId = sec.section_id || sec.sectionId || sec.section?.id || sec.section?.section_id;
+                const instId = sec.id || generateUUID();
+                
+                // Find matching definition to restore allowed views list
+                const matchingDef = adminSections.find(s => s.id === sId || s.code === sec.section?.code) || 
+                                    SECTION_PRESETS.find(p => p.code === sec.section?.code);
+                const allowedViews = matchingDef ? ((matchingDef as any).views || (matchingDef as any).view || "") : "";
+
                 return {
                     ...sec,
+                    id: instId,
+                    instanceId: instId,
                     section_id: sId,
                     sectionId: sId,
                     section: sec.section ? {
                         ...sec.section,
                         id: sId,
-                        section_id: sId
-                    } : null
+                        section_id: sId,
+                        views: sec.section.views || allowedViews
+                    } : {
+                        id: sId,
+                        section_id: sId,
+                        views: allowedViews
+                    }
                 };
             });
 
@@ -298,15 +312,37 @@ export default function TemplateManagement() {
         }));
     };
 
+    // Merge database definitions and code presets deduplicated
+    const getAvailableSections = () => {
+        const merged = [...adminSections];
+        SECTION_PRESETS.forEach(preset => {
+            const exists = merged.some(s => s.code === preset.code || s.title.toLowerCase() === preset.title.toLowerCase());
+            if (!exists) {
+                merged.push({
+                    id: generateUUID(),
+                    ...preset,
+                    views: preset.view,
+                    fields: preset.fields
+                } as any);
+            }
+        });
+        return merged;
+    };
+
     // Adding a preset/dynamic section
     const addPresetSection = (sec: any) => {
         const nextPos = editForm.courseSections.length;
         const sId = sec.id || sec.section_id || sec.sectionId || generateUUID();
+        const instId = generateUUID();
+
+        const allowedViews = sec.views || sec.view || "title-description";
 
         const newSectionItem = {
             course_id: "",
             section_id: sId,
             sectionId: sId,
+            id: instId,
+            instanceId: instId,
             title: sec.title,
             position: nextPos,
             content: "[]",
@@ -314,7 +350,7 @@ export default function TemplateManagement() {
                 id: sId,
                 title: sec.title,
                 code: sec.code,
-                views: sec.views || sec.view || "title-description",
+                views: allowedViews,
                 form: sec.form || null,
                 description: sec.description || null,
                 type: sec.type || null,
@@ -328,7 +364,7 @@ export default function TemplateManagement() {
                 updated_at: sec.updated_at || new Date().toISOString(),
                 section: null
             },
-            view: sec.views || sec.view || "title-description"
+            view: allowedViews.split("|")[0]
         };
 
         setEditForm(prev => ({
@@ -715,7 +751,7 @@ export default function TemplateManagement() {
 
                                     return (
                                         <div 
-                                            key={index} 
+                                            key={section.instanceId || section.id || index} 
                                             className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all"
                                         >
                                             <div className="space-y-1 flex-1 pr-4">
@@ -734,9 +770,33 @@ export default function TemplateManagement() {
                                                         }}
                                                         className="h-9 w-60 text-xs font-bold text-slate-900 border-slate-200 focus-visible:ring-indigo-500 bg-white"
                                                     />
-                                                    <Badge variant="secondary" className="font-mono text-[9px] bg-slate-50 text-indigo-600 border border-slate-200 rounded">
-                                                        {section.view}
-                                                    </Badge>
+                                                    
+                                                    {/* View layout selector dropdown */}
+                                                    {(() => {
+                                                        const allowedViews = (section.section?.views || section.section?.view || "title-description").split("|");
+                                                        if (allowedViews.length <= 1) {
+                                                            return (
+                                                                <Badge variant="secondary" className="font-mono text-[9px] bg-slate-50 text-indigo-600 border border-slate-200 rounded">
+                                                                    {section.view}
+                                                                </Badge>
+                                                            );
+                                                        }
+                                                        return (
+                                                            <select
+                                                                value={section.view}
+                                                                onChange={(e) => {
+                                                                    const updated = [...editForm.courseSections];
+                                                                    updated[index] = { ...updated[index], view: e.target.value };
+                                                                    setEditForm(prev => ({ ...prev, courseSections: updated }));
+                                                                }}
+                                                                className="h-8 rounded border border-slate-200 bg-white px-2 text-[10px] outline-none focus:border-indigo-500 font-semibold text-slate-700 cursor-pointer"
+                                                            >
+                                                                {allowedViews.map((v: string) => (
+                                                                    <option key={v} value={v}>{v}</option>
+                                                                ))}
+                                                            </select>
+                                                        );
+                                                    })()}
                                                 </div>
                                                 <div className="flex items-center gap-4 text-[10px] text-slate-500 pl-7">
                                                     <span>Code: <span className="font-mono text-slate-600">{section.section?.code}</span></span>
@@ -800,25 +860,59 @@ export default function TemplateManagement() {
                             </div>
 
                             {/* Preset Add Toolbar */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-200/50">
-                                <div className="flex items-center gap-2">
-                                    <Plus className="h-4 w-4 text-indigo-600 shrink-0" />
-                                    <span className="text-xs font-bold text-slate-700">Add Predefined Section:</span>
+                            <div className="flex flex-col gap-4 bg-slate-50/50 p-5 rounded-2xl border border-slate-200/50">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-2">
+                                        <Plus className="h-4 w-4 text-indigo-600 shrink-0" />
+                                        <span className="text-xs font-bold text-slate-700">Add Predefined Section:</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {getAvailableSections().slice(0, 8).map((sec: any) => (
+                                            <Button
+                                                key={sec.id || sec.title}
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => addPresetSection(sec)}
+                                                className="h-8 text-[10px] font-bold border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 gap-1 bg-white"
+                                                type="button"
+                                            >
+                                                <Plus className="h-3 w-3" />
+                                                {sec.title}
+                                            </Button>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {(adminSections.length > 0 ? adminSections : SECTION_PRESETS).map((sec: any) => (
-                                        <Button
-                                            key={sec.id || sec.title}
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => addPresetSection(sec)}
-                                            className="h-8 text-[10px] font-bold border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 gap-1 bg-white"
-                                            type="button"
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-slate-200/60">
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase shrink-0">Select from all schemas:</span>
+                                    <div className="flex-1 flex gap-2">
+                                        <select
+                                            id="all-sections-select"
+                                            className="h-9 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs outline-none focus:border-indigo-500 font-semibold text-slate-700 cursor-pointer"
                                         >
-                                            <Plus className="h-3 w-3" />
-                                            {sec.title}
+                                            <option value="">Choose a section type...</option>
+                                            {getAvailableSections().map((sec: any) => (
+                                                <option key={sec.id || sec.title} value={JSON.stringify(sec)}>
+                                                    {sec.title} ({sec.code || sec.views || sec.view})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <Button
+                                            type="button"
+                                            onClick={() => {
+                                                const selectEl = document.getElementById('all-sections-select') as HTMLSelectElement;
+                                                if (selectEl && selectEl.value) {
+                                                    try {
+                                                        const sec = JSON.parse(selectEl.value);
+                                                        addPresetSection(sec);
+                                                        selectEl.value = "";
+                                                    } catch {}
+                                                }
+                                            }}
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white h-9 text-xs font-semibold px-4 shrink-0"
+                                        >
+                                            Add Selected
                                         </Button>
-                                    ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>

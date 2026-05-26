@@ -38,7 +38,7 @@ export default function Home() {
       <ExpertTrainers />
       {/* <LatestBlogs />      */}
       {/* <InterviewQuestions />     */}
-      <PlacementModule />
+      <PlacementModule theme="light" />
       <Testimonials />
       {/* <HomeFAQ /> */}
       <HomeContact />

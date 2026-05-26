@@ -183,6 +183,29 @@ export const fetchAdminCategories = async (): Promise<AdminResponse<any[]>> => {
     return response.data;
 };
 
+export const createAdminCategory = async (data: {
+    title: string;
+    slug: string;
+    position: number;
+    image?: string;
+    description?: string;
+    categoryId?: string | null;
+}): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.post<AdminResponse<any>>('/admin/categories', data);
+    return response.data;
+};
+
+export const updateAdminCategory = async (id: string, data: {
+    title?: string;
+    slug?: string;
+    position?: number;
+    image?: string;
+    description?: string;
+}): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.patch<AdminResponse<any>>(`/admin/categories/${id}`, data);
+    return response.data;
+};
+
 export const fetchAdminCourses = async (
     page: number = 1,
     limit: number = 10,
@@ -242,10 +265,14 @@ export const createAdminCourseSection = async (data: {
     content: string;
     position: number;
 }): Promise<AdminResponse<any>> => {
-    const response = await axiosClient.post<AdminResponse<any>>(`/admin/sections`, data);
+    const payload = {
+        ...data,
+        course_id: data.courseId,
+        section_id: data.sectionId
+    };
+    const response = await axiosClient.post<AdminResponse<any>>(`/admin/sections`,  payload);
     return response.data;
 };
-
 export const updateAdminCourseSection = async (id: string, data: {
     title?: string;
     view?: string;

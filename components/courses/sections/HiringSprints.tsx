@@ -118,65 +118,60 @@ export default function HiringSprints({ course }: { course: CourseDetail }) {
         displayData = DYNAMIC_SPRINTS.python;
     }
 
-    return (
-        <section className="space-y-8">
-            <div className="text-center mb-10">
-                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 font-outfit mb-4">Hiring Sprints</h2>
-                <div className="h-1 w-20 bg-indigo-600 mx-auto rounded-full" />
-            </div>
+    // Helper to generate a clean, natural description paragraph matching the screenshot design style
+    const getDescription = (sprint: typeof SPRINTS_DATA[0]) => {
+        const expText = sprint.experience.toLowerCase().includes('year') || sprint.experience.toLowerCase().includes('experience')
+            ? `candidates with ${sprint.experience}`
+            : `${sprint.experience.toLowerCase()} candidates`;
+        return `${sprint.company} is actively recruiting for a ${sprint.role} to join their team. This is a ${sprint.type.toLowerCase()} opportunity based in ${sprint.location}, suitable for ${expText}.`;
+    };
 
-            <div className="grid lg:grid-cols-3 gap-8 items-start">
-                {/* Description Column */}
-                <div className="lg:col-span-1 space-y-4">
-                    <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6">
-                        <Briefcase className="h-6 w-6" />
-                    </div>
-                    <p className="text-slate-600 leading-relaxed text-lg">
+    return (
+        <section className="bg-slate-50/60 border border-slate-100/80 rounded-[2.5rem] p-8 md:p-12 space-y-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 pb-6 border-b border-slate-200/60">
+                <div className="max-w-2xl space-y-3">
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 font-outfit tracking-tight">Hiring Sprints</h2>
+                    <p className="text-slate-600 leading-relaxed text-sm md:text-base font-normal">
                         Our Hiring Sprints give you the chance to hear directly from Hiring Managers and Business Heads about job roles, projects, growth opportunities, and the recruitment process. Ask questions, clarify doubts, and perform your best in the interview.
                     </p>
                 </div>
-
-                <div className="lg:col-span-2 grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {displayData.map((sprint, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center group"
-                        >
-                            <div className="h-16 w-full flex items-center justify-center mb-6">
-                                {sprint.logo ? (
-                                    <img 
-                                        src={sprint.logo} 
-                                        alt={sprint.company} 
-                                        className="max-h-full max-w-[120px] object-contain group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                ) : (
-                                    <span className="font-bold text-slate-400">{sprint.company}</span>
-                                )}
-                            </div>
-                            
-                            <h3 className="font-bold text-slate-900 text-lg mb-4">{sprint.role}</h3>
-                            
-                            <ul className="space-y-2 text-slate-500 text-sm font-medium w-full">
-                                <li className="flex items-center justify-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                                    {sprint.location}
-                                </li>
-                                <li className="flex items-center justify-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                                    {sprint.type}
-                                </li>
-                                <li className="flex items-center justify-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                                    {sprint.experience}
-                                </li>
-                            </ul>
-                        </motion.div>
-                    ))}
+                <div className="text-slate-400 text-sm font-semibold tracking-wide shrink-0">
+                    {displayData.length} {displayData.length === 1 ? 'Sprint' : 'Sprints'}
                 </div>
+            </div>
+
+            {/* Grid of Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayData.map((sprint, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_10px_30px_-6px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300 flex flex-col items-start text-left group"
+                    >
+                        {/* Logo Container */}
+                        <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-slate-50 p-2.5 border border-slate-100 mb-6">
+                            {sprint.logo ? (
+                                <img 
+                                    src={sprint.logo} 
+                                    alt={sprint.company} 
+                                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                />
+                            ) : (
+                                <span className="font-bold text-slate-400 text-lg">{sprint.company.substring(0, 2).toUpperCase()}</span>
+                            )}
+                        </div>
+                        
+                        <h3 className="font-bold text-slate-900 text-xl font-outfit mb-3">{sprint.company}</h3>
+                        
+                        <p className="text-slate-600 text-sm leading-relaxed font-normal">
+                            {getDescription(sprint)}
+                        </p>
+                    </motion.div>
+                ))}
             </div>
         </section>
     );

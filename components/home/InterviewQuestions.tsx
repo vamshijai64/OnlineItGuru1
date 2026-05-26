@@ -8,7 +8,7 @@ import { useHomeStore } from '@/store/homeStore';
 
 export default function InterviewQuestions() {
   const questions = useHomeStore((state) => state.interviewQuestions);
-  const loading   = useHomeStore((state) => state.loading.interviewQuestions);
+  const loading = useHomeStore((state) => state.loading.interviewQuestions);
 
   return (
     <section className="relative py-24 px-6 bg-white">

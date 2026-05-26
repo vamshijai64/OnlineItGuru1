@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import {
     createCourse, CreateCourseData, CourseRequestData, AdminCourse, fetchAdminCourseById,
-    updateAdminCourse, deleteAdminCourse, fetchAdminCategories, fetchAdminCourses,
+    updateAdminCourse, deleteAdminCourse, fetchAdminCategories, createAdminCategory, updateAdminCategory, fetchAdminCourses,
     fetchAdminInterviewQuestions, fetchAdminOffers, fetchAdminReviews,
-    fetchAdminCoursesByCategory, fetchAdminCourseSections, updateSectionPositions,
+    fetchAdminCoursesByCategory, updateSectionPositions,
     fetchAdminContentList, fetchAdminContentById, createAdminContent,
     updateAdminContent, deleteAdminContent, CreateContentData, UpdateContentData, ContentItem,
     fetchAdminUsersList, fetchAdminUserById, createAdminUser, updateAdminUser, deleteAdminUser, CreateUserData, UpdateUserData, UserItem,
@@ -76,6 +76,8 @@ interface AdminState {
 
     createCourse: (data: CourseRequestData) => Promise<{ success: boolean; message?: string }>;
     fetchCategories: () => Promise<void>;
+    createCategory: (data: { title: string; slug: string; position: number; image?: string; description?: string; categoryId?: string | null }) => Promise<{ success: boolean; message?: string }>;
+    updateCategory: (id: string, data: { title?: string; slug?: string; position?: number; image?: string; description?: string }) => Promise<{ success: boolean; message?: string }>;
     fetchAllCourses: (page?: number, limit?: number, search?: string, category?: string) => Promise<void>;
     fetchCourseById: (id: string) => Promise<AdminCourse | null>;
     updateCourse: (id: string, data: CourseRequestData) => Promise<{ success: boolean; message?: string }>;
@@ -91,8 +93,8 @@ interface AdminState {
     fetchCourseSections: (courseId: string) => Promise<void>;
     updateCourseSectionPositions: (courseId: string, positions: { id: string, position: number }[]) => Promise<boolean>;
     createCourseSectionItem: (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => Promise<{ success: boolean; message?: string }>;
-    updateCourseSectionItem: (id: string, data: { title?: string; view?: string; content?: string; position?: number }) => Promise<{ success: boolean; message?: string }>;
-    deleteCourseSectionItem: (id: string) => Promise<{ success: boolean; message?: string }>;
+    updateCourseSectionItem: (id: string, data: { title?: string; view?: string; content?: string; position?: number }, courseId?: string) => Promise<{ success: boolean; message?: string }>;
+    deleteCourseSectionItem: (id: string, courseId?: string) => Promise<{ success: boolean; message?: string }>;
     fetchContentList: (type: string, page?: number, limit?: number, search?: string) => Promise<void>;
     fetchContentById: (type: string, id: string) => Promise<void>;
     createContentItem: (type: string, data: CreateContentData) => Promise<{ success: boolean; message?: string }>;
@@ -119,7 +121,7 @@ interface AdminState {
     clearMessages: () => void;
 }
 
-export const useAdminStore = create<AdminState>((set) => ({
+export const useAdminStore = create<AdminState>()((set, get) => ({
     isLoading: false,
     error: null,
     successMessage: null,
@@ -176,6 +178,42 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
+    createCategory: async (data) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminCategory(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'Category created successfully' });
+                return { success: true, message: 'Category created successfully' };
+            }
+            throw new Error(response.message || 'Failed to create category');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    updateCategory: async (id, data) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminCategory(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'Category updated successfully' });
+                return { success: true, message: 'Category updated successfully' };
+            }
+            throw new Error(response.message || 'Failed to update category');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
     fetchAllCourses: async (page?: number, limit?: number, search?: string, category?: string) => {
         set({ isLoading: true, error: null });
         try {
@@ -225,12 +263,20 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
+
     fetchCourseById: async (id: string) => {
         set({ isLoading: true, error: null });
         try {
             const response = await fetchAdminCourseById(id);
             if (response.success && response.data) {
-                set({ isLoading: false });
+                // The course response already embeds courseSections — populate the
+                // store so CourseSections.tsx renders immediately without a separate fetch.
+                const sections = (response.data as any).courseSections;
+                if (Array.isArray(sections)) {
+                    set({ courseSections: sections, isLoading: false });
+                } else {
+                    set({ isLoading: false });
+                }
                 return response.data;
             }
             throw new Error(response.message || 'Failed to fetch course');
@@ -435,30 +481,31 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    fetchCourseSections: async (courseId: string) => {
-        set({ isLoading: true, error: null });
-        try {
-            const response = await fetchAdminCourseSections(courseId);
-            if (response.success) {
-                set({
-                    courseSections: response.data || [],
-                    isLoading: false
-                });
-            }
-        } catch (error: any) {
-            set({ isLoading: false });
-        }
+    fetchCourseSections: async (_courseId: string) => {
+        // No backend endpoint for fetching course-sections; sections are managed
+        // via the parent course PATCH. This is intentionally a no-op.
     },
 
     updateCourseSectionPositions: async (courseId: string, positions: { id: string, position: number }[]) => {
         set({ isLoading: true, error: null });
         try {
+            const currentSections = get().courseSections || [];
+            const updatedSections = currentSections.map((s: any) => {
+                const posObj = positions.find(p => p.id === s.id || p.id === s.sectionId || p.id === s.section_id);
+                if (posObj) {
+                    return { ...s, position: posObj.position };
+                }
+                return s;
+            }).sort((a: any, b: any) => a.position - b.position);
+
+            // Use the dedicated reorder endpoint — NOT updateAdminCourse.
+            // Calling updateAdminCourse with a partial payload (only courseSections)
+            // triggers a full SQL UPDATE on the courses table which hits the
+            // NOT NULL constraint on the `description` column.
             const response = await updateSectionPositions(courseId, positions);
             if (response.success) {
-                // Fetch the updated sections
-                const updatedResponse = await fetchAdminCourseSections(courseId);
                 set({
-                    courseSections: updatedResponse.data || [],
+                    courseSections: updatedSections,
                     isLoading: false,
                     successMessage: 'Section positions updated successfully'
                 });
@@ -686,7 +733,7 @@ export const useAdminStore = create<AdminState>((set) => ({
                         if (typeof parsedData === 'string') {
                             try {
                                 parsedData = JSON.parse(parsedData);
-                            } catch {}
+                            } catch { }
                         }
                         if (typeof parsedData === 'object' && parsedData !== null) {
                             courseDetails = parsedData.courseDetails || {};
@@ -973,10 +1020,43 @@ export const useAdminStore = create<AdminState>((set) => ({
     createCourseSectionItem: async (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {
-            const response = await createAdminCourseSection(data);
+            const courseId = data.courseId;
+
+            // Fetch the full live course so we can spread all required fields
+            // (e.g. `description`) into the PATCH payload and avoid the NOT NULL error.
+            const courseResponse = await fetchAdminCourseById(courseId);
+            if (!courseResponse.success || !courseResponse.data) {
+                throw new Error('Could not load course data for section create');
+            }
+            const liveCourse = courseResponse.data;
+
+            const currentSections = get().courseSections || [];
+
+            const newSection = {
+                courseId: courseId,
+                course_id: courseId,
+                sectionId: data.sectionId,
+                section_id: data.sectionId,
+                title: data.title,
+                view: data.view,
+                content: data.content || "[]",
+                position: data.position ?? currentSections.length
+            };
+
+            const updatedSections = [...currentSections, newSection].sort((a: any, b: any) => a.position - b.position);
+
+            const response = await updateAdminCourse(courseId, {
+                ...liveCourse,
+                courseSections: updatedSections
+            } as any);
             if (response.success) {
-                set({ isLoading: false, successMessage: response.message || 'Course section created successfully' });
-                return { success: true, message: response.message };
+                const freshSections = (response.data as any)?.courseSections;
+                set({
+                    courseSections: Array.isArray(freshSections) ? freshSections : updatedSections,
+                    isLoading: false,
+                    successMessage: 'Course section created successfully'
+                });
+                return { success: true, message: 'Course section created successfully' };
             }
             throw new Error(response.message || 'Failed to create course section');
         } catch (error: any) {
@@ -991,15 +1071,66 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    updateCourseSectionItem: async (id: string, data: { title?: string; view?: string; content?: string; position?: number }) => {
+    updateCourseSectionItem: async (id: string, data: { title?: string; view?: string; content?: string; position?: number }, courseId?: string) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {
-            const response = await updateAdminCourseSection(id, data);
+            const currentSections = get().courseSections || [];
+            const targetSection = currentSections.find((s: any) => s.id === id || s.sectionId === id || s.section_id === id);
+            const resolvedCourseId = courseId || targetSection?.courseId || targetSection?.course_id;
+
+            if (!resolvedCourseId) {
+                throw new Error('Course ID not found for the section update');
+            }
+
+            // Fetch the full live course so we can spread all required fields
+            // (e.g. `description`) into the PATCH payload and avoid the NOT NULL error.
+            const courseResponse = await fetchAdminCourseById(resolvedCourseId);
+            if (!courseResponse.success || !courseResponse.data) {
+                throw new Error('Could not load course data for section update');
+            }
+            const liveCourse = courseResponse.data;
+
+            // Build updatedSections from the LIVE server sections (matching by sectionId)
+            // so we always send current IDs that the backend knows about.
+            const liveSections: any[] = (liveCourse as any).courseSections || currentSections;
+            const updatedSections = liveSections.map((s: any) => {
+                const isTarget =
+                    s.id === id ||
+                    s.sectionId === id ||
+                    s.sectionid === id;
+
+                if (isTarget) {
+                    return { ...s, ...data, courseId: resolvedCourseId, course_id: resolvedCourseId };
+                }
+                return s;
+            });
+
+            const response = await updateAdminCourse(resolvedCourseId, {
+                ...liveCourse,
+                courseSections: updatedSections
+            } as any);
             if (response.success) {
-                set({ isLoading: false, successMessage: response.message || 'Course section updated successfully' });
-                return { success: true, message: response.message };
+                // The backend recreates sections with new IDs and may reset content.
+                // Re-apply our edit on top of the fresh server sections by matching sectionId.
+                const freshSections: any[] = (response.data as any)?.courseSections;
+                let finalSections = updatedSections;
+                if (Array.isArray(freshSections)) {
+                    finalSections = freshSections.map((fresh: any) => {
+                        const wasTarget =
+                            targetSection &&
+                            (fresh.sectionId === targetSection.sectionId ||
+                                fresh.id === targetSection.id);
+                        if (wasTarget) {
+                            return { ...fresh, ...data };
+                        }
+                        return fresh;
+                    });
+                }
+                set({ courseSections: finalSections, isLoading: false, successMessage: 'Course section updated successfully' });
+                return { success: true, message: 'Course section updated successfully' };
             }
             throw new Error(response.message || 'Failed to update course section');
+
         } catch (error: any) {
             let message = 'An unexpected error occurred';
             if (axios.isAxiosError(error) && error.response) {
@@ -1012,13 +1143,41 @@ export const useAdminStore = create<AdminState>((set) => ({
         }
     },
 
-    deleteCourseSectionItem: async (id: string) => {
+    deleteCourseSectionItem: async (id: string, courseId?: string) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {
-            const response = await deleteAdminCourseSection(id);
+            const currentSections = get().courseSections || [];
+            const targetSection = currentSections.find((s: any) => s.id === id || s.sectionId === id || s.section_id === id);
+            const resolvedCourseId = courseId || targetSection?.courseId || targetSection?.course_id;
+
+            if (!resolvedCourseId) {
+                throw new Error('Course ID not found for the section deletion');
+            }
+
+            // Fetch the full live course so we can spread all required fields
+            // (e.g. `description`) into the PATCH payload and avoid the NOT NULL error.
+            const courseResponse = await fetchAdminCourseById(resolvedCourseId);
+            if (!courseResponse.success || !courseResponse.data) {
+                throw new Error('Could not load course data for section deletion');
+            }
+            const liveCourse = courseResponse.data;
+
+            const remainingSections = currentSections
+                .filter((s: any) => s.id !== id && s.sectionId !== id && s.section_id !== id)
+                .map((s: any, idx: number) => ({ ...s, position: idx }));
+
+            const response = await updateAdminCourse(resolvedCourseId, {
+                ...liveCourse,
+                courseSections: remainingSections
+            } as any);
             if (response.success) {
-                set({ isLoading: false, successMessage: response.message || 'Course section deleted successfully' });
-                return { success: true, message: response.message };
+                const freshSections = (response.data as any)?.courseSections;
+                set({
+                    courseSections: Array.isArray(freshSections) ? freshSections : remainingSections,
+                    isLoading: false,
+                    successMessage: 'Course section deleted successfully'
+                });
+                return { success: true, message: 'Course section deleted successfully' };
             }
             throw new Error(response.message || 'Failed to delete course section');
         } catch (error: any) {

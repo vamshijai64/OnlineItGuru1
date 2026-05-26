@@ -16,6 +16,7 @@ import {
 import CourseBanner from "@/components/courses/CourseBanner";
 import CourseContentPanel from "@/components/courses/CourseContentPanel";
 import PlacementModule from "@/components/home/PlacementModule";
+import FaqSection from "@/components/courses/sections/FaqSection";
 
 // ── Icons for Category View ──────────────────────────────────────────────────
 const iconMap: Record<string, React.ElementType> = {
@@ -282,6 +283,9 @@ function CourseDetailView({ slug }: { slug: string }) {
     <div className="min-h-screen bg-slate-50">
       <CourseBanner course={course} />
       <CourseContentPanel course={course} sections={sections.length > 0 ? sections : (course.sections || [])} />
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-16">
+        <FaqSection course={course} sections={sections.length > 0 ? sections : (course.sections || [])} />
+      </div>
       <PlacementModule />
     </div>
   );

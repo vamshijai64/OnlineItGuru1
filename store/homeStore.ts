@@ -34,6 +34,8 @@ export interface Blog {
   featureImage: string | null;
   publishedAt: string;
   type: string;
+  keywords?: string | null;
+  content?: string;
 }
 
 interface ApiCourse {
@@ -74,6 +76,8 @@ interface ApiBlog {
   featureImage: string | null;
   publishedAt: string;
   type: string;
+  keywords?: string | null;
+  content?: string;
 }
 export interface InterviewQuestion {
   id: string;
@@ -81,6 +85,9 @@ export interface InterviewQuestion {
   slug: string;
   featureImage: string | null;
   publishedAt: string;
+  type?: string;
+  keywords?: string | null;
+  content?: string;
 }
 export interface Tutorial {
   id: string;
@@ -88,6 +95,9 @@ export interface Tutorial {
   slug: string;
   featureImage: string | null;
   publishedAt: string;
+  type: string;
+  keywords?: string | null;
+  content?: string;
 }
 export interface Category {
   id: string;
@@ -201,6 +211,8 @@ function mapBlog(b: ApiBlog): Blog {
       : (blogImageMap[b.type] ?? blogImageMap['blog']),
     publishedAt: b.publishedAt,
     type: b.type,
+    keywords: b.keywords ?? null,
+    content: b.content,
   };
 }
 function mapInterviewQuestion(item: ApiBlog): InterviewQuestion {
@@ -212,6 +224,9 @@ function mapInterviewQuestion(item: ApiBlog): InterviewQuestion {
       ? `${BASE_IMAGE_URL}${item.featureImage}`
       : 'https://images.unsplash.com/photo-1573497620053-ea5300f94f21?w=800&q=80',
     publishedAt: item.publishedAt,
+    type: item.type,
+    keywords: item.keywords ?? null,
+    content: item.content,
   };
 }
 function mapTutorial(item: ApiBlog): Tutorial {
@@ -223,6 +238,9 @@ function mapTutorial(item: ApiBlog): Tutorial {
       ? `${BASE_IMAGE_URL}${item.featureImage}`
       : 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80',
     publishedAt: item.publishedAt,
+    type: item.type,
+    keywords: item.keywords ?? null,
+    content: item.content,
   };
 }
 

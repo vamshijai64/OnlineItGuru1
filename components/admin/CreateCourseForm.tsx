@@ -190,6 +190,9 @@ export default function CreateCourseForm({ courseToEdit, prefillFromTemplate, on
             totalLearners: Number(formData.totalLearners),
             courseTemplateId: formData.courseTemplateId || "",
             course_template_id: formData.courseTemplateId || "",
+            // Backend `courses` table has a NOT NULL `description` column.
+            // The form stores this in `courseOverview`, so we mirror it here.
+            description: formData.courseOverview || "",
         };
 
         let res;
