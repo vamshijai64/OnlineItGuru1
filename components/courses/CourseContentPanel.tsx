@@ -40,16 +40,14 @@ interface Props {
 
 const FIXED_NAV_ITEMS = [
     { id: "overview", label: "Course Overview", icon: Layout },
-    { id: "objectives", label: "Course Objectives", icon: Target },
     { id: "syllabus", label: "Course Syllabus", icon: BookOpen },
-    { id: "projects", label: "Projects", icon: Layers },
-    { id: "enrollment", label: "Enrollment Options", icon: Calendar },
-  
-    { id: "reviews", label: "Reviews", icon: Star },
+    { id: "handsonprojects", label: "Hands On Project", icon: Layers },
     { id: "skills", label: "Skills & Tools", icon: ListChecks },
+    { id: "upcomingcohort", label: "Upcoming Cohort", icon: Calendar },
     { id: "outlook", label: "Job Outlook", icon: TrendingUp },
     { id: "hiring", label: "Hiring Sprints", icon: Briefcase },
     { id: "certification", label: "Certification", icon: Award },
+    { id: "reviews", label: "Reviews", icon: Star },
 ];
 
 
@@ -176,17 +174,14 @@ export default function CourseContentPanel({ course, sections }: Props) {
                                 {/* ─── Change your section rendering blocks in CourseContentPanel.tsx to match this ─── */}
 
                                 {id === "overview" && <OverviewSection course={course} />}
+                                {id === "syllabus" && <SyllabusSection course={course} sections={sections || course?.sections || []} />}
+                                {id === "handsonprojects" && <ProjectsSection course={course} sections={sections || course?.sections || []} />}
                                 {id === "skills" && <SkillsAndTools />}
+                                {id === "upcomingcohort" && <EnrollmentSection course={course} sections={sections || course?.sections || []} />}
                                 {id === "outlook" && <JobOutlook />}
                                 {id === "hiring" && <HiringSprints course={course} />}
 
-                                {/* FIXED PROP PASS-THROUGHS */}
-                                {id === "objectives" && <ObjectivesSection sections={sections || course?.sections || []} />}
-                                {id === "syllabus" && <SyllabusSection course={course} sections={sections || course?.sections || []} />}
-                                {id === "projects" && <ProjectsSection course={course} sections={sections || course?.sections || []} />}
-                                {id === "enrollment" && <EnrollmentSection course={course} sections={sections || course?.sections || []} />}
-                                {/* {id === "faqs" && <FaqSection course={course} sections={sections || course?.sections || []} />} */}
-
+                             
                                 {id === "reviews" && <ReviewsSection course={course} />}
                                 {id === "certification" && <CertificationSection course={course} />}
                             </section>

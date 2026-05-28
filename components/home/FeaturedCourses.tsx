@@ -136,6 +136,8 @@ export default function FeaturedCourses() {
                     delay={index}
                     isTrending={index === 0}
                     isNew={index === 2}
+                    assignments={course.assignments}
+                    liveProjects={course.liveProjects}
                   />
                 </motion.div>
               ))

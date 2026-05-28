@@ -52,6 +52,8 @@ interface ApiCourse {
   previewImage: string | null;
   courseCount: number;
   category: { id: string; title: string; slug: string };
+  assignments?: number;
+  liveProjects?: string | number;
 }
 export interface Course {
   id: string;
@@ -68,6 +70,8 @@ export interface Course {
   badge: string | null;
   courseCount?: number;
   totalReviews?: number;
+  assignments?: number;
+  liveProjects?: string | number;
 }
 interface ApiBlog {
   id: string;
@@ -199,6 +203,8 @@ function mapCourse(c: ApiCourse): Course {
       ? `${BASE_IMAGE_URL}${c.previewImage}`
       : (categoryImageMap[c.category.title] ?? DEFAULT_IMAGE),
     badge: null,
+    assignments: c.assignments ?? 0,
+    liveProjects: c.liveProjects ?? 0,
   };
 }
 function mapBlog(b: ApiBlog): Blog {

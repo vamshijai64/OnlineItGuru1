@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Award, Clock, Download, Laptop, Users, Share2, Heart, Play, Home, ChevronRight } from "lucide-react";
+import { Star, Award, Clock, Download, Laptop, Users, Share2, Heart, Play, Home, ChevronRight, Video, FileText, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CourseDetail } from "@/store/homeStore";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import EnrollModal from "./EnrollModal";
 
 interface CourseBannerProps {
     course: CourseDetail;
@@ -15,6 +16,7 @@ interface CourseBannerProps {
 
 export default function CourseBanner({ course }: CourseBannerProps) {
     const [showDemo, setShowDemo] = useState(false);
+    const [showEnroll, setShowEnroll] = useState(false);
 
     // Stats mapping from API data
     const stats = [
@@ -165,7 +167,10 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                                     </div>
                                 </div>
 
-                                <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black text-xs py-5 rounded-xl shadow-[0_10px_20px_-10px_rgba(236,72,153,0.4)] transition-all active:scale-[0.98] uppercase tracking-wider">
+                                <Button 
+                                    onClick={() => setShowEnroll(true)}
+                                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black text-xs py-5 rounded-xl shadow-[0_10px_20px_-10px_rgba(236,72,153,0.4)] transition-all active:scale-[0.98] uppercase tracking-wider"
+                                >
                                     Enroll Now
                                 </Button>
 
@@ -173,17 +178,18 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                                     <p className="text-[11px] font-bold text-slate-200 mb-3">Includes:</p>
                                     <ul className="space-y-2.5">
                                         {[
-                                            { icon: Play, text: `${course.duration || "40+"} hours video` },
-                                            { icon: Laptop, text: `${course.assignments || "18"} projects` },
-                                            { icon: Download, text: `${course.sectionCount || "12"} resources` },
-                                            { icon: Clock, text: "Lifetime access" },
-                                            { icon: Award, text: "Certificate" },
+                                            { icon: Video, text: `${course.duration || "40"} hours high-quality video` },
+                                            { icon: FileText, text: `${course.assignments || "2"} projects` },
+                                            { icon: Download, text: `${course.sectionCount || "18"} downloadable resource` },
+                                            { icon: Clock, text: "Lifetime access and 24x7 support" },
+                                            { icon: Smartphone, text: "Access on your computer or mobile" },
+                                            { icon: Award, text: "Get certificate on course completion" },
                                         ].map((item, i) => (
                                             <li key={i} className="flex items-center gap-3 text-xs text-slate-300 font-medium group/item">
-                                                <div className="h-6 w-6 rounded-lg bg-white/5 flex items-center justify-center text-pink-400/80 group-hover/item:bg-pink-500/10 group-hover/item:text-pink-300 transition-colors">
+                                                <div className="flex-shrink-0 h-6 w-6 rounded-lg bg-white/5 flex items-center justify-center text-pink-400/80 group-hover/item:bg-pink-500/10 group-hover/item:text-pink-300 transition-colors">
                                                     <item.icon className="h-3 w-3" />
                                                 </div>
-                                                <span className="line-clamp-1">{item.text}</span>
+                                                <span className="leading-normal">{item.text}</span>
                                             </li>
                                         ))}
                                     </ul>
@@ -214,7 +220,11 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                                 </span>
                             </div>
                             <div className="space-y-3 mt-4">
-                                <Button size="lg" className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-base">
+                                <Button 
+                                    onClick={() => setShowEnroll(true)}
+                                    size="lg" 
+                                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold text-base"
+                                >
                                     ENROLL NOW
                                 </Button>
                                 <Button variant="outline" size="lg" className="w-full font-semibold border-white/10 text-white">
@@ -268,6 +278,7 @@ export default function CourseBanner({ course }: CourseBannerProps) {
                     </div>
                 )}
             </AnimatePresence>
+            <EnrollModal isOpen={showEnroll} onClose={() => setShowEnroll(false)} price={price} courseTitle={course.title} />
         </section>
     );
 }

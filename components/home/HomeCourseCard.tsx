@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Clock, Users, ChevronRight, Award, LucideIcon, BookOpen, Code2, Cloud, Brain, Database, Briefcase, Settings } from 'lucide-react';
+import { Star, Clock,Laptop, Users, ChevronRight, Award, LucideIcon, BookOpen, Code2, Cloud, Brain, Database, Briefcase, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { CourseDetail } from "@/store/homeStore";
 
 interface HomeCourseCardProps {
   id: string;
@@ -14,6 +15,8 @@ interface HomeCourseCardProps {
   rating: number;
   reviews: number;
   duration: string;
+  assignments?: string | number;
+  liveProjects?: string | number;
   students: number;
   image: string | null;
   delay?: number;
@@ -38,6 +41,7 @@ const defaultHighlights = [
   "Certification of Completion",
   "Placement Assistance"
 ];
+   
 
 export default function HomeCourseCard({ 
   title, 
@@ -51,7 +55,9 @@ export default function HomeCourseCard({
   delay = 0,
   isTrending = false,
   isNew = false,
-  lightMode = false
+  lightMode = false,
+  assignments=0,
+  liveProjects=0,
 }: HomeCourseCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const style = categoryStyles[category] || categoryStyles['default'];
@@ -125,10 +131,13 @@ export default function HomeCourseCard({
                   key={i} 
                   className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'text-yellow-400 fill-yellow-400' : lightMode ? 'text-slate-200' : 'text-gray-700'}`} 
                 />
+                
               ))}
             </div>
             <span className={`text-sm font-bold ${lightMode ? 'text-slate-900' : 'text-white'}`}>{rating}</span>
             <span className={`text-xs ${lightMode ? 'text-slate-500' : 'text-gray-600'}`}>({reviews.toLocaleString()})</span>
+             <Users className="w-3.5 h-3.5 text-blue-500" />
+            <span className={`text-xs ${lightMode ? 'text-slate-500' : 'text-gray-600'}`}>({students.toLocaleString()})</span>
           </div>
           
           {/* Stats */}
@@ -136,11 +145,18 @@ export default function HomeCourseCard({
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-purple-500" />
               <span>{duration}</span>
+
+            </div>
+            
+            <div className="flex items-center gap-1.5">
+              <Laptop className="w-3.5 h-3.5 text-purple-500" />
+              <span>{assignments}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-blue-500" />
-              <span>{students.toLocaleString()} Students</span>
+              <Users className="w-3.5 h-3.5 text-purple-500" />
+              <span>{liveProjects}</span>
             </div>
+            
           </div>
           
           {/* CTA */}

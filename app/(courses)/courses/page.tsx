@@ -198,6 +198,8 @@ export default function CoursesPage() {
                     isTrending={index === 0 && page === 1}
                     isNew={index === 2 && page === 1}
                     lightMode={true}
+                    assignments={course.assignments}
+                    liveProjects={course.liveProjects}
                   />
                 </motion.div>
               ))
