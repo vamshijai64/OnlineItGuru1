@@ -1,66 +1,49 @@
-"use client";
+import React from "react";
+import PublicPageDetailClient from "@/components/pages/PublicPageDetailClient";
+import {
+  fetchSeoWithFallback,
+  constructMetadata,
+  fetchPublicPagesServer,
+  getExcerpt,
+  JsonLd
+} from "@/lib/seo";
+import { Metadata } from "next";
 
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
-import { useHomeStore } from "@/store/homeStore";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+interface Props {
+  params: Promise<{ slug: string }>;
+}
 
-export default function PublicPageDetail() {
-  const params = useParams();
-  const slug = params?.slug as string;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const paths = [`/p/${slug}`, `/${slug}`];
+  
+  // Fetch SEO configuration from backend
+  const seo = await fetchSeoWithFallback(paths);
+  
+  // Fetch resource details for fallback if SEO is not defined
+  const pages = await fetchPublicPagesServer();
+  const page = pages.find((p) => p.slug === slug);
+  
+  const title = page?.title || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const description = getExcerpt(page?.content || "", 160) || "Read more about OnlineITGuru.";
+  
+  return constructMetadata(seo, {
+    title: `${title} | OnlineITGuru`,
+    description,
+    canonicalUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/p/${slug}`,
+  });
+}
 
-  const fetchPublicPages = useHomeStore((s) => s.fetchPublicPages);
-  const publicPages = useHomeStore((s) => s.publicPages);
-  const loading = useHomeStore((s) => s.loading.publicPages);
-
-  useEffect(() => {
-    if (publicPages.length === 0) {
-      fetchPublicPages();
-    }
-  }, []);
-
-  const page = publicPages.find((p) => p.slug === slug);
-
-  if (loading && !page) {
-    return (
-      <div className="min-h-screen pt-24 pb-16 bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
-  if (!page && !loading) {
-    return (
-      <div className="min-h-screen pt-24 pb-16 bg-gray-50 flex items-center justify-center flex-col gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">Page Not Found</h1>
-        <Link href="/" className="text-purple-600 font-semibold hover:underline">Return to Home</Link>
-      </div>
-    );
-  }
-
-  if (!page) return null;
+export default async function PublicPageDetail({ params }: Props) {
+  const { slug } = await params;
+  const paths = [`/p/${slug}`, `/${slug}`];
+  const seo = await fetchSeoWithFallback(paths);
+  const pages = await fetchPublicPagesServer();
 
   return (
-    <main className="min-h-screen pt-24 pb-16 bg-gray-50">
-      <div className="container mx-auto max-w-4xl px-6">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
-          <div className="flex items-center gap-2 text-sm text-gray-400 mb-8 flex-wrap">
-            <Link href="/" className="hover:text-purple-600 transition-colors">Home</Link>
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-            <span className="text-gray-900 font-medium">{page.title}</span>
-          </div>
-          
-          <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-10 font-outfit leading-tight border-b border-gray-100 pb-6">
-            {page.title}
-          </h1>
-
-          <div 
-            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-600 prose-p:leading-relaxed prose-a:text-purple-600 prose-li:marker:text-purple-600 prose-ul:space-y-2 prose-strong:text-gray-900"
-            dangerouslySetInnerHTML={{ __html: page.content }} 
-          />
-        </div>
-      </div>
-    </main>
+    <>
+      <JsonLd jsonLd={seo?.metadata?.jsonLd} />
+      <PublicPageDetailClient slug={slug} initialPages={pages} />
+    </>
   );
 }

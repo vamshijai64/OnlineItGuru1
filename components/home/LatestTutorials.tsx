@@ -22,7 +22,6 @@ export default function LatestTutorials() {
     <section className="relative py-24 px-6 bg-gradient-to-br from-slate-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-        {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-purple-600 bg-purple-100 border border-purple-200 rounded-full">
             Tutorials
@@ -35,7 +34,6 @@ export default function LatestTutorials() {
           </p>
         </div>
 
-        {/* Loading Skeleton */}
         {loading && (
           <div className="grid md:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
@@ -44,7 +42,6 @@ export default function LatestTutorials() {
           </div>
         )}
 
-        {/* Tutorials Grid */}
         {!loading && tutorials.length > 0 && (
           <div className="grid md:grid-cols-3 gap-6">
             {tutorials.map((tutorial, index) => (
@@ -59,7 +56,6 @@ export default function LatestTutorials() {
                   href={`/tutorials/${tutorial.slug}`}
                   className="group block bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-500"
                 >
-                  {/* Top image / gradient banner */}
                   <div className={`relative h-36 bg-gradient-to-br ${cardGradients[index % cardGradients.length]} overflow-hidden`}>
                     {tutorial.featureImage ? (
                       <img
@@ -68,19 +64,16 @@ export default function LatestTutorials() {
                         className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      // Decorative play icon when no image
                       <div className="absolute inset-0 flex items-center justify-center">
                         <PlayCircle className="w-14 h-14 text-white/50" />
                       </div>
                     )}
 
-                    {/* Tutorial badge */}
                     <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
                       Tutorial
                     </span>
                   </div>
 
-                  {/* Content */}
                   <div className="p-5">
                     <h3 className="text-sm font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-purple-600 transition-colors">
                       {tutorial.title}
@@ -101,14 +94,12 @@ export default function LatestTutorials() {
           </div>
         )}
 
-        {/* Empty */}
         {!loading && tutorials.length === 0 && (
           <div className="text-center py-12 text-gray-400">
             No tutorials available right now.
           </div>
         )}
 
-        {/* View All */}
         <div className="text-center mt-12">
           <Link
             href="/tutorials"

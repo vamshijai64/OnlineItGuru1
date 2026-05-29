@@ -51,7 +51,6 @@ export default function TimelineStep({
         )}
       </div>
 
-      {/* Content */}
       <motion.div
         className="flex-1 pb-16"
         initial={{ opacity: 0, y: 10 }}

@@ -131,7 +131,6 @@ function TrainerCard({
                 transition={{ duration: 0.1 }}
                 style={{ transformStyle: 'preserve-3d' }}
             >
-                {/* Animated border */}
                 <div className="absolute inset-0 rounded-3xl overflow-hidden">
                     <motion.div
                         className="absolute inset-0 bg-gradient-to-r from-[#ec4899] via-purple-600 to-[#ec4899]"
@@ -143,7 +142,6 @@ function TrainerCard({
                     />
                 </div>
 
-                {/* Profile Image */}
                 <div className="relative mx-auto w-32 h-32 mb-6">
                     <motion.div
                         className="absolute inset-0 rounded-full border-2 border-[#ec4899] opacity-60"
@@ -156,7 +154,6 @@ function TrainerCard({
                         className="absolute inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)] rounded-full object-cover"
                     />
 
-                    {/* LinkedIn badge */}
                     {linkedinUrl && (
                         <a
                             href={linkedinUrl}
@@ -169,13 +166,11 @@ function TrainerCard({
                     )}
                 </div>
 
-                {/* Info */}
                 <div className="text-center relative z-10">
                     <h3 className="text-xl font-bold text-white mb-1 font-outfit">{name}</h3>
                     <p className="text-gray-400 mb-1 text-sm">{designation}</p>
                     <p className="text-[#ec4899] text-sm font-semibold mb-6">{company}</p>
 
-                    {/* Expertise badges */}
                     <div className="flex flex-wrap justify-center items-center gap-2 mb-6 min-h-[60px]">
                         {expertise.slice(0, 3).map((skill: string, i: number) => (
                             <span
@@ -187,7 +182,6 @@ function TrainerCard({
                         ))}
                     </div>
 
-                    {/* Stats - appear on hover */}
                     <motion.div
                         className="grid grid-cols-3 gap-2 pt-4 border-t border-white/10"
                         initial={{ opacity: 0.5 }}
@@ -224,7 +218,6 @@ function TrainerCard({
 export default function ExpertTrainers() {
     return (
         <section className="relative py-24 px-6 bg-[#020617] overflow-hidden">
-            {/* Background Orbs */}
             <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] -z-10" />
 
             <div className="container mx-auto max-w-7xl relative z-10">

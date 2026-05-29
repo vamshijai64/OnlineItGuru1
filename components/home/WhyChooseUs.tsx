@@ -74,7 +74,7 @@ function FeatureCard({ icon: Icon, title, description, gradient = 'from-purple-5
 }
 
 export default function WhyChooseUs() {
-  const features = useHomeStore((state) => state.features); // ✅ from store
+  const features = useHomeStore((state) => state.features); 
 
   return (
     <section className="relative py-24 px-6 bg-gray-50">

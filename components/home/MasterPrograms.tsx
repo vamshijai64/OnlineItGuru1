@@ -14,7 +14,6 @@ export default function MasterPrograms() {
     <section className="relative py-24 px-6 bg-gradient-to-br from-purple-50 via-white to-blue-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-        {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-purple-600 bg-purple-100 border border-purple-200 rounded-full">
             Master Programs
@@ -27,7 +26,6 @@ export default function MasterPrograms() {
           </p>
         </div>
 
-        {/* Loading Skeleton */}
         {loading && (
           <div className="grid md:grid-cols-2 gap-6">
             {[...Array(4)].map((_, i) => (
@@ -36,7 +34,6 @@ export default function MasterPrograms() {
           </div>
         )}
 
-        {/* Programs Grid */}
         {!loading && masterPrograms.length > 0 && (
           <div className="grid md:grid-cols-2 gap-6">
             {masterPrograms.map((program, index) => (
@@ -48,11 +45,9 @@ export default function MasterPrograms() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                {/* Left color accent bar */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-blue-500 rounded-l-3xl" />
 
                 <div className="flex gap-4 p-6 pl-8">
-                  {/* Thumbnail */}
                   <div className="flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-100 to-blue-100">
                     {program.image && (
                       <img
@@ -63,7 +58,6 @@ export default function MasterPrograms() {
                     )}
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-purple-500 uppercase tracking-wider">
                       {program.category}
@@ -72,7 +66,6 @@ export default function MasterPrograms() {
                       {program.title}
                     </h3>
 
-                    {/* Meta */}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-3">
                       <span className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
@@ -88,7 +81,6 @@ export default function MasterPrograms() {
                       </span>
                     </div>
 
-                    {/* Price + CTA */}
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-lg font-bold text-gray-900">₹{program.price}</span>
@@ -108,14 +100,12 @@ export default function MasterPrograms() {
           </div>
         )}
 
-        {/* Empty */}
         {!loading && masterPrograms.length === 0 && (
           <div className="text-center py-12 text-gray-400">
             No master programs available right now.
           </div>
         )}
 
-        {/* View All */}
         <div className="text-center mt-12">
           <Link
             href="/courses"

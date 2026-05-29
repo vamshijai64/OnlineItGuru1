@@ -15,7 +15,6 @@ export default function CTASection() {
           transition={{ duration: 0.8 }}
           className="relative p-10 md:p-14 rounded-[1.0rem] overflow-hidden bg-gradient-to-br from-indigo-900/40 via-slate-900/60 to-purple-900/40 border border-white/5 shadow-2xl text-center"
         >
-          {/* Subtle Glows */}
           <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-lg" />
           <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full" />
 

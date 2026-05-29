@@ -1,48 +1,23 @@
-"use client"
+import React from "react";
+import HomePageClient from "@/components/home/HomePageClient";
+import { getSeoByPath, constructMetadata, JsonLd } from "@/lib/seo";
+import { Metadata } from "next";
 
-import { useEffect } from "react";
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoByPath("/");
+  return constructMetadata(seo, {
+    title: "Online Courses | Online IT Certification Training | OnlineITGuru",
+    description: "Best online course provider in the world. Learn in-demand IT skills from top industry experts.",
+    canonicalUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/`,
+  });
+}
 
-import Hero from "@/components/home/Hero";
-import WhyChooseUs from "@/components/home/WhyChooseUs";
-import FeaturedCourses from "@/components/home/FeaturedCourses";
-import CorporateTraining from "@/components/home/CorporateTraining";
-import ExpertTrainers from "@/components/home/ExpertTrainers";
-import PlacementModule from "@/components/home/PlacementModule";
-import { useHomeStore } from "@/store/homeStore";
-import MasterPrograms from "@/components/home/MasterPrograms";
-import LatestBlogs from "@/components/home/LatestBlogs";
-import InterviewQuestions from "@/components/home/InterviewQuestions";
-import LatestTutorials from "@/components/home/LatestTutorials";
-import LearningPath from "@/components/home/LearningPath";
-import CTASection from "@/components/home/CTASection";
-import HomeContact from "@/components/home/HomeContact";
-import HomeFAQ from "@/components/home/HomeFAQ";
-import Testimonials from "@/components/home/Testimonials";
-
-export default function Home() {
- const fetchAll = useHomeStore((state) => state.fetchAll);
-
-   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
-  console.log("course",fetchAll)
+export default async function HomePage() {
+  const seo = await getSeoByPath("/");
   return (
-    <main className="min-h-screen">
-     <Hero />
-      <WhyChooseUs />
-      <FeaturedCourses />
-      <LearningPath />
-      {/* <MasterPrograms />      */}
-      <CorporateTraining />
-      {/* <LatestTutorials /> */}
-      <ExpertTrainers />
-      {/* <LatestBlogs />      */}
-      {/* <InterviewQuestions />     */}
-      <PlacementModule theme="light" />
-      <Testimonials />
-      {/* <HomeFAQ /> */}
-      <HomeContact />
-      <CTASection />
-    </main>
+    <>
+      <JsonLd jsonLd={seo?.metadata?.jsonLd} />
+      <HomePageClient />
+    </>
   );
 }

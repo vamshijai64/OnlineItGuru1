@@ -33,7 +33,6 @@ const benefits = [
 export default function HomeContact() {
   return (
     <section className="relative py-24 px-6 bg-[#020617] overflow-hidden">
-      {/* Background Decorative Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 blur-[120px] rounded-full" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/5 blur-[120px] rounded-full" />
 

@@ -265,36 +265,26 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-start justify-center overflow-hidden bg-gray-950">
-      {/* Background Section - Exact Replica as per Reference */}
       <div className="absolute inset-0">
-        {/* Animated background gradient */}
         <div className="absolute inset-4 bg-gradient-to-br from-gray-950 via-purple-1150/10 to-gray-1250" />
 
-        {/* Particle network */}
         <ParticleNetwork />
 
-        {/* Floating tech icons */}
         <FloatingIcons />
 
-        {/* Gradient orbs - Color adjusted for pink/mixed replica */}
-        {/* Orb behind text - Bright Pink/Mixed - INTENSIFIED */}
+     
         <div className="absolute top-[20%] left-[20%] w-[600px] h-[500px] bg-pink-700/25 rounded-full blur-[120px] animate-pulse mix-blend-screen" />
-        {/* Bottom Right Orb - Blue/Mixed */}
         <div className="absolute bottom-[10%] right-[10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[110px] animate-pulse" style={{ animationDelay: '1s' }} />
-
-        {/* 4 Corners Dark Mixed Colors as requested */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-900/10 rounded-full blur-[80px]" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-900/10 rounded-full blur-[80px]" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-900/10 rounded-full blur-[80px]" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-900/10 rounded-full blur-[80px]" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 container mx-auto px-6 pt-32 lg:pt-40 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            {/* Left content */}
-            <div className="flex flex-col px-8">
+             <div className="flex flex-col px-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -329,7 +319,6 @@ export default function Hero() {
               </motion.div>
             </div>
 
-            {/* Right - Hero image/visual */}
             <motion.div
               className="relative hidden lg:block"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -344,7 +333,6 @@ export default function Hero() {
                   className="relative rounded-3xl shadow-2xl shadow-purple-500/20 border border-white/10 w-full"
                 />
 
-                {/* Floating cards */}
                 <motion.div
                   className="absolute -left-8 top-1/4 p-4 rounded-2xl bg-gray-900/80 backdrop-blur-xl border border-white/10 shadow-2xl"
                   animate={{ y: [0, -10, 0] }}
@@ -382,7 +370,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:block"
         animate={{ y: [0, 10, 0] }}

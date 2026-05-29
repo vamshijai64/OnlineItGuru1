@@ -20,7 +20,6 @@ export default function LatestBlogs() {
     <section className="relative py-24 px-6 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
 
-        {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-purple-600 bg-purple-100 border border-purple-200 rounded-full">
             Latest Blogs
@@ -33,7 +32,6 @@ export default function LatestBlogs() {
           </p>
         </div>
 
-        {/* Loading Skeleton */}
         {loading && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
@@ -42,7 +40,6 @@ export default function LatestBlogs() {
           </div>
         )}
 
-        {/* Blogs Grid */}
         {!loading && blogs.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {blogs.map((blog, index) => (
@@ -54,7 +51,6 @@ export default function LatestBlogs() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                {/* Image */}
                 <div className="h-40 bg-gradient-to-br from-purple-100 to-blue-100 overflow-hidden">
                   {blog.featureImage && (
                     <img
@@ -65,7 +61,6 @@ export default function LatestBlogs() {
                   )}
                 </div>
 
-                {/* Content */}
                 <div className="p-5">
                   <span className="inline-block px-2 py-0.5 mb-2 text-xs font-semibold text-purple-600 bg-purple-50 rounded-full capitalize">
                     {blog.type.replace('_', ' ')}
@@ -91,14 +86,12 @@ export default function LatestBlogs() {
           </div>
         )}
 
-        {/* Empty */}
         {!loading && blogs.length === 0 && (
           <div className="text-center py-12 text-gray-400">
             No blogs available right now.
           </div>
         )}
 
-        {/* View All */}
         <div className="text-center mt-12">
           <Link
             href="/blog"

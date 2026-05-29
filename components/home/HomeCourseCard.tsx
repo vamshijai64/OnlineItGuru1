@@ -83,13 +83,11 @@ export default function HomeCourseCard({
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         style={{ transformStyle: 'preserve-3d' }}
       >
-        {/* Front of card */}
         <Link 
           href={`/courses/${slug}`}
           className={cardClasses}
           style={{ backfaceVisibility: 'hidden' }}
         >
-          {/* Badges */}
           <div className="flex gap-2 mb-4">
             {isTrending && (
               <span className="px-3 py-1 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-bold uppercase tracking-wider">
@@ -108,22 +106,18 @@ export default function HomeCourseCard({
             )}
           </div>
           
-          {/* Icon / Image Placeholder */}
           <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg shadow-black/20`}>
             <Icon className="w-7 h-7 text-white" />
           </div>
           
-          {/* Category */}
           <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] mb-2">
             {category}
           </span>
           
-          {/* Title */}
           <h3 className={`text-xl font-bold mb-3 line-clamp-2 leading-tight ${lightMode ? 'text-slate-900' : 'text-white'}`}>
             {title}
           </h3>
           
-          {/* Rating */}
           <div className="flex items-center gap-2 mb-4">
             <div className="flex items-center gap-0.5">
               {[...Array(5)].map((_, i) => (
@@ -140,7 +134,6 @@ export default function HomeCourseCard({
             <span className={`text-xs ${lightMode ? 'text-slate-500' : 'text-gray-600'}`}>({students.toLocaleString()})</span>
           </div>
           
-          {/* Stats */}
           <div className={`flex items-center gap-4 text-xs mt-auto ${lightMode ? 'text-slate-500' : 'text-gray-400'}`}>
             <div className="flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-purple-500" />
@@ -159,7 +152,6 @@ export default function HomeCourseCard({
             
           </div>
           
-          {/* CTA */}
           <div className="mt-5">
             <Button 
               className={`w-full bg-gradient-to-r ${gradient} hover:brightness-110 text-white border-0 rounded-xl h-12 font-bold transition-all shadow-lg shadow-black/20`}
@@ -170,7 +162,6 @@ export default function HomeCourseCard({
           </div>
         </Link>
         
-        {/* Back of card */}
         <Link 
           href={`/courses/${slug}`}
           className={cardClasses}

@@ -62,13 +62,11 @@ export default function FeaturedCourses() {
     if (courses.length === 0) fetchCourses();
     if (categories.length === 0) fetchCategories();
 
-    // Fetch courses for the selected category
     const categorySlug = selectedCategory === 'all' ? "" : selectedCategory;
     fetchCoursesByCategory(categorySlug, 1);
   }, [selectedCategory, fetchCourses, fetchCategories, fetchCoursesByCategory]);
 
-  // If "all" is selected, we combine featured and some general courses
-  // If a category is selected, we show what came back from the API
+  
   const categoryItems = categoryCoursesPage?.items || [];
 
   let displayCourses = [];
@@ -81,13 +79,11 @@ export default function FeaturedCourses() {
     });
     displayCourses = featured.slice(0, 6);
   } else {
-    // Show up to 6 from the selected category
     displayCourses = categoryItems.slice(0, 6);
   }
 
   return (
-    <section className="relative py-24 px-6 bg-[#030303] overflow-hidden">
-      {/* Background Orbs */}
+    <section className="relative py -24 px-6 bg-[#030303] overflow-hidden">
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] -z-10 animate-pulse" />
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] -z-10 animate-pulse" style={{ animationDelay: '2s' }} />
 
@@ -109,7 +105,6 @@ export default function FeaturedCourses() {
         <div key={`${selectedCategory}-${loading.categoryCourses}`} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatePresence mode="popLayout">
             {(loading.courses || loading.categoryCourses) ? (
-              // Loading Skeletons
               [...Array(6)].map((_, i) => (
                 <div key={`skeleton-${i}`} className="h-[420px] rounded-3xl bg-white/5 border border-white/10 animate-pulse" />
               ))
@@ -145,7 +140,6 @@ export default function FeaturedCourses() {
           </AnimatePresence>
         </div>
 
-        {/* Empty State */}
         {!loading.courses && displayCourses.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}

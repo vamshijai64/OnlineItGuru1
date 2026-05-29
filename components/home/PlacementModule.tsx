@@ -31,9 +31,7 @@ export default function PlacementModule({ theme = "dark" }: PlacementModuleProps
             ? "py-24 bg-slate-50/50 text-slate-800 overflow-hidden relative border-t border-b border-slate-100" 
             : "py-24 bg-[#020617] text-white overflow-hidden relative"
         }>
-            {/* Background Atmosphere */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {/* Background Orbs */}
                 <div className={isLight 
                     ? "absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-200/20 rounded-full blur-[120px] animate-pulse" 
                     : "absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-pink-600/10 rounded-full blur-[120px] animate-pulse"
@@ -43,10 +41,8 @@ export default function PlacementModule({ theme = "dark" }: PlacementModuleProps
                     : "absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] animate-pulse"
                 } style={{ animationDelay: '2s' }} />
                 
-                {/* Subtle Grid Pattern */}
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.015]" />
                 
-                {/* Vignette */}
                 <div className={isLight 
                     ? "absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#f8fafc_80%)]" 
                     : "absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#020617_80%)]"
@@ -100,7 +96,6 @@ export default function PlacementModule({ theme = "dark" }: PlacementModuleProps
                             : "bg-white/5 p-8 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden"
                         }
                     >
-                        {/* Inner Glow */}
                         <div className={isLight 
                             ? "absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" 
                             : "absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"

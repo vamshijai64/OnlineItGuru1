@@ -53,7 +53,6 @@ export default function HomeCategoryFilter({ categories, selected, onSelect, var
 
   return (
     <div className={containerClasses}>
-      {/* "All Courses" Button */}
       <motion.button
         onClick={() => onSelect('all')}
         className={`relative px-5 py-3 rounded-full flex items-center gap-2 font-medium transition-all duration-300 ${buttonClasses(selected === 'all')}`}
@@ -74,7 +73,6 @@ export default function HomeCategoryFilter({ categories, selected, onSelect, var
         </span>
       </motion.button>
 
-      {/* Dynamic Categories */}
       {categories.map((category) => {
         const Icon = iconMap[category.image] || Settings;
         const isSelected = selected === category.slug;
