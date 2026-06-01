@@ -58,6 +58,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
+import SEOForm from "./SEOForm";
 
 export default function PostManagement() {
     const { 
@@ -77,6 +78,7 @@ export default function PostManagement() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [activeMainTab, setActiveMainTab] = useState<'general' | 'seo'>('general');
 
     const [formData, setFormData] = useState({
         title: "",
@@ -524,6 +526,7 @@ export default function PostManagement() {
     const handleCloseForm = () => {
         setIsFormOpen(false);
         setViewState('list');
+        setActiveMainTab('general');
     };
 
     const handleCreate = async () => {
@@ -792,10 +795,37 @@ export default function PostManagement() {
             <Dialog open={isFormOpen} onOpenChange={(open) => { if(!open) handleCloseForm(); }}>
                 <DialogContent className="!max-w-none w-3/4 h-[92vh] max-h-[92vh] overflow-hidden flex flex-col rounded-2xl">
                     <DialogHeader className="flex-shrink-0">
-                        <DialogTitle className="text-xl font-bold text-slate-900">
-                            {viewState === 'create' ? 'Create Post' : 'Edit Post'}
+                        <DialogTitle className="text-xl font-bold text-slate-900 flex justify-between items-center pr-6">
+                            <span>{viewState === 'create' ? 'Create Post' : 'Edit Post'}</span>
+                            <div className="flex space-x-1 bg-slate-100/80 p-1 rounded-xl w-fit font-normal">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMainTab("general")}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                                        activeMainTab === "general"
+                                            ? "bg-white text-indigo-600 shadow-sm"
+                                            : "text-slate-500 hover:text-slate-900"
+                                    }`}
+                                >
+                                    General Info
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMainTab("seo")}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                                        activeMainTab === "seo"
+                                            ? "bg-white text-indigo-600 shadow-sm"
+                                            : "text-slate-500 hover:text-slate-900"
+                                    }`}
+                                >
+                                    SEO Settings
+                                </button>
+                            </div>
                         </DialogTitle>
                     </DialogHeader>
+
+                    {activeMainTab === "general" ? (
+                        <>
 
                     <div className="flex-1 overflow-auto py-4 space-y-6">
                         <div className="grid gap-5">
@@ -1322,6 +1352,19 @@ export default function PostManagement() {
                             Save
                         </Button>
                     </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 overflow-auto py-4 pr-2 custom-scrollbar">
+                            <SEOForm
+                                objectType="App\\Post"
+                                objectId={selectedPost?.id}
+                                defaultPath={`/blog/${formData.slug}`}
+                                defaultTitle={formData.title}
+                                defaultDescription={formData.content}
+                                onSaveSuccess={handleCloseForm}
+                            />
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
 

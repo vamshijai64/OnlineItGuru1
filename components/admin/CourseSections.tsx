@@ -50,6 +50,8 @@ import {
     ChevronUp
 } from "lucide-react";
 
+import { SECTION_PRESETS, generateUUID } from "@/lib/section-presets";
+
 const getTemplateData = (template: any) => {
     let courseDetails = {};
     let courseSections: any[] = [];
@@ -86,6 +88,7 @@ export default function CourseSections({
         isLoading,
         fetchCourseById,
         fetchCourseTemplates,
+        fetchCourseTemplateById,
         courseSections,
         fetchCourseSections,
         createCourseSectionItem,
@@ -95,6 +98,7 @@ export default function CourseSections({
     } = useAdminStore();
 
     const [course, setCourse] = useState<any | null>(null);
+    const [templateSections, setTemplateSections] = useState<any[]>([]);
     const [noTemplateError, setNoTemplateError] = useState<boolean>(false);
 
     const [localSections, setLocalSections] = useState<any[]>([]);
@@ -138,6 +142,14 @@ export default function CourseSections({
                     const templateId = c.courseTemplateId || c.course_template_id;
                     if (templateId && templateId !== "none" && templateId !== "course-template-id") {
                         await fetchCourseSections(courseId);
+                        
+                        // Fetch the associated template and store its sections
+                        const templateRes = await fetchCourseTemplateById(templateId);
+                        if (templateRes) {
+                            const { courseSections: tSections } = getTemplateData(templateRes);
+                            setTemplateSections(tSections || []);
+                        }
+                        
                         setNoTemplateError(false);
                     } else {
                         setNoTemplateError(true);
@@ -148,7 +160,7 @@ export default function CourseSections({
         loadCourseAndSections();
         fetchSections(1, 100);
         fetchCourseTemplates();
-    }, [courseId, fetchCourseById, fetchCourseSections, fetchSections, fetchCourseTemplates]);
+    }, [courseId, fetchCourseById, fetchCourseSections, fetchSections, fetchCourseTemplates, fetchCourseTemplateById]);
 
     useEffect(() => {
         if (courseSections) {
@@ -210,11 +222,11 @@ export default function CourseSections({
         setEditingSection(null);
         setActionError(null);
         setActionSuccess(null);
-        const baselineDef = adminSections[0];
+        const baselineDef = templateSections[0];
         setForm({
             title: baselineDef ? baselineDef.title : "",
-            sectionId: baselineDef ? baselineDef.id : "",
-            view: baselineDef ? (baselineDef.views || "default").split("|")[0] : "default",
+            sectionId: baselineDef ? (baselineDef.section_id || baselineDef.sectionId || baselineDef.id) : "",
+            view: baselineDef ? (baselineDef.view || baselineDef.section?.views || "default").split("|")[0] : "default",
             position: localSections.length
         });
         setIsFormOpen(true);
@@ -234,13 +246,13 @@ export default function CourseSections({
     };
 
     const handleTemplateChange = (secId: string) => {
-        const matched = adminSections.find(s => s.id === secId);
+        const matched = templateSections.find(s => (s.section_id === secId || s.sectionId === secId || s.id === secId));
         if (matched) {
             setForm(prev => ({
                 ...prev,
                 sectionId: secId,
                 title: matched.title || "",
-                view: (matched.views || "default").split("|")[0]
+                view: (matched.view || matched.section?.views || "default").split("|")[0]
             }));
         }
     };
@@ -271,6 +283,7 @@ export default function CourseSections({
                 setActionError(res.message || "Failed to adjust layout structure elements.");
             }
         } else {
+            const matched = templateSections.find(s => (s.section_id === form.sectionId || s.sectionId === form.sectionId || s.id === form.sectionId));
             const payload = {
                 courseId: courseId,
                 course_id: courseId,
@@ -279,7 +292,17 @@ export default function CourseSections({
                 title: form.title,
                 view: form.view,
                 content: "[]",
-                position: form.position
+                position: form.position,
+                section: matched?.section ? {
+                    id: matched.section.id || form.sectionId,
+                    section_id: matched.section.section_id || form.sectionId,
+                    title: matched.section.title || matched.title,
+                    code: matched.section.code || "",
+                    views: matched.section.views || matched.view || "title-description",
+                    fields: typeof matched.section.fields === 'string' 
+                        ? matched.section.fields 
+                        : JSON.stringify(matched.section.fields || [])
+                } : null
             };
             const res = await createCourseSectionItem(payload);
             setIsSubmitting(false);
@@ -516,7 +539,14 @@ export default function CourseSections({
                                         <SelectValue placeholder="Select Global Component Node Schema Definition" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {adminSections.map(s => <SelectItem key={s.id} value={s.id}>{s.title} ({s.code})</SelectItem>)}
+                                        {templateSections.map(s => {
+                                            const sId = s.section_id || s.sectionId || s.id;
+                                            return (
+                                                <SelectItem key={sId} value={sId}>
+                                                    {s.title} {s.section?.code ? `(${s.section.code})` : ""}
+                                                </SelectItem>
+                                            );
+                                        })}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -535,10 +565,9 @@ export default function CourseSections({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {(() => {
-                                        const currentDef = adminSections.find(s => s.id === form.sectionId);
-                                        // FIXED: Change currentDef?.view to currentDef?.views to handle pipe string safely
-                                        const possibleViews = currentDef?.views || "title-description";
-                                        return possibleViews.split("|").map(v => <SelectItem key={v} value={v}>{v}</SelectItem>);
+                                        const currentDef = templateSections.find(s => (s.section_id === form.sectionId || s.sectionId === form.sectionId || s.id === form.sectionId));
+                                        const possibleViews: string = (currentDef?.section?.views || currentDef?.view || "title-description") as string;
+                                        return possibleViews.split("|").map((v: string) => <SelectItem key={v} value={v}>{v}</SelectItem>);
                                     })()}
                                 </SelectContent>
                             </Select>

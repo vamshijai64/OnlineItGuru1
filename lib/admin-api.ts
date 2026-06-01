@@ -516,3 +516,164 @@ export const deleteAdminSection = async (id: string): Promise<AdminResponse<any>
     const response = await axiosClient.delete<AdminResponse<any>>(`/admin/sections/${id}`);
     return response.data;
 };
+
+// ── Admin SEO Types ─────────────────────────────────────────────────────────
+
+export interface SeoPageItem {
+    id: number;
+    path: string;
+    object: string;
+    objectId: string;
+    robotIndex: string;
+    robotFollow: string;
+    canonicalUrl: string;
+    title: string;
+    description: string;
+    changeFrequency: string;
+    priority: number;
+    schema?: string | null;
+    focusKeyword?: string | null;
+    tagsHtml?: string | null;
+    metaTags?: Array<{
+        seoMetaTagId: number;
+        content: string;
+    }>;
+    linkTags?: Array<any>;
+    images?: Array<any>;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface SeoSettingItem {
+    id: number;
+    site_title: string;
+    robot_index: string;
+    robot_follow: string;
+    twitter_username?: string | null;
+    [key: string]: any;
+}
+
+export interface SeoMetaTagItem {
+    id: number;
+    name: string;
+    inputType: string;
+    inputLabel: string;
+    inputPlaceholder?: string | null;
+    inputInfo?: string | null;
+    visibility: string;
+}
+
+export const fetchPublicSeo = async (params: { path?: string; object?: string; objectId?: string }): Promise<AdminResponse<any>> => {
+    let url = `/public/seo?`;
+    if (params.path) {
+        url += `path=${encodeURIComponent(params.path)}`;
+    } else if (params.object && params.objectId) {
+        url += `object=${encodeURIComponent(params.object)}&objectId=${encodeURIComponent(params.objectId)}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminSeoPages = async (
+    page: number = 1,
+    limit: number = 10,
+    search?: string
+): Promise<AdminResponse<any>> => {
+    let url = `/admin/seo/pages?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminSeoPageById = async (id: string | number): Promise<AdminResponse<SeoPageItem>> => {
+    const response = await axiosClient.get<AdminResponse<SeoPageItem>>(`/admin/seo/pages/${id}`);
+    return response.data;
+};
+
+export const createAdminSeoPage = async (data: any): Promise<AdminResponse<SeoPageItem>> => {
+    const response = await axiosClient.post<AdminResponse<SeoPageItem>>(`/admin/seo/pages`, data);
+    return response.data;
+};
+
+export const updateAdminSeoPage = async (id: string | number, data: any): Promise<AdminResponse<SeoPageItem>> => {
+    const response = await axiosClient.patch<AdminResponse<SeoPageItem>>(`/admin/seo/pages/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminSeoPage = async (id: string | number): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/seo/pages/${id}`);
+    return response.data;
+};
+
+// ── Admin SEO Settings API Calls ──────────────────────────────────────────────────
+
+export const fetchAdminSeoSettings = async (
+    page: number = 1,
+    limit: number = 20,
+    search?: string
+): Promise<AdminResponse<any>> => {
+    let url = `/admin/seo/settings?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminSeoSettingById = async (id: string | number): Promise<AdminResponse<SeoSettingItem>> => {
+    const response = await axiosClient.get<AdminResponse<SeoSettingItem>>(`/admin/seo/settings/${id}`);
+    return response.data;
+};
+
+export const createAdminSeoSetting = async (data: any): Promise<AdminResponse<SeoSettingItem>> => {
+    const response = await axiosClient.post<AdminResponse<SeoSettingItem>>(`/admin/seo/settings`, data);
+    return response.data;
+};
+
+export const updateAdminSeoSetting = async (id: string | number, data: any): Promise<AdminResponse<SeoSettingItem>> => {
+    const response = await axiosClient.patch<AdminResponse<SeoSettingItem>>(`/admin/seo/settings/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminSeoSetting = async (id: string | number): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/seo/settings/${id}`);
+    return response.data;
+};
+
+// ── Admin SEO Meta Tags API Calls ──────────────────────────────────────────────────
+
+export const fetchAdminSeoMetaTags = async (
+    page: number = 1,
+    limit: number = 20,
+    search?: string
+): Promise<AdminResponse<any>> => {
+    let url = `/admin/seo/meta-tags?page=${page}&limit=${limit}`;
+    if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+    }
+    const response = await axiosClient.get<AdminResponse<any>>(url);
+    return response.data;
+};
+
+export const fetchAdminSeoMetaTagById = async (id: string | number): Promise<AdminResponse<SeoMetaTagItem>> => {
+    const response = await axiosClient.get<AdminResponse<SeoMetaTagItem>>(`/admin/seo/meta-tags/${id}`);
+    return response.data;
+};
+
+export const createAdminSeoMetaTag = async (data: any): Promise<AdminResponse<SeoMetaTagItem>> => {
+    const response = await axiosClient.post<AdminResponse<SeoMetaTagItem>>(`/admin/seo/meta-tags`, data);
+    return response.data;
+};
+
+export const updateAdminSeoMetaTag = async (id: string | number, data: any): Promise<AdminResponse<SeoMetaTagItem>> => {
+    const response = await axiosClient.patch<AdminResponse<SeoMetaTagItem>>(`/admin/seo/meta-tags/${id}`, data);
+    return response.data;
+};
+
+export const deleteAdminSeoMetaTag = async (id: string | number): Promise<AdminResponse<any>> => {
+    const response = await axiosClient.delete<AdminResponse<any>>(`/admin/seo/meta-tags/${id}`);
+    return response.data;
+};
+

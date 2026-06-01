@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { AdminCourse, CourseTemplateItem } from "@/lib/admin-api";
+import SEOForm from "./SEOForm";
 import {
     Select,
     SelectContent,
@@ -38,6 +39,8 @@ export default function CreateCourseForm({ courseToEdit, prefillFromTemplate, on
     } = useAdminStore();
 
     const { categories, fetchCategories } = useHomeStore();
+
+    const [activeMainTab, setActiveMainTab] = useState<"general" | "seo">("general");
 
     const [formData, setFormData] = useState({
         type: "Standard Course",
@@ -211,7 +214,36 @@ export default function CreateCourseForm({ courseToEdit, prefillFromTemplate, on
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 max-h-[76vh] overflow-y-auto pr-4 custom-scrollbar">
+        <div className="flex flex-col h-full">
+            <div className="border-b border-slate-100 pb-3 mb-4 flex-shrink-0">
+                <div className="flex space-x-1 bg-slate-100/80 p-1 rounded-xl w-fit">
+                    <button
+                        type="button"
+                        onClick={() => setActiveMainTab("general")}
+                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            activeMainTab === "general"
+                                ? "bg-white text-indigo-600 shadow-sm"
+                                : "text-slate-500 hover:text-slate-900"
+                        }`}
+                    >
+                        General Info
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveMainTab("seo")}
+                        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+                            activeMainTab === "seo"
+                                ? "bg-white text-indigo-600 shadow-sm"
+                                : "text-slate-500 hover:text-slate-900"
+                        }`}
+                    >
+                        SEO Settings
+                    </button>
+                </div>
+            </div>
+
+            {activeMainTab === "general" ? (
+                <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar flex-1">
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
                     <AlertCircle className="h-4 w-4 shrink-0" />
@@ -586,5 +618,18 @@ export default function CreateCourseForm({ courseToEdit, prefillFromTemplate, on
                 </Button>
             </div>
         </form>
+            ) : (
+                <div className="flex-1 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar">
+                    <SEOForm
+                        objectType="App\\Course"
+                        objectId={courseToEdit?.id}
+                        defaultPath={`/courses/${formData.slug}`}
+                        defaultTitle={formData.title}
+                        defaultDescription={formData.courseOverview}
+                        onSaveSuccess={onSuccess}
+                    />
+                </div>
+            )}
+        </div>
     );
 }

@@ -11,7 +11,11 @@ import {
     CourseTemplateItem, fetchAdminCourseTemplates, fetchAdminCourseTemplateById, updateAdminCourseTemplate,
     createAdminCourseTemplate, deleteAdminCourseTemplate,
     SectionItem, CreateSectionData, fetchAdminSections, fetchAdminSectionById, createAdminSection, updateAdminSection, deleteAdminSection,
-    createAdminCourseSection, updateAdminCourseSection, deleteAdminCourseSection
+    createAdminCourseSection, updateAdminCourseSection, deleteAdminCourseSection,
+    SeoPageItem, SeoSettingItem, SeoMetaTagItem,
+    fetchPublicSeo, fetchAdminSeoPages, fetchAdminSeoPageById, createAdminSeoPage, updateAdminSeoPage, deleteAdminSeoPage,
+    fetchAdminSeoSettings, fetchAdminSeoSettingById, createAdminSeoSetting, updateAdminSeoSetting, deleteAdminSeoSetting,
+    fetchAdminSeoMetaTags, fetchAdminSeoMetaTagById, createAdminSeoMetaTag, updateAdminSeoMetaTag, deleteAdminSeoMetaTag
 } from '@/lib/admin-api';
 import axios from 'axios';
 
@@ -92,7 +96,7 @@ interface AdminState {
     fetchCoursesByCategory: (categorySlug: string, page?: number) => Promise<void>;
     fetchCourseSections: (courseId: string) => Promise<void>;
     updateCourseSectionPositions: (courseId: string, positions: { id: string, position: number }[]) => Promise<boolean>;
-    createCourseSectionItem: (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => Promise<{ success: boolean; message?: string }>;
+    createCourseSectionItem: (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number; section?: any }) => Promise<{ success: boolean; message?: string }>;
     updateCourseSectionItem: (id: string, data: { title?: string; view?: string; content?: string; position?: number }, courseId?: string) => Promise<{ success: boolean; message?: string }>;
     deleteCourseSectionItem: (id: string, courseId?: string) => Promise<{ success: boolean; message?: string }>;
     fetchContentList: (type: string, page?: number, limit?: number, search?: string) => Promise<void>;
@@ -117,6 +121,46 @@ interface AdminState {
     createSectionItem: (data: CreateSectionData) => Promise<{ success: boolean; message?: string }>;
     updateSectionItem: (id: string, data: Partial<CreateSectionData>) => Promise<{ success: boolean; message?: string }>;
     deleteSectionItem: (id: string) => Promise<{ success: boolean; message?: string }>;
+
+    adminSeoPages: SeoPageItem[];
+    seoPagesPagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    } | null;
+    adminSeoSettings: SeoSettingItem[];
+    seoSettingsPagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    } | null;
+    adminSeoMetaTags: SeoMetaTagItem[];
+    seoMetaTagsPagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    } | null;
+
+    fetchSeoPages: (page?: number, limit?: number, search?: string) => Promise<void>;
+    fetchSeoPageById: (id: string | number) => Promise<SeoPageItem | null>;
+    createSeoPage: (data: any) => Promise<{ success: boolean; message?: string; data?: SeoPageItem }>;
+    updateSeoPage: (id: string | number, data: any) => Promise<{ success: boolean; message?: string; data?: SeoPageItem }>;
+    deleteSeoPage: (id: string | number) => Promise<{ success: boolean; message?: string }>;
+
+    fetchSeoSettings: (page?: number, limit?: number, search?: string) => Promise<void>;
+    fetchSeoSettingById: (id: string | number) => Promise<SeoSettingItem | null>;
+    createSeoSetting: (data: any) => Promise<{ success: boolean; message?: string; data?: SeoSettingItem }>;
+    updateSeoSetting: (id: string | number, data: any) => Promise<{ success: boolean; message?: string; data?: SeoSettingItem }>;
+    deleteSeoSetting: (id: string | number) => Promise<{ success: boolean; message?: string }>;
+
+    fetchSeoMetaTags: (page?: number, limit?: number, search?: string) => Promise<void>;
+    fetchSeoMetaTagById: (id: string | number) => Promise<SeoMetaTagItem | null>;
+    createSeoMetaTag: (data: any) => Promise<{ success: boolean; message?: string; data?: SeoMetaTagItem }>;
+    updateSeoMetaTag: (id: string | number, data: any) => Promise<{ success: boolean; message?: string; data?: SeoMetaTagItem }>;
+    deleteSeoMetaTag: (id: string | number) => Promise<{ success: boolean; message?: string }>;
 
     clearMessages: () => void;
 }
@@ -144,6 +188,12 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     adminCourseTemplates: [],
     adminSections: [],
     sectionsPagination: null,
+    adminSeoPages: [],
+    seoPagesPagination: null,
+    adminSeoSettings: [],
+    seoSettingsPagination: null,
+    adminSeoMetaTags: [],
+    seoMetaTagsPagination: null,
 
     createCourse: async (data: CourseRequestData) => {
         set({ isLoading: true, error: null, successMessage: null });
@@ -1017,7 +1067,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
         }
     },
 
-    createCourseSectionItem: async (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number }) => {
+    createCourseSectionItem: async (data: { courseId: string; sectionId: string; title: string; view: string; content: string; position: number; section?: any }) => {
         set({ isLoading: true, error: null, successMessage: null });
         try {
             const courseId = data.courseId;
@@ -1040,7 +1090,8 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
                 title: data.title,
                 view: data.view,
                 content: data.content || "[]",
-                position: data.position ?? currentSections.length
+                position: data.position ?? currentSections.length,
+                section: data.section || null
             };
 
             const updatedSections = [...currentSections, newSection].sort((a: any, b: any) => a.position - b.position);
@@ -1187,6 +1238,255 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
             } else if (error instanceof Error) {
                 message = error.message;
             }
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    fetchSeoPages: async (page = 1, limit = 10, search?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSeoPages(page, limit, search);
+            if (response.success) {
+                set({
+                    adminSeoPages: response.data?.items || response.data?.pages || response.data || [],
+                    seoPagesPagination: response.data?.pagination || null,
+                    isLoading: false
+                });
+            } else {
+                set({ isLoading: false });
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
+        }
+    },
+    fetchSeoPageById: async (id: string | number) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSeoPageById(id);
+            set({ isLoading: false });
+            if (response.success) {
+                return response.data || null;
+            }
+            return null;
+        } catch (error: any) {
+            set({ isLoading: false });
+            return null;
+        }
+    },
+    createSeoPage: async (data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminSeoPage(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO page created successfully' });
+                return { success: true, message: 'SEO page created successfully', data: response.data };
+            }
+            throw new Error(response.message || 'Failed to create SEO page');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+    updateSeoPage: async (id: string | number, data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminSeoPage(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO page updated successfully' });
+                return { success: true, message: 'SEO page updated successfully', data: response.data };
+            }
+            throw new Error(response.message || 'Failed to update SEO page');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+    deleteSeoPage: async (id: string | number) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminSeoPage(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO page deleted successfully' });
+                return { success: true, message: 'SEO page deleted successfully' };
+            }
+            throw new Error(response.message || 'Failed to delete SEO page');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    fetchSeoSettings: async (page = 1, limit = 20, search?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSeoSettings(page, limit, search);
+            if (response.success) {
+                set({
+                    adminSeoSettings: response.data?.items || response.data?.settings || response.data || [],
+                    seoSettingsPagination: response.data?.pagination || null,
+                    isLoading: false
+                });
+            } else {
+                set({ isLoading: false });
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
+        }
+    },
+    fetchSeoSettingById: async (id: string | number) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSeoSettingById(id);
+            set({ isLoading: false });
+            if (response.success) {
+                return response.data || null;
+            }
+            return null;
+        } catch (error: any) {
+            set({ isLoading: false });
+            return null;
+        }
+    },
+    createSeoSetting: async (data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminSeoSetting(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO setting created successfully' });
+                return { success: true, message: 'SEO setting created successfully', data: response.data };
+            }
+            throw new Error(response.message || 'Failed to create SEO setting');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+    updateSeoSetting: async (id: string | number, data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminSeoSetting(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO setting updated successfully' });
+                return { success: true, message: 'SEO setting updated successfully', data: response.data };
+            }
+            throw new Error(response.message || 'Failed to update SEO setting');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+    deleteSeoSetting: async (id: string | number) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminSeoSetting(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO setting deleted successfully' });
+                return { success: true, message: 'SEO setting deleted successfully' };
+            }
+            throw new Error(response.message || 'Failed to delete SEO setting');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+
+    fetchSeoMetaTags: async (page = 1, limit = 20, search?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSeoMetaTags(page, limit, search);
+            if (response.success) {
+                set({
+                    adminSeoMetaTags: response.data?.items || response.data?.metaTags || response.data || [],
+                    seoMetaTagsPagination: response.data?.pagination || null,
+                    isLoading: false
+                });
+            } else {
+                set({ isLoading: false });
+            }
+        } catch (error: any) {
+            set({ isLoading: false });
+        }
+    },
+    fetchSeoMetaTagById: async (id: string | number) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetchAdminSeoMetaTagById(id);
+            set({ isLoading: false });
+            if (response.success) {
+                return response.data || null;
+            }
+            return null;
+        } catch (error: any) {
+            set({ isLoading: false });
+            return null;
+        }
+    },
+    createSeoMetaTag: async (data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await createAdminSeoMetaTag(data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO meta tag created successfully' });
+                return { success: true, message: 'SEO meta tag created successfully', data: response.data };
+            }
+            throw new Error(response.message || 'Failed to create SEO meta tag');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+    updateSeoMetaTag: async (id: string | number, data: any) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await updateAdminSeoMetaTag(id, data);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO meta tag updated successfully' });
+                return { success: true, message: 'SEO meta tag updated successfully', data: response.data };
+            }
+            throw new Error(response.message || 'Failed to update SEO meta tag');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
+            set({ error: message, isLoading: false });
+            return { success: false, message };
+        }
+    },
+    deleteSeoMetaTag: async (id: string | number) => {
+        set({ isLoading: true, error: null, successMessage: null });
+        try {
+            const response = await deleteAdminSeoMetaTag(id);
+            if (response.success) {
+                set({ isLoading: false, successMessage: 'SEO meta tag deleted successfully' });
+                return { success: true, message: 'SEO meta tag deleted successfully' };
+            }
+            throw new Error(response.message || 'Failed to delete SEO meta tag');
+        } catch (error: any) {
+            const message = axios.isAxiosError(error) && error.response
+                ? error.response.data?.message || 'An unexpected error occurred'
+                : error instanceof Error ? error.message : 'An unexpected error occurred';
             set({ error: message, isLoading: false });
             return { success: false, message };
         }

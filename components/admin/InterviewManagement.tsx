@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import SEOForm from "./SEOForm";
 
 export default function InterviewManagement() {
     const { adminContent, contentPagination, fetchContentList, createContentItem, updateContentItem, deleteContentItem, isLoading } = useAdminStore();
@@ -26,6 +27,7 @@ export default function InterviewManagement() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [activeMainTab, setActiveMainTab] = useState<'general' | 'seo'>('general');
 
     const [formData, setFormData] = useState({
         title: "",
@@ -70,6 +72,7 @@ export default function InterviewManagement() {
     const handleCloseForm = () => {
         setIsFormOpen(false);
         setViewState('list');
+        setActiveMainTab('general');
     };
 
     const handleCreate = async () => {
@@ -216,13 +219,40 @@ export default function InterviewManagement() {
             <Dialog open={isFormOpen} onOpenChange={(open) => { if(!open) handleCloseForm(); }}>
                 <DialogContent className="!max-w-none w-3/4 h-[92vh] max-h-[92vh] overflow-hidden flex flex-col rounded-2xl">
                     <DialogHeader className="flex-shrink-0">
-                        <DialogTitle className="text-xl font-bold text-slate-900">
-                            {viewState === 'create' ? 'Create Interview Question' : 'Edit Interview Question'}
+                        <DialogTitle className="text-xl font-bold text-slate-900 flex justify-between items-center pr-6">
+                            <span>{viewState === 'create' ? 'Create Interview Question' : 'Edit Interview Question'}</span>
+                            <div className="flex space-x-1 bg-slate-100/80 p-1 rounded-xl w-fit font-normal">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMainTab("general")}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                                        activeMainTab === "general"
+                                            ? "bg-white text-indigo-600 shadow-sm"
+                                            : "text-slate-500 hover:text-slate-900"
+                                    }`}
+                                >
+                                    General Info
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveMainTab("seo")}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                                        activeMainTab === "seo"
+                                            ? "bg-white text-indigo-600 shadow-sm"
+                                            : "text-slate-500 hover:text-slate-900"
+                                    }`}
+                                >
+                                    SEO Settings
+                                </button>
+                            </div>
                         </DialogTitle>
                         <DialogDescription className="text-slate-500 text-xs">
                             {viewState === 'create' ? 'Add a new interview question to the platform.' : 'Modify existing question details.'}
                         </DialogDescription>
                     </DialogHeader>
+
+                    {activeMainTab === "general" ? (
+                        <>
 
                     <div className="flex-1 overflow-auto py-4 space-y-6">
                         <div className="grid gap-6">
@@ -256,6 +286,19 @@ export default function InterviewManagement() {
                             {viewState === 'create' ? 'Publish Question' : 'Save Changes'}
                         </Button>
                     </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 overflow-auto py-4 pr-2 custom-scrollbar">
+                            <SEOForm
+                                objectType="App\\InterviewQuestion"
+                                objectId={selectedItem?.id}
+                                defaultPath={`/interview-questions/${formData.slug}`}
+                                defaultTitle={formData.title}
+                                defaultDescription={formData.content}
+                                onSaveSuccess={handleCloseForm}
+                            />
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
 

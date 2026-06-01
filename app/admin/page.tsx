@@ -17,7 +17,8 @@ import {
     MessageSquare,
     FileText,
     Layout,
-    Grid
+    Grid,
+    Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AuthForm from "@/components/auth/AuthForm";
@@ -38,6 +39,7 @@ import PageManagement from "@/components/admin/PageManagement";
 import UserManagement from "@/components/admin/UserManagement";
 import TemplateManagement from "@/components/admin/TemplateManagement";
 import SectionManagement from "@/components/admin/SectionManagement";
+import SEOManagement from "@/components/admin/SEOManagement";
 
 export default function AdminDashboard() {
     const { user, logout } = useAuthStore();
@@ -51,8 +53,8 @@ export default function AdminDashboard() {
         adminSections, fetchSections
     } = useAdminStore();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users' | 'course-templates' | 'sections'>('overview');
-    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users' | 'course-templates' | 'sections'>('courses');
+    const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users' | 'course-templates' | 'sections' | 'seo'>('overview');
+    const [previousTab, setPreviousTab] = useState<'overview' | 'courses' | 'categories' | 'offers' | 'interviews' | 'reviews' | 'category-courses' | 'course-sections' | 'blogs' | 'tutorials' | 'pages' | 'users' | 'course-templates' | 'sections' | 'seo'>('courses');
     
     // State for drill-downs
     const [selectedCategory, setSelectedCategory] = useState<{slug: string, title: string} | null>(null);
@@ -202,6 +204,14 @@ export default function AdminDashboard() {
                     </Button>
                     <Button 
                         variant="ghost" 
+                        onClick={() => navigateToTab('seo')}
+                        className={`w-full justify-start gap-3 ${activeTab === 'seo' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
+                    >
+                        <Globe className="h-4 w-4" />
+                        SEO Management
+                    </Button>
+                    <Button 
+                        variant="ghost" 
                         onClick={() => navigateToTab('users')}
                         className={`w-full justify-start gap-3 ${activeTab === 'users' ? 'text-indigo-600 bg-indigo-50 font-bold' : 'text-slate-600 hover:bg-slate-100'}`}
                     >
@@ -273,6 +283,7 @@ export default function AdminDashboard() {
                     {activeTab === 'blogs' && <PostManagement />}
                     {activeTab === 'tutorials' && <TutorialManagement />}
                     {activeTab === 'pages' && <PageManagement />}
+                    {activeTab === 'seo' && <SEOManagement />}
                     {activeTab === 'users' && <UserManagement />}
                     {activeTab === 'course-templates' && <TemplateManagement />}
                     {activeTab === 'sections' && <SectionManagement />}
